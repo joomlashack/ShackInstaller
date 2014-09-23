@@ -11,6 +11,11 @@ defined('_JEXEC') or die();
 class AllediaInstallerBase
 {
     /**
+     * @var array
+     */
+    protected $messages = array();
+
+    /**
      * Display messages from array
      *
      * @return void
