@@ -3,7 +3,7 @@ Alledia Installer
 
 ## About
 
-Common libraris for our extension installer scripts
+Common libraries for our extension installer scripts
 
 ## Requirements
 
