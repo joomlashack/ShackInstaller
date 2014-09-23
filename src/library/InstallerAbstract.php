@@ -59,7 +59,7 @@ abstract class AllediaInstallerAbstract
 
         // Load the installer default language
         $language = JFactory::getLanguage();
-        $language->load('lib_allediainstaller.sys', __DIR__);
+        $language->load('lib_allediainstaller.sys', ALLEDIA_INSTALLER_PATH);
     }
 
     /**
