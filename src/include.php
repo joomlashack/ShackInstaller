@@ -13,5 +13,5 @@ if (!defined('ALLEDIA_INSTALLER_LOADED')) {
 
     define('ALLEDIA_INSTALLER_PATH', __DIR__);
 
-    require_once ALLEDIA_INSTALLER_PATH . '/base.php';
+    require_once ALLEDIA_INSTALLER_PATH . '/library/InstallerAbstract.php';
 }
