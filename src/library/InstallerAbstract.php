@@ -123,7 +123,7 @@ abstract class AllediaInstallerAbstract
     {
         $this->initprops($parent);
 
-        if ($type == 'update') {
+        if ($type === 'update') {
             $this->clearUpdateServers();
         }
 
@@ -140,6 +140,11 @@ abstract class AllediaInstallerAbstract
     {
         $this->installRelated();
         $this->clearObsolete();
+
+        if ($type === 'install' && $this->type === 'plugin') {
+            $this->publishThisPlugin();
+            $this->reorderThisPlugin();
+        }
 
         $this->showMessages();
 
@@ -450,14 +455,26 @@ abstract class AllediaInstallerAbstract
     }
 
     /**
-     * Use this in preflight to clear out obsolete update servers when the url has changed.
+     * Finds the extension row for the main extension
+     *
+     * @return JTableExtension
      */
-    protected function clearUpdateServers()
+    protected function findThisExtension()
     {
         $attributes = (array)$this->manifest->attributes();
         $attributes = $attributes['@attributes'];
 
         $extension = $this->findExtension($attributes['type'], (string)$this->manifest->element, $attributes['group']);
+
+        return $extension;
+    }
+
+    /**
+     * Use this in preflight to clear out obsolete update servers when the url has changed.
+     */
+    protected function clearUpdateServers()
+    {
+        $extension = $this->findThisExtension();
 
         $db = JFactory::getDbo();
         $db->setQuery('SELECT `update_site_id`
@@ -551,5 +568,32 @@ abstract class AllediaInstallerAbstract
         }
 
         return $manifestPath;
+    }
+
+    /**
+     * Check if it needs to publish the extension
+     */
+    public function publishThisPlugin()
+    {
+        $attributes = (array) $this->manifest->element->attributes();
+        $attributes = $attributes['@attributes'];
+
+        if (isset($attributes['publish']) && (bool) $attributes['publish']) {
+            $extension = $this->findThisExtension();
+            $extension->publish();
+        }
+    }
+
+    /**
+     * Check if it needs to reorder the extension
+     */
+    public function reorderThisPlugin()
+    {
+        $attributes = (array) $this->manifest->element->attributes();
+        $attributes = $attributes['@attributes'];
+        if (isset($attributes['ordering'])) {
+            $extension = $this->findThisExtension();
+            $this->setPluginOrder($extension, $attributes['ordering']);
+        }
     }
 }
