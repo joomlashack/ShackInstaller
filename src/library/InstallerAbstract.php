@@ -223,8 +223,6 @@ abstract class AllediaInstallerAbstract
                     }
                 }
             }
-
-            // die();
         }
     }
 
