@@ -234,7 +234,7 @@ abstract class AllediaInstallerAbstract
 
                             if ($type === 'plugin') {
                                 if (isset($attributes['ordering'])) {
-                                    $this->setPluginOrder($current, (int) $attributes['ordering']);
+                                    $this->setPluginOrder($current, $attributes['ordering']);
                                 }
                             }
                         }
