@@ -202,7 +202,7 @@ abstract class AllediaInstallerAbstract
                         }
                     }
 
-                    $text     = 'LIB_ALLEDIAINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
+                    $text = 'LIB_ALLEDIAINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
                     if ($installer->install($path)) {
                         $this->setMessage(JText::sprintf($text, $typeName, $element));
                         if ($isNew) {
