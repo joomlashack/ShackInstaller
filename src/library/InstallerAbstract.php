@@ -36,6 +36,16 @@ abstract class AllediaInstallerAbstract
     protected $messages = array();
 
     /**
+     * @var string
+     */
+    protected $type;
+
+    /**
+     * @var string
+     */
+    protected $group;
+
+    /**
      * @param JInstallerAdapterComponent $parent
      *
      * @return void
@@ -50,6 +60,11 @@ abstract class AllediaInstallerAbstract
             $path              = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
             $this->mediaFolder = $path;
         }
+
+        $attributes  = (array) $this->manifest->attributes();
+        $attributes  = $attributes['@attributes'];
+        $this->type  = $attributes['type'];
+        $this->group = $attributes['group'];
 
         // Load the installer default language
         $language = JFactory::getLanguage();
