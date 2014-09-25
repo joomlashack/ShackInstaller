@@ -274,11 +274,6 @@ abstract class AllediaInstallerAbstract
                                 $newVersion
                             )
                         );
-
-                        // Set custom data
-                        $current = $this->findExtension($type, $element, $group);
-                        $current->bind(array('custom_data' => 'aha!'));
-                        $current->store();
                     } else {
                         $this->setMessage(JText::sprintf($text . '_FAIL', $typeName, $element), 'error');
 
