@@ -1,6 +1,6 @@
 <div>Version: <?php echo $this->manifest->version; ?></div>
 
-<?php if ($this->manifest->relatedExtensions) : ?>
+<?php if ($this->manifest->alledia->relatedExtensions) : ?>
     <h4>Related Extensions</h4>
     <ul>
         <?php foreach ($this->relatedExtensionsState as $element => $data) : ?>

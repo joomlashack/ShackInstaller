@@ -154,7 +154,7 @@ abstract class AllediaInstallerAbstract
         $this->showMessages();
 
         // Show additional installation messages
-        $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->element, $this->group);
+        $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->alledia->element, $this->group);
         $file          = strpos($type, 'install') === false ? $type : 'install';
 
         $name     = JText::_((string) $this->manifest->name);
@@ -181,12 +181,12 @@ abstract class AllediaInstallerAbstract
      */
     protected function installRelated()
     {
-        if ($this->manifest->relatedExtensions) {
+        if ($this->manifest->alledia->relatedExtensions) {
             $installer      = new JInstaller();
             $source         = $this->installer->getPath('source');
             $extensionsPath = $source . '/extensions';
 
-            foreach ($this->manifest->relatedExtensions->extension as $extension) {
+            foreach ($this->manifest->alledia->relatedExtensions->extension as $extension) {
                 $path = $extensionsPath . '/' . (string)$extension;
 
                 $attributes = (array) $extension->attributes();
@@ -296,11 +296,11 @@ abstract class AllediaInstallerAbstract
      */
     protected function uninstallRelated()
     {
-        if ($this->manifest->relatedExtensions) {
+        if ($this->manifest->alledia->relatedExtensions) {
             $installer      = new JInstaller();
             $source         = $this->installer->getPath('source');
 
-            foreach ($this->manifest->relatedExtensions->extension as $extension) {
+            foreach ($this->manifest->alledia->relatedExtensions->extension as $extension) {
                 $attributes = (array) $extension->attributes();
                 if (!empty($attributes)) {
                     $attributes = $attributes['@attributes'];
@@ -509,7 +509,11 @@ abstract class AllediaInstallerAbstract
         $attributes = (array)$this->manifest->attributes();
         $attributes = $attributes['@attributes'];
 
-        $extension = $this->findExtension($attributes['type'], (string)$this->manifest->element, $attributes['group']);
+        $extension = $this->findExtension(
+            $attributes['type'],
+            (string) $this->manifest->alledia->element,
+            $attributes['group']
+        );
 
         return $extension;
     }
@@ -554,7 +558,7 @@ abstract class AllediaInstallerAbstract
             'module'    => 'mod'
         );
 
-        return $prefixes[$this->type] . '_' . (string) $this->manifest->element;
+        return $prefixes[$this->type] . '_' . (string) $this->manifest->alledia->element;
     }
 
     /**
@@ -650,7 +654,7 @@ abstract class AllediaInstallerAbstract
      */
     public function publishThisPlugin()
     {
-        $attributes = (array) $this->manifest->element->attributes();
+        $attributes = (array) $this->manifest->alledia->element->attributes();
         $attributes = $attributes['@attributes'];
 
         if (isset($attributes['publish']) && (bool) $attributes['publish']) {
@@ -664,7 +668,7 @@ abstract class AllediaInstallerAbstract
      */
     public function reorderThisPlugin()
     {
-        $attributes = (array) $this->manifest->element->attributes();
+        $attributes = (array) $this->manifest->alledia->element->attributes();
         $attributes = $attributes['@attributes'];
         if (isset($attributes['ordering'])) {
             $extension = $this->findThisExtension();
