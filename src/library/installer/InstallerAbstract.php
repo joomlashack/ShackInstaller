@@ -73,7 +73,7 @@ abstract class AllediaInstallerAbstract
 
         // Load the installer default language
         $language = JFactory::getLanguage();
-        $language->load('lib_allediainstaller.sys', ALLEDIA_INSTALLER_PATH);
+        $language->load('lib_allediainstaller.sys', ALLEDIA_INSTALLER_EXTENSION_PATH);
     }
 
     /**
@@ -157,19 +157,20 @@ abstract class AllediaInstallerAbstract
         $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->element, $this->group);
         $file          = strpos($type, 'install') === false ? $type : 'install';
 
-        $name = JText::_((string) $this->manifest->name);
+        $name     = JText::_((string) $this->manifest->name);
+        $tmplPath = $extensionPath . '/views/installer/tmpl';
 
-        $path = $extensionPath . '/installer/views/header/tmpl/' . $file . '.php';
+        $path = $tmplPath . '/header_' . $file . '.php';
         include $path;
 
-        $path = $extensionPath . '/views/installer/tmpl/' . $file . '.php';
+        $path = $tmplPath . '/body_' . $file . '.php';
         if (file_exists($path)) {
             JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
             require_once $path;
         }
 
-        $path = $extensionPath . '/installer/views/footer/tmpl/' . $file . '.php';
+        $path = $tmplPath . '/footer_' . $file . '.php';
         include $path;
     }
 
