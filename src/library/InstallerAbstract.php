@@ -46,6 +46,11 @@ abstract class AllediaInstallerAbstract
     protected $group;
 
     /**
+     * @var array
+     */
+    protected $relatedExtensionsState = array();
+
+    /**
      * @param JInstallerAdapterComponent $parent
      *
      * @return void
@@ -141,21 +146,31 @@ abstract class AllediaInstallerAbstract
         $this->installRelated();
         $this->clearObsolete();
 
-        if ($type === 'install' && $this->type === 'plugin') {
+        if (strpos($type, 'install') !== false && $this->type === 'plugin') {
             $this->publishThisPlugin();
             $this->reorderThisPlugin();
         }
 
         $this->showMessages();
 
-        // @TODO: check this
-        // // Show additional installation messages
-        // $file = strpos($type, 'install') === false ? $type : 'install';
-        // $path = JPATH_ADMINISTRATOR . '/components/com_simplerenew/views/welcome/tmpl/' . $file . '.php';
-        // if (file_exists($path)) {
-        //     JFactory::getLanguage()->load('com_simplerenew', JPATH_ADMINISTRATOR . '/components/com_simplerenew');
-        //     require_once $path;
-        // }
+        // Show additional installation messages
+        $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->element, $this->group);
+        $file          = strpos($type, 'install') === false ? $type : 'install';
+
+        $name = JText::_((string) $this->manifest->name);
+
+        $path = $extensionPath . '/installer/views/header/tmpl/' . $file . '.php';
+        include $path;
+
+        $path = $extensionPath . '/views/installer/tmpl/' . $file . '.php';
+        if (file_exists($path)) {
+            JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
+
+            require_once $path;
+        }
+
+        $path = $extensionPath . '/installer/views/footer/tmpl/' . $file . '.php';
+        include $path;
     }
 
     /**
@@ -192,29 +207,42 @@ abstract class AllediaInstallerAbstract
 
                     $typeName = ucfirst(trim(($group ? : '') . ' ' . $type));
 
+                    // Get data from the manifest
+                    $tmpInstaller = new JInstaller();
+                    $tmpInstaller->setPath('source', $path);
+                    $newManifest = $tmpInstaller->getManifest();
+                    unset($tmpInstaller);
+                    $newVersion = (string)$newManifest->version;
+
+
                     // Check if we have a higher version installed
                     if (!$isNew) {
                         $currentManifestPath = $this->getManifestPath($type, $element, $group);
                         $currentManifest = $this->getInfoFromManifest($currentManifestPath);
 
-                        $tmpInstaller = new JInstaller();
-                        $tmpInstaller->setPath('source', $path);
-                        $newManifest = $tmpInstaller->getManifest();
-                        unset($tmpInstaller);
-
                         // Avoid to update for an outdated version
                         $currentVersion = $currentManifest->get('version');
-                        $newVersion     = (string)$newManifest->version;
+
                         if (version_compare($currentVersion, $newVersion, '>')) {
                             $this->setMessage(
                                 JText::sprintf(
-                                    'LIB_ALLEDIAINSTALLER_RELATED_ALREADY_UPDATED',
+                                    'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_SKIPED',
                                     strtolower($typeName),
                                     $element,
                                     $newVersion,
                                     $currentVersion
                                 ),
                                 'warning'
+                            );
+
+                            // Store the state of the install/update
+                            $this->relatedExtensionsState[$element] = array(
+                                'name'    => (string) $newManifest->name,
+                                'message' => JText::sprintf(
+                                    'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_SKIPED',
+                                    $newVersion,
+                                    $currentVersion
+                                )
                             );
 
                             // Skip the install for this extension
@@ -238,8 +266,29 @@ abstract class AllediaInstallerAbstract
                                 }
                             }
                         }
+
+                        $this->relatedExtensionsState[$element] = array(
+                            'name'    => (string) $newManifest->name,
+                            'message' => JText::sprintf(
+                                'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_INSTALLED',
+                                $newVersion
+                            )
+                        );
+
+                        // Set custom data
+                        $current = $this->findExtension($type, $element, $group);
+                        $current->bind(array('custom_data' => 'aha!'));
+                        $current->store();
                     } else {
                         $this->setMessage(JText::sprintf($text . '_FAIL', $typeName, $element), 'error');
+
+                        $this->relatedExtensionsState[$element] = array(
+                            'name'    => (string) $newManifest->name,
+                            'message' => JText::sprintf(
+                                'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_FAILED',
+                                $newVersion
+                            )
+                        );
                     }
                 }
             }
@@ -494,6 +543,25 @@ abstract class AllediaInstallerAbstract
     }
 
     /**
+     * Get the full element, like com_myextension, lib_extension
+     *
+     * @return string
+     */
+    protected function getFullElement()
+    {
+        $prefixes = array(
+            'component' => 'com',
+            'plugin'    => 'plg',
+            'template'  => 'tpl',
+            'library'   => 'lib',
+            'cli'       => 'cli',
+            'module'    => 'mod'
+        );
+
+        return $prefixes[$this->type] . '_' . (string) $this->manifest->element;
+    }
+
+    /**
      * Get extension information from manifest
      *
      * @return JRegistry
@@ -525,10 +593,9 @@ abstract class AllediaInstallerAbstract
      *
      * @return string The path
      */
-    public function getManifestPath($type, $element, $group = '')
+    public function getExtensionPath($type, $element, $group = '')
     {
         $basePath = '';
-        $manifestPath = '';
 
         $folders = array(
             'component' => 'administrator/components/',
@@ -548,6 +615,18 @@ abstract class AllediaInstallerAbstract
         } else {
             $basePath .= $element;
         }
+
+        return $basePath;
+    }
+
+    /**
+     * Get the path for the manifest file
+     *
+     * @return string The path
+     */
+    public function getManifestPath($type, $element, $group = '')
+    {
+        $basePath = $this->getExtensionPath($type, $element, $group);
 
         $installer = new JInstaller();
         if ($type !== 'library') {
