@@ -46,9 +46,11 @@ abstract class AllediaInstallerAbstract
     protected $group;
 
     /**
+     * Feedback of the install by related extension
+     *
      * @var array
      */
-    protected $relatedExtensionsState = array();
+    protected $relatedExtensionFeedback = array();
 
     /**
      * @param JInstallerAdapterComponent $parent
@@ -146,9 +148,14 @@ abstract class AllediaInstallerAbstract
         $this->installRelated();
         $this->clearObsolete();
 
+        $element = (string) $this->manifest->alledia->element;
+
+        // Check and publish/reorder the plugin, if required
+        $published = false;
+        $ordering  = false;
         if (strpos($type, 'install') !== false && $this->type === 'plugin') {
-            $this->publishThisPlugin();
-            $this->reorderThisPlugin();
+            $published = $this->publishThisPlugin();
+            $ordering  = $this->reorderThisPlugin();
         }
 
         $this->showMessages();
@@ -215,6 +222,7 @@ abstract class AllediaInstallerAbstract
                     unset($tmpInstaller);
                     $newVersion = (string)$newManifest->version;
 
+                    $this->storeFeedbackForRelatedExtension($element, 'name', (string) $newManifest->name);
 
                     // Check if we have a higher version installed
                     if (!$isNew) {
@@ -237,9 +245,10 @@ abstract class AllediaInstallerAbstract
                             );
 
                             // Store the state of the install/update
-                            $this->relatedExtensionsState[$element] = array(
-                                'name'    => (string) $newManifest->name,
-                                'message' => JText::sprintf(
+                            $this->storeFeedbackForRelatedExtension(
+                                $element,
+                                'message',
+                                JText::sprintf(
                                     'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_SKIPED',
                                     $newVersion,
                                     $currentVersion
@@ -259,28 +268,35 @@ abstract class AllediaInstallerAbstract
 
                             if (isset($attributes['publish']) && (bool) $attributes['publish']) {
                                 $current->publish();
+
+                                $this->storeFeedbackForRelatedExtension($element, 'publish', true);
                             }
 
                             if ($type === 'plugin') {
                                 if (isset($attributes['ordering'])) {
                                     $this->setPluginOrder($current, $attributes['ordering']);
+
+                                    $this->storeFeedbackForRelatedExtension($element, 'ordering', true);
                                 }
                             }
                         }
 
-                        $this->relatedExtensionsState[$element] = array(
-                            'name'    => (string) $newManifest->name,
-                            'message' => JText::sprintf(
+                        $this->storeFeedbackForRelatedExtension(
+                            $element,
+                            'message',
+                            JText::sprintf(
                                 'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_INSTALLED',
                                 $newVersion
                             )
                         );
+
                     } else {
                         $this->setMessage(JText::sprintf($text . '_FAIL', $typeName, $element), 'error');
 
-                        $this->relatedExtensionsState[$element] = array(
-                            'name'    => (string) $newManifest->name,
-                            'message' => JText::sprintf(
+                        $this->storeFeedbackForRelatedExtension(
+                            $element,
+                            'message',
+                            JText::sprintf(
                                 'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_FAILED',
                                 $newVersion
                             )
@@ -593,7 +609,7 @@ abstract class AllediaInstallerAbstract
      *
      * @return string The path
      */
-    public function getExtensionPath($type, $element, $group = '')
+    protected function getExtensionPath($type, $element, $group = '')
     {
         $basePath = '';
 
@@ -624,7 +640,7 @@ abstract class AllediaInstallerAbstract
      *
      * @return string The path
      */
-    public function getManifestPath($type, $element, $group = '')
+    protected function getManifestPath($type, $element, $group = '')
     {
         $basePath = $this->getExtensionPath($type, $element, $group);
 
@@ -652,7 +668,7 @@ abstract class AllediaInstallerAbstract
     /**
      * Check if it needs to publish the extension
      */
-    public function publishThisPlugin()
+    protected function publishThisPlugin()
     {
         $attributes = (array) $this->manifest->alledia->element->attributes();
         $attributes = $attributes['@attributes'];
@@ -660,19 +676,44 @@ abstract class AllediaInstallerAbstract
         if (isset($attributes['publish']) && (bool) $attributes['publish']) {
             $extension = $this->findThisExtension();
             $extension->publish();
+
+            return true;
         }
+
+        return false;
     }
 
     /**
      * Check if it needs to reorder the extension
      */
-    public function reorderThisPlugin()
+    protected function reorderThisPlugin()
     {
         $attributes = (array) $this->manifest->alledia->element->attributes();
         $attributes = $attributes['@attributes'];
+
         if (isset($attributes['ordering'])) {
             $extension = $this->findThisExtension();
             $this->setPluginOrder($extension, $attributes['ordering']);
+
+            return $attributes['ordering'];
         }
+
+        return false;
+    }
+
+    /**
+     * Stores feedback data for related extensions to display after install
+     *
+     * @param  string $element
+     * @param  string $key
+     * @param  string $value
+     */
+    protected function storeFeedbackForRelatedExtension($element, $key, $value)
+    {
+        if (!isset($this->relatedExtensionFeedback[$element])) {
+            $this->relatedExtensionFeedback[$element] = array();
+        }
+
+        $this->relatedExtensionFeedback[$element][$key] = $value;
     }
 }
