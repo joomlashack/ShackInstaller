@@ -164,6 +164,9 @@ abstract class AllediaInstallerAbstract
         $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->alledia->element, $this->group);
         $file          = strpos($type, 'install') === false ? $type : 'install';
 
+        // Load the extension language
+        JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
+
         $name     = JText::_((string) $this->manifest->name);
         $tmplPath = $extensionPath . '/views/installer/tmpl';
 
