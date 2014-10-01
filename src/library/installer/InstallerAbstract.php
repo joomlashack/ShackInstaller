@@ -564,9 +564,13 @@ abstract class AllediaInstallerAbstract
     /**
      * Get the full element, like com_myextension, lib_extension
      *
+     * @var string $type
+     * @var string $element
+     * @var string $group
+     *
      * @return string
      */
-    protected function getFullElement()
+    protected function getFullElement($type = null, $element = null, $group = null)
     {
         $prefixes = array(
             'component' => 'com',
@@ -577,7 +581,19 @@ abstract class AllediaInstallerAbstract
             'module'    => 'mod'
         );
 
-        return $prefixes[$this->type] . '_' . (string) $this->manifest->alledia->element;
+        $type    = empty($type) ? $this->type : $type;
+        $element = empty($element) ? (string) $this->manifest->alledia->element : $element;
+        $group   = empty($group) ? $this->group : $group;
+
+        $fullElement = $prefixes[$type] . '_';
+
+        if ($type === 'plugin') {
+            $fullElement .= $group . '_';
+        }
+
+        $fullElement .= $element;
+
+        return $fullElement;
     }
 
     /**
