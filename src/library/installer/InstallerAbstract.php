@@ -161,6 +161,7 @@ abstract class AllediaInstallerAbstract
      */
     public function postFlight($type, $parent)
     {
+
         $this->installRelated();
         $this->clearObsolete();
 
@@ -197,13 +198,13 @@ abstract class AllediaInstallerAbstract
         $path = $tmplPath . '/header_' . $file . '.php';
         include $path;
 
+        // Include the body, from the extension
         $path = $tmplPath . '/body_' . $file . '.php';
         if (file_exists($path)) {
-            JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
-
-            require_once $path;
+            include $path;
         }
 
+        // Include the footer
         $path = $tmplPath . '/footer_' . $file . '.php';
         include $path;
 
