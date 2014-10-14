@@ -164,6 +164,7 @@ abstract class AllediaInstallerAbstract
 
         $this->installRelated();
         $this->clearObsolete();
+        $this->addAllediaAuthorshipToExtension();
 
         $element = (string) $this->manifest->alledia->element;
 
@@ -761,5 +762,27 @@ abstract class AllediaInstallerAbstract
         }
 
         $this->relatedExtensionFeedback[$element][$key] = $value;
+    }
+
+    /**
+     * This method add a mark to the extensions, allowing to detect our extensions
+     * on the extensions table.
+     */
+    protected function addAllediaAuthorshipToExtension()
+    {
+        $extension = $this->findThisExtension();
+
+        $db = JFactory::getDbo();
+
+        // Update the extension
+        $db->setQuery('UPDATE `#__extensions` SET custom_data="{\"author\":\"Alledia\"}"
+                       WHERE extension_id=' . (int)$extension->extension_id);
+        $db->execute();
+
+        // Update the Alledia framework
+        // @TODO: remove this after libraries be able to have a custom install script
+        $db->setQuery('UPDATE `#__extensions` SET custom_data="{\"author\":\"Alledia\"}"
+                       WHERE type="library" AND element="allediaframework"');
+        $db->execute();
     }
 }
