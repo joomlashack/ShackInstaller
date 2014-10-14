@@ -138,6 +138,22 @@ abstract class AllediaInstallerAbstract
     }
 
     /**
+     * Load Alledia Framework
+     */
+    protected function loadAllediaFramework()
+    {
+        if (!defined('ALLEDIA_FRAMEWORK_LOADED')) {
+            $allediaFrameworkPath = JPATH_SITE . '/libraries/allediaframework/include.php';
+
+            if (!file_exists($allediaFrameworkPath)) {
+                throw new Exception('Alledia framework not found');
+            }
+
+            require_once $allediaFrameworkPath;
+        }
+    }
+
+    /**
      * @param string                     $type
      * @param JInstallerAdapterComponent $parent
      *
@@ -158,7 +174,14 @@ abstract class AllediaInstallerAbstract
             $ordering  = $this->reorderThisPlugin();
         }
 
-        $this->showMessages();
+        $this->loadAllediaFramework();
+
+        // Load the extension instance from the framework
+        $extension = Alledia\Factory::getExtension(
+            (string) $this->manifest->alledia->namespace,
+            $this->type,
+            $this->group
+        );
 
         // Show additional installation messages
         $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->alledia->element, $this->group);
@@ -170,6 +193,7 @@ abstract class AllediaInstallerAbstract
         $name     = JText::_((string) $this->manifest->name);
         $tmplPath = $extensionPath . '/views/installer/tmpl';
 
+        // Load the views
         $path = $tmplPath . '/header_' . $file . '.php';
         include $path;
 
@@ -182,6 +206,8 @@ abstract class AllediaInstallerAbstract
 
         $path = $tmplPath . '/footer_' . $file . '.php';
         include $path;
+
+        $this->showMessages();
     }
 
     /**
