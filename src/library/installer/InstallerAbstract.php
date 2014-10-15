@@ -71,7 +71,10 @@ abstract class AllediaInstallerAbstract
         $attributes  = (array) $this->manifest->attributes();
         $attributes  = $attributes['@attributes'];
         $this->type  = $attributes['type'];
-        $this->group = $attributes['group'];
+
+        if ($this->type === 'plugin') {
+            $this->group = $attributes['group'];
+        }
 
         // Load the installer default language
         $language = JFactory::getLanguage();
@@ -387,11 +390,17 @@ abstract class AllediaInstallerAbstract
     {
         $row = JTable::getInstance('extension');
 
+        $prefixes = array(
+            'component' => 'com_',
+            'module'    => 'mod_'
+        );
+
         $terms = array(
             'type'    => $type,
-            'element' => ($type == 'module' ? 'mod_' : '') . $element
+            'element' => (array_key_exists($type, $prefixes) ? $prefixes[$type] : '') . $element
         );
-        if ($type == 'plugin') {
+
+        if ($type === 'plugin') {
             $terms['folder'] = $group;
         }
 
@@ -556,10 +565,15 @@ abstract class AllediaInstallerAbstract
         $attributes = (array)$this->manifest->attributes();
         $attributes = $attributes['@attributes'];
 
+        $group = '';
+        if ($attributes['type'] === 'plugin') {
+            $group = $attributes['group'];
+        }
+
         $extension = $this->findExtension(
             $attributes['type'],
             (string) $this->manifest->alledia->element,
-            $attributes['group']
+            $group
         );
 
         return $extension;
@@ -661,20 +675,18 @@ abstract class AllediaInstallerAbstract
         $basePath = '';
 
         $folders = array(
-            'component' => 'administrator/components/',
+            'component' => 'administrator/components/com_',
             'plugin'    => 'plugins/',
             'template'  => 'templates/',
             'library'   => 'administrator/manifests/libraries/',
             'cli'       => 'cli/',
-            'module'    => 'modules/'
+            'module'    => 'modules/mod_'
         );
 
         $basePath = JPATH_SITE . '/' . $folders[$type];
 
         if ($type === 'plugin') {
             $basePath .= $group . '/' . $element;
-        } elseif ($type === 'module') {
-            $basePath .= 'mod_' . $element;
         } else {
             $basePath .= $element;
         }
