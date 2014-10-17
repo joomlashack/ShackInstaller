@@ -8,6 +8,8 @@
 
 defined('_JEXEC') or die();
 
+use Alledia\Framework;
+
 abstract class AllediaInstallerAbstract
 {
     /**
@@ -182,7 +184,7 @@ abstract class AllediaInstallerAbstract
         $this->loadAllediaFramework();
 
         // Load the extension instance from the framework
-        $extension = Alledia\Factory::getExtension(
+        $extension = Factory::getExtension(
             (string) $this->manifest->alledia->namespace,
             $this->type,
             $this->group
