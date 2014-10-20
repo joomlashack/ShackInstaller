@@ -9,6 +9,7 @@
 defined('_JEXEC') or die();
 
 use Alledia\Framework;
+use Alledia\Framework\Factory;
 
 abstract class AllediaInstallerAbstract
 {
