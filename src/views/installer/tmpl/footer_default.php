@@ -1,7 +1,18 @@
+<?php
+/**
+ * @package   AllediaInstaller
+ * @contact   www.alledia.com, hello@alledia.com
+ * @copyright 2014 Alledia.com, All rights reserved
+ * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
+ */
+
+defined('_JEXEC') or die();
+?>
 <?php if ($this->manifest->alledia->relatedExtensions) : ?>
     <a href="#alledia-installer-footer" id="alledia-installer-footer-toggler">
         <?php echo JText::_('LIB_ALLEDIAINSTALLER_SHOW_DETAILS'); ?>
     </a>
+
     <div id="alledia-installer-footer" style="display: none;">
         <h4><?php echo JText::_('LIB_ALLEDIAINSTALLER_RELATED_EXTENSIONS'); ?></h4>
         <ul>
