@@ -21,11 +21,6 @@ defined('_JEXEC') or die();
 <div class="alledia-wrapper">
 
     <div class="alledia-content">
-        <?php if (file_exists($mediaPath . '/images/logo.png')) : ?>
-            <img src="<?php echo $mediaURL . '/images/logo.png'; ?>" class="alledia-extension-logo" alt="Extension logo" />
-        <?php endif; ?>
-
-
         <h1><?php echo $name; ?></h1>
 
         <h3>
@@ -46,9 +41,8 @@ defined('_JEXEC') or die();
             include __DIR__ . "/default_license.php";
         }
 
-        if (!empty($this->manifest->alledia->relatedExtensions)) {
-            include __DIR__ . "/default_related.php";
-        }
+
+        include __DIR__ . "/default_info.php";
 
         ?>
 
@@ -58,10 +52,9 @@ defined('_JEXEC') or die();
                 <a href="https://www.alledia.com" target="_blank">
                     <img class="alledia-logo" src="<?php echo $mediaURL . "/images/logo-alledia.png"; ?>" />
                 </a>
-                <div>
+                <span>
                     &copy; 2014 Alledia.com. All rights reserved.<br>
-                    <a href="http://www.gnu.org/licenses/gpl-3.0.html">GNU/GPL v3.0</a>
-                </div>
+                </span>
             <?php else : ?>
                 <div class="alert alert-success"><i class="icon-publish"></i> <a href="https://www.alledia.com/plans/" style="color:#ed8034;" target="_blank">Go Pro to access more features!</a></div>
             <?php endif; ?>

@@ -12,13 +12,6 @@
     padding: 0px;
 }
 
-.alledia-wrapper img.alledia-extension-logo {
-    width: 140px;
-    position: absolute;
-    right: 10px;
-    top: -8px;
-}
-
 .alledia-wrapper input#alledia-license-keys {
     font-family: monospace;
     font-size: 20px !important;
@@ -41,7 +34,6 @@
 }
 
 .alledia-wrapper .alledia-button {
-    background-color: #075c97;
     color: #ffffff;
     display: inline-block;
     box-sizing: border-box !important;
@@ -95,7 +87,7 @@
 
 .alledia-wrapper .alledia-related-table {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
+    margin-bottom: 7px;
     width: 100%;
 }
 
@@ -120,29 +112,25 @@
 }
 
 .alledia-wrapper .alledia-footer {
-    background: none repeat scroll 0 0 #edf5fa;
     box-sizing: border-box;
-    height: 120px;
-    margin-bottom: 30px;
+    height: 60px;
+    margin-bottom: 50px;
     margin-top: 20px;
-    padding-left: 10px;
     padding-top: 25px;
 }
 
-.alledia-wrapper .alledia-footer div{
-    bottom: 20px;
+.alledia-wrapper .alledia-footer span{
     color: gray;
     font-size: 10px;
-    left: 10px;
-    position: absolute;
+    float: right
 }
 
 .alledia-wrapper img.alledia-logo {
     width: 90px;
 }
 
-@media screen and (max-width: 640px) {
-    .alledia-wrapper img.alledia-extension-logo {
-        position: static;
-    }
+.alledia-wrapper .alledia-license {
+    color: gray;
+    font-size: 10px;
+    padding-left: 10px;
 }
