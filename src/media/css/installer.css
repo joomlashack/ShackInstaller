@@ -81,7 +81,8 @@
 
 .alledia-wrapper .alledia-related-table {
 	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	margin-bottom: 40px
+	margin-bottom: 40px;
+    width: 100%;
 }
 
 .alledia-wrapper .alledia-related-table th {
