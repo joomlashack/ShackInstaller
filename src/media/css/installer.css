@@ -26,7 +26,9 @@
     min-height: 22px !important;
     line-height: 22px;
     border-radius: 0;
-    box-shadow: none;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    -o-border-radius: 0;
     color: rgba(103, 128, 208, 0.65);
     padding: 8px 10px;
     font-weight: 300;
@@ -36,7 +38,6 @@
 }
 
 .alledia-wrapper .alledia-button {
-    background-color: #075c97;
     color: #ffffff;
     display: inline-block;
     box-sizing: border-box !important;
@@ -49,7 +50,7 @@
     border: none;
     line-height: 40px;
     min-height: 40px;
-    padding: 0 12px;
+    padding: 0 18px;
     background: #075c97;
     color: #ffffff;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
@@ -58,6 +59,10 @@
     -webkit-transition: background 0.2s ease-in-out;
     transition: background 0.2s ease-in-out;
     margin-top: 15px;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -o-border-radius: 3px;
 }
 
 .alledia-wrapper .alledia-empty-key-msg {
@@ -90,6 +95,8 @@
 	background: #f6f6f6;
 	font-weight: bold;
 	line-height: 38px;
+    padding-: 5px 10px;
+    text-align: left;
 }
 
 .alledia-wrapper .alledia-related-table tr {
