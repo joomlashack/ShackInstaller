@@ -12,14 +12,17 @@
     padding: 0px;
 }
 
-.alledia-wrapper img.alledia-logo {
-    width: 70px;
+.alledia-wrapper img.alledia-extension-logo {
+    width: 140px;
+    position: absolute;
+    right: 10px;
+    top: -8px;
 }
 
 .alledia-wrapper input#alledia-license-keys {
     font-family: monospace;
     font-size: 20px !important;
-    width: 445px !important;
+    width: 410px !important;
     text-align: center;
     vertical-align: middle;
     height: 22px;
@@ -61,11 +64,15 @@
 }
 
 .alledia-wrapper .alledia-empty-key-msg {
-	font-style: italic;
+    font-style: italic;
 }
 
 .alledia-wrapper .alledia-details-container {
-	margin-top: 30px;
+    margin-top: 30px;
+}
+
+.alledia-wrapper .alledia-details-container.offset {
+    padding-top: 60px;
 }
 
 .alledia-wrapper #alledia-installer-license-success {
@@ -81,31 +88,53 @@
 }
 
 .alledia-wrapper .alledia-related-table {
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	margin-bottom: 40px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
     width: 100%;
 }
 
 .alledia-wrapper .alledia-related-table th {
-	background: #f6f6f6;
-	font-weight: bold;
-	line-height: 38px;
+    background: #f6f6f6;
+    font-weight: bold;
+    line-height: 38px;
 }
 
 .alledia-wrapper .alledia-related-table tr {
-	padding: 3px 0;
-	box-sizing: border-box;
-	line-height: 34px;
-	border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 3px 0;
+    box-sizing: border-box;
+    line-height: 34px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .alledia-wrapper .alledia-related-table td {
-	padding-left: 10px;
-	padding-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .alledia-wrapper .alledia-footer {
-	box-sizing: border-box;
-	margin-top: 20px;
-	margin-bottom: 30px;
+    background: none repeat scroll 0 0 #edf5fa;
+    box-sizing: border-box;
+    height: 120px;
+    margin-bottom: 30px;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-top: 25px;
+}
+
+.alledia-wrapper .alledia-footer div{
+    bottom: 20px;
+    color: gray;
+    font-size: 10px;
+    left: 10px;
+    position: absolute;
+}
+
+.alledia-wrapper img.alledia-logo {
+    width: 90px;
+}
+
+@media screen and (max-width: 640px) {
+    .alledia-wrapper img.alledia-extension-logo {
+        position: static;
+    }
 }

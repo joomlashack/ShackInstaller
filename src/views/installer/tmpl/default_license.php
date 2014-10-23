@@ -68,21 +68,29 @@ defined('_JEXEC') or die();
             });
 
             $('#alledia-license-save-button').on('click', function() {
+
                 $.post('<?php echo JURI::root(); ?>/administrator/index.php?plugin=system_osmylicensesmanager&task=license.save',
                     {
                         'license-keys': $('#alledia-license-keys').val()
                     },
                     function(data) {
-                        var result = JSON.parse(data);
+                        try
+                        {
+                            var result = JSON.parse(data);
 
-                        $('#alledia-installer-license-panel').hide();
+                            $('#alledia-installer-license-panel').hide();
 
-                        if (result.success) {
-                            $('#alledia-installer-license-success').show();
-                        } else {
+                            if (result.success) {
+                                $('#alledia-installer-license-success').show();
+                            } else {
+                                $('#alledia-installer-license-error').show();
+                            }
+                        } catch (e) {
+                            $('#alledia-installer-license-panel').hide();
                             $('#alledia-installer-license-error').show();
                         }
-                    }
+                    },
+                    'text'
                 ).fail(function() {
                     $('#alledia-installer-license-panel').hide();
                     $('#alledia-installer-license-error').show();

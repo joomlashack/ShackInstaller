@@ -190,6 +190,15 @@ abstract class AllediaInstallerAbstract
             $this->group
         );
 
+        // If Free, remove any missed Pro library
+        if (!$extension->isPro()) {
+            $proLibraryPath = $extension->getProLibraryPath();
+            if (file_exists($proLibraryPath)) {
+                jimport('joomla.filesystem.folder');
+                JFolder::delete($proLibraryPath);
+            }
+        }
+
         // Show additional installation messages
         $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->alledia->element, $this->group);
 
@@ -198,7 +207,8 @@ abstract class AllediaInstallerAbstract
 
         $name      = JText::_((string) $this->manifest->name);
         $tmplPath  = $extensionPath . '/views/installer/tmpl';
-        $mediaURL = JURI::root() . 'media/' . $extension->getFullElement();
+        $mediaURL  = JURI::root() . 'media/' . $extension->getFullElement();
+        $mediaPath = JPATH_SITE . '/media/' . $extension->getFullElement();
 
         // If Pro extension, includes the license form view
         if ($extension->isPro()) {
