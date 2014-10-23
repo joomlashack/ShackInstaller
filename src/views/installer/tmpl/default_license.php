@@ -30,7 +30,7 @@ defined('_JEXEC') or die();
 
             <p class="alledia-empty-key-msg">
                 <?php echo JText::_('LIB_ALLEDIAINSTALLER_MSG_LICENSE_KEYS_EMPTY'); ?>&nbsp;
-                <a href="https://www.alledia.com/account/key/" target-"_blank">
+                <a href="https://www.alledia.com/account/key/" target="_blank">
                     <?php echo JText::_('LIB_ALLEDIAINSTALLER_I_DONT_REMEMBER_MY_KEY'); ?>
                 </a>
             </p>
