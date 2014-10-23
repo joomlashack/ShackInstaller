@@ -48,7 +48,10 @@ defined('_JEXEC') or die();
         ?>
 
         <div class="alledia-footer">
-            Powered by <img class="alledia-logo" src="<?php echo $mediaURL . "/images/logo-alledia.png"; ?>" />
+            Powered by
+                <a href="https://www.alledia.com" target="_blank">
+                    <img class="alledia-logo" src="<?php echo $mediaURL . "/images/logo-alledia.png"; ?>" />
+                </a>
         </div>
     </div>
 
