@@ -57,6 +57,7 @@
     font-size: 14px;
     -webkit-transition: background 0.2s ease-in-out;
     transition: background 0.2s ease-in-out;
+    margin-top: 15px;
 }
 
 .alledia-wrapper .alledia-empty-key-msg {
