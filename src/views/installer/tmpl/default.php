@@ -41,35 +41,11 @@ defined('_JEXEC') or die();
             include __DIR__ . "/default_license.php";
         }
 
+        if ($this->manifest->alledia->relatedExtensions) {
+            include __DIR__ . "/default_related.php";
+        }
+
         ?>
-
-        <?php if ($this->manifest->alledia->relatedExtensions) : ?>
-            <div class="alledia-details-container">
-
-                <a href="javascript:void(0);" id="alledia-installer-footer-toggler">
-                    <?php echo JText::_('LIB_ALLEDIAINSTALLER_SHOW_DETAILS'); ?>
-                </a>
-
-                <div id="alledia-installer-footer" style="display: none;">
-                    <h4><?php echo JText::_('LIB_ALLEDIAINSTALLER_RELATED_EXTENSIONS'); ?></h4>
-                    <ul>
-                        <?php foreach ($this->relatedExtensionFeedback as $element => $data) : ?>
-                            <li>
-                                <?php echo JText::_($data['name']) . ': ' . $data['message']; ?>
-                                <?php if (isset($data['publish'])) : ?>
-                                    <?php echo JText::_('LIB_ALLEDIAINSTALLER_PUBLISHED'); ?>: <?php echo JText::_($data['publish'] ? 'JYES' : 'JNO'); ?>
-                                <?php endif; ?>
-
-                                <?php if (isset($data['ordering'])) : ?>
-                                    <?php echo JText::_('LIB_ALLEDIAINSTALLER_SORTED'); ?>: <?php echo JText::_($data['ordering'] ? 'JYES' : 'JNO'); ?>
-                                <?php endif; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-
-            </div>
-        <?php endif; ?>
 
         <div class="alledia-footer">
             Powered by <img class="alledia-logo" src="<?php echo $mediaURL . "/images/logo-alledia.png"; ?>" />
@@ -77,17 +53,3 @@ defined('_JEXEC') or die();
     </div>
 
 </div>
-
-<script>
-(function($) {
-
-    $(function() {
-        // More info button
-        $('#alledia-installer-footer-toggler').on('click', function(event) {
-            $('#alledia-installer-footer').show();
-            $(this).hide();
-        });
-    });
-
-})(jQueryAlledia);
-</script>

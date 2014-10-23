@@ -67,6 +67,31 @@
 	margin-top: 30px;
 }
 
+.alledia-wrapper .alledia-related-table {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	margin-bottom: 40px
+}
+
+.alledia-wrapper .alledia-related-table th {
+	background: #f6f6f6;
+	font-weight: bold;
+	line-height: 38px;
+}
+
+.alledia-wrapper .alledia-related-table tr {
+	padding: 3px 0;
+	box-sizing: border-box;
+	line-height: 34px;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.alledia-wrapper .alledia-related-table td {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
 .alledia-wrapper .alledia-footer {
-	margin-top: 10px;
+	box-sizing: border-box;
+	margin-top: 20px;
+	margin-bottom: 30px;
 }
