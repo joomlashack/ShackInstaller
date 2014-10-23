@@ -43,6 +43,18 @@ defined('_JEXEC') or die();
                 <?php echo JText::_('LIB_ALLEDIAINSTALLER_SAVE_LICENSE_KEY'); ?>
             </a>
         </div>
+
+        <div id="alledia-installer-license-success" style="display: none">
+            <p>
+                <?php echo JText::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_SUCCESS'); ?>
+            </p>
+        </div>
+
+        <div id="alledia-installer-license-error" style="display: none">
+            <p>
+                <?php echo JText::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_ERROR'); ?>
+            </p>
+        </div>
     </div>
 
     <script>
@@ -61,10 +73,19 @@ defined('_JEXEC') or die();
                         'license-keys': $('#alledia-license-keys').val()
                     },
                     function(data) {
-                        console.log(data);
+                        var result = JSON.parse(data);
+
+                        $('#alledia-installer-license-panel').hide();
+
+                        if (result.success) {
+                            $('#alledia-installer-license-success').show();
+                        } else {
+                            $('#alledia-installer-license-error').show();
+                        }
                     }
                 ).fail(function() {
-                    console.log(33);
+                    $('#alledia-installer-license-panel').hide();
+                    $('#alledia-installer-license-error').show();
                 });
 
             });

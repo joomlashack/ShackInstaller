@@ -67,6 +67,18 @@
 	margin-top: 30px;
 }
 
+.alledia-wrapper #alledia-installer-license-success {
+    font-size: 18px;
+    color: #075c97;
+    padding-top: 20px;
+}
+
+.alledia-wrapper #alledia-installer-license-error {
+    font-size: 16px;
+    color: #974646;
+    padding-top: 20px;
+}
+
 .alledia-wrapper .alledia-related-table {
 	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 	margin-bottom: 40px
