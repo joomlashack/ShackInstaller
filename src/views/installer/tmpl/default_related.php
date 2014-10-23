@@ -18,8 +18,8 @@ defined('_JEXEC') or die();
 
         <table class="alledia-related-table">
             <thead>
-                <tr colspan="3">
-                    <th><?php echo JText::_('LIB_ALLEDIAINSTALLER_RELATED_EXTENSIONS'); ?></th>
+                <tr>
+                    <th colspan="2"><?php echo JText::_('LIB_ALLEDIAINSTALLER_RELATED_EXTENSIONS'); ?></th>
                 </tr>
             </thead>
             <tbody>
