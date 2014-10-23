@@ -6,10 +6,4 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
-defined('_JEXEC') or die();
-
-include 'header_default.php';
-?>
-
-<h3>Thanks for update!</h3>
-<div>Version: <?php echo $this->manifest->version; ?></div>
+// Override this file in your extension

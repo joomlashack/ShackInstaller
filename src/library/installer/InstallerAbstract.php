@@ -8,6 +8,8 @@
 
 defined('_JEXEC') or die();
 
+use Alledia\Framework\Factory;
+
 abstract class AllediaInstallerAbstract
 {
     /**
@@ -179,29 +181,40 @@ abstract class AllediaInstallerAbstract
             $ordering  = $this->reorderThisPlugin();
         }
 
+        $this->loadAllediaFramework();
+
+        // Load the extension instance from the framework
+        $extension = Factory::getExtension(
+            (string) $this->manifest->alledia->namespace,
+            $this->type,
+            $this->group
+        );
+
         // Show additional installation messages
         $extensionPath = $this->getExtensionPath($this->type, (string) $this->manifest->alledia->element, $this->group);
-        $file          = strpos($type, 'install') === false ? $type : 'install';
 
         // Load the extension language
         JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
-        $name     = JText::_((string) $this->manifest->name);
-        $tmplPath = $extensionPath . '/views/installer/tmpl';
+        $name      = JText::_((string) $this->manifest->name);
+        $tmplPath  = $extensionPath . '/views/installer/tmpl';
+        $mediaURL = JURI::root() . 'media/' . $extension->getFullElement();
 
-        // Load the views
-        $path = $tmplPath . '/header_' . $file . '.php';
-        include $path;
+        // If Pro extension, includes the license form view
+        if ($extension->isPro()) {
+            // Get the OSMyLicensesManager extension to handle the license key
+            $licensesManagerExtension = Factory::getExtension('osmylicensesmanager', 'plugin', 'system');
+            $isLicensesManagerInstalled = false;
 
-        // Include the body, from the extension
-        $path = $tmplPath . '/body_' . $file . '.php';
-        if (file_exists($path)) {
-            include $path;
+            if (!empty($licensesManagerExtension)) {
+                $licenseKey = $licensesManagerExtension->params->get('license-keys', '');
+
+                $isLicensesManagerInstalled = true;
+            }
         }
 
-        // Include the footer
-        $path = $tmplPath . '/footer_' . $file . '.php';
-        include $path;
+        // Include the installer template
+        include $tmplPath . '/default.php';
 
         $this->showMessages();
     }
@@ -683,6 +696,29 @@ abstract class AllediaInstallerAbstract
         }
 
         return $basePath;
+    }
+
+    /**
+     * Get the id for an installed extension
+     *
+     * @return int The id
+     */
+    protected function getExtensionId($type, $element, $group = '')
+    {
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true)
+            ->select('extension_id')
+            ->from('#__extensions')
+            ->where(
+                array(
+                    $db->qn('element') . ' = ' . $db->q($element),
+                    $db->qn('folder') . ' = ' . $db->q($group),
+                    $db->qn('type') . ' = ' . $db->q($type)
+                )
+            );
+        $db->setQuery($query);
+
+        return $db->loadResult();
     }
 
     /**
