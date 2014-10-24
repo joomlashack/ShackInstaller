@@ -8,9 +8,6 @@
 
 defined('_JEXEC') or die();
 ?>
-<link rel="stylesheet" href="<?php echo $mediaURL . '/css/installer.css'; ?>">
-<link rel="stylesheet" href="<?php echo JURI::root() . 'media/lib_allediaframework/css/style_gopro_field.css'; ?>">
-
 <?php if (version_compare(JVERSION, '3.0', '<')) : ?>
     <script src="<?php echo $mediaURL . '/js/jquery.js'; ?>"></script>
 <?php else : ?>
@@ -33,7 +30,6 @@ defined('_JEXEC') or die();
         if ($extension->isPro()) {
             include __DIR__ . "/default_license.php";
         }
-
 
         include __DIR__ . "/default_info.php";
 

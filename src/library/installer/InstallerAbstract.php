@@ -220,10 +220,6 @@ abstract class AllediaInstallerAbstract
         // Load the extension language
         JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
-        $name        = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
-        $mediaURL    = JURI::root() . 'media/' . $extension->getFullElement();
-        $libMediaURL = JURI::root() . 'media/lib_allediaframework';
-
         // If Pro extension, includes the license form view
         if ($extension->isPro()) {
             // Get the OSMyLicensesManager extension to handle the license key
@@ -247,6 +243,17 @@ abstract class AllediaInstallerAbstract
             $string,
             $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '')
         );
+
+        $name         = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
+        $mediaPath    = JPATH_SITE . '/media/' . $extension->getFullElement();
+        $libMediaPath = JPATH_SITE . '/media/lib_allediaframework';
+        $mediaURL     = JURI::root() . 'media/' . $extension->getFullElement();
+        $libMediaURL  = JURI::root() . 'media/lib_allediaframework';
+
+        $this->addStyles(array(
+            $mediaPath . '/css/installer.css',
+            $libMediaPath . '/css/style_gopro_field.css',
+        ));
 
         // Include the installer template
         include $extensionPath . '/views/installer/tmpl/default.php';
@@ -858,5 +865,22 @@ abstract class AllediaInstallerAbstract
         $db->setQuery('UPDATE `#__extensions` SET custom_data="{\"author\":\"Alledia\"}"
                        WHERE type="library" AND element="allediaframework"');
         $db->execute();
+    }
+
+    /**
+     * Add styles to the output. Used because when the postFlight
+     * method is called, we can't add stylesheets to the head.
+     *
+     * @param array $stylesheets
+     */
+    protected function addStyles($stylesheets)
+    {
+        foreach ($stylesheets as $path) {
+            if (file_exists($path)) {
+                $style = file_get_contents($path);
+
+                echo '<style>' . $style . '</style>';
+            }
+        }
     }
 }
