@@ -166,8 +166,8 @@ abstract class AllediaInstallerAbstract
      */
     public function postFlight($type, $parent)
     {
-        $this->installRelated();
         $this->clearObsolete();
+        $this->installRelated();
         $this->addAllediaAuthorshipToExtension();
 
         // @TODO: Stop the script here if this is a related extension (but still remove pro folder, if needed)
