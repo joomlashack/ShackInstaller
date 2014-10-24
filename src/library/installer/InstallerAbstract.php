@@ -213,7 +213,7 @@ abstract class AllediaInstallerAbstract
         // Load the extension language
         JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
-        $name        = JText::_((string) $this->manifest->name);
+        $name        = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
         $tmplPath    = $extensionPath . '/views/installer/tmpl';
         $mediaURL    = JURI::root() . 'media/' . $extension->getFullElement();
         $libMediaURL = JURI::root() . 'media/lib_allediaframework';
