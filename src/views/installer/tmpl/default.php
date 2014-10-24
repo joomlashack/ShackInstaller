@@ -22,15 +22,7 @@ defined('_JEXEC') or die();
 <div class="alledia-wrapper">
 
     <div class="alledia-content">
-        <h1><?php echo $name; ?></h1>
-
-        <h3>
-            <?php if ($type === 'install') : ?>
-                <?php echo JText::sprintf('LIB_ALLEDIAINSTALLER_THANKS_INSTALL', $this->manifest->version); ?>
-            <?php else : ?>
-                <?php echo JText::sprintf('LIB_ALLEDIAINSTALLER_THANKS_UPDATE', $this->manifest->version); ?>
-            <?php endif; ?>
-        </h3>
+        <h2><?php echo $welcomeMessage; ?></h2>
 
         <?php
 

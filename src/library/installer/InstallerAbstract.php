@@ -166,10 +166,11 @@ abstract class AllediaInstallerAbstract
      */
     public function postFlight($type, $parent)
     {
-
         $this->installRelated();
         $this->clearObsolete();
         $this->addAllediaAuthorshipToExtension();
+
+        // @TODO: Stop the script here if this is a related extension (but still remove pro folder, if needed)
 
         $element = (string) $this->manifest->alledia->element;
 
@@ -214,7 +215,6 @@ abstract class AllediaInstallerAbstract
         JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
         $name        = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
-        $tmplPath    = $extensionPath . '/views/installer/tmpl';
         $mediaURL    = JURI::root() . 'media/' . $extension->getFullElement();
         $libMediaURL = JURI::root() . 'media/lib_allediaframework';
 
@@ -231,8 +231,19 @@ abstract class AllediaInstallerAbstract
             }
         }
 
+        // Welcome message
+        if ($type === 'install') {
+            $string = 'LIB_ALLEDIAINSTALLER_THANKS_INSTALL';
+        } else {
+            $string = 'LIB_ALLEDIAINSTALLER_THANKS_UPDATE';
+        }
+        $welcomeMessage = JText::sprintf(
+            $string,
+            $this->manifest->alledia->namespace . ' ' . ($extension->isPro() ? 'Pro' : '')
+        );
+
         // Include the installer template
-        include $tmplPath . '/default.php';
+        include $extensionPath . '/views/installer/tmpl/default.php';
 
         $this->showMessages();
     }

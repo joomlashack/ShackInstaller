@@ -15,7 +15,10 @@ defined('_JEXEC') or die();
     </a>
 
     <div id="alledia-installer-footer" style="display: none;">
-
+        <div class="alledia-license">
+            Release: v<?php echo $this->manifest->version; ?>
+        </div>
+        <br>
         <?php if (!empty($this->manifest->alledia->relatedExtensions)) : ?>
             <table class="alledia-related-table">
                 <thead>
