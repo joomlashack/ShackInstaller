@@ -13,11 +13,6 @@ use Alledia\Framework\Factory;
 abstract class AllediaInstallerAbstract
 {
     /**
-     * @var array Obsolete folders/files to be deleted - use admin/site/media for location
-     */
-    protected $obsoleteItems = array();
-
-    /**
      * @var JInstaller
      */
     protected $installer = null;
@@ -570,32 +565,81 @@ abstract class AllediaInstallerAbstract
     }
 
     /**
-     * Delete obsolete files and folders
+     * Delete obsolete files, folders and extensions.
+     * Files and folders are identified from the site
+     * root path and should starts with a slash.
      */
     protected function clearObsolete()
     {
-        if ($this->obsoleteItems) {
-            $admin = $this->installer->getPath('extension_administrator');
-            $site  = $this->installer->getPath('extension_site');
+        $obsolete = $this->manifest->alledia->obsolete;
+        if ($obsolete) {
+            // Extensions
+            if ($obsolete->extension) {
+                foreach ($obsolete->extension as $extension) {
+                    $attributes = (array) $extension->attributes();
+                    if (!empty($attributes)) {
+                        $attributes = $attributes['@attributes'];
+                    }
 
-            $search  = array('#^/admin#', '#^/site#');
-            $replace = array($admin, $site);
-            if ($this->mediaFolder) {
-                $search[]  = '#^/media#';
-                $replace[] = $this->mediaFolder;
+                    $type    = $attributes['type'];
+                    $element = $attributes['element'];
+
+                    $group = '';
+                    if (isset($attributes['group'])) {
+                        $group  = $attributes['group'];
+                    }
+
+                    $current = $this->findExtension($type, $element, $group);
+                    if (!empty($current)) {
+                        // Try to uninstall
+                        $tmpInstaller = new JInstaller();
+                        $uninstalled = $tmpInstaller->uninstall($type, $current->extension_id);
+
+                        $typeName = ucfirst(trim(($group ? : '') . ' ' . $type));
+
+                        if ($uninstalled) {
+                            $this->setMessage(
+                                JText::sprintf(
+                                    'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_SUCCESS',
+                                    strtolower($typeName),
+                                    $element
+                                )
+                            );
+                        } else {
+                            $this->setMessage(
+                                JText::sprintf(
+                                    'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_FAIL',
+                                    strtolower($typeName),
+                                    $element
+                                ),
+                                'error'
+                            );
+                        }
+                    }
+                }
             }
 
-            foreach ($this->obsoleteItems as $item) {
-                $path = preg_replace($search, $replace, $item);
-                if (is_file($path)) {
-                    $success = JFile::delete($path);
-                } elseif (is_dir($path)) {
-                    $success = JFolder::delete($path);
-                } else {
-                    $success = null;
+            // Files
+            if ($obsolete->file) {
+                jimport('joomla.filesystem.file');
+
+                foreach ($obsolete->file as $file) {
+                    $path = JPATH_SITE . (string) $file;
+                    if (file_exists($path)) {
+                        JFile::delete($path);
+                    }
                 }
-                if ($success !== null) {
-                    $this->setMessage('Delete ' . $path . ($success ? ' [OK]' : ' [FAILED]'));
+            }
+
+            // Folders
+            if ($obsolete->folder) {
+                jimport('joomla.filesystem.folder');
+
+                foreach ($obsolete->folder as $folder) {
+                    $path = JPATH_SITE . (string) $folder;
+                    if (file_exists($path)) {
+                        JFolder::delete($path);
+                    }
                 }
             }
         }
