@@ -191,12 +191,20 @@ abstract class AllediaInstallerAbstract
         );
 
         // If Free, remove any missed Pro library
+        $goProAd = '';
         if (!$extension->isPro()) {
             $proLibraryPath = $extension->getProLibraryPath();
             if (file_exists($proLibraryPath)) {
                 jimport('joomla.filesystem.folder');
                 JFolder::delete($proLibraryPath);
             }
+
+            // Load the Pro ad field
+            require_once ALLEDIA_FRAMEWORK_PATH . '/joomla/fields/GoPro.php';
+            $field = new JFormFieldGoPro();
+            $field->fromInstaller = true;
+            $goProAd = $field->getInput();
+            unset($field);
         }
 
         // Show additional installation messages
@@ -205,10 +213,10 @@ abstract class AllediaInstallerAbstract
         // Load the extension language
         JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
-        $name      = JText::_((string) $this->manifest->name);
-        $tmplPath  = $extensionPath . '/views/installer/tmpl';
-        $mediaURL  = JURI::root() . 'media/' . $extension->getFullElement();
-        $mediaPath = JPATH_SITE . '/media/' . $extension->getFullElement();
+        $name        = JText::_((string) $this->manifest->name);
+        $tmplPath    = $extensionPath . '/views/installer/tmpl';
+        $mediaURL    = JURI::root() . 'media/' . $extension->getFullElement();
+        $libMediaURL = JURI::root() . 'media/lib_allediaframework';
 
         // If Pro extension, includes the license form view
         if ($extension->isPro()) {

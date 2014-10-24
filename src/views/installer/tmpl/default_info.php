@@ -8,7 +8,7 @@
 
 defined('_JEXEC') or die();
 ?>
-<div class="alledia-details-container <?php echo $extension->isPro() ? '' : 'offset'; ?>">
+<div class="alledia-details-container">
 
     <a href="javascript:void(0);" id="alledia-installer-footer-toggler">
         <?php echo JText::_('LIB_ALLEDIAINSTALLER_SHOW_DETAILS'); ?>

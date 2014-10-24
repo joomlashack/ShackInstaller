@@ -9,6 +9,7 @@
 defined('_JEXEC') or die();
 ?>
 <link rel="stylesheet" href="<?php echo $mediaURL . '/css/installer.css'; ?>">
+<link rel="stylesheet" href="<?php echo JURI::root() . 'media/lib_allediaframework/css/style_gopro_field.css'; ?>">
 
 <?php if (version_compare(JVERSION, '3.0', '<')) : ?>
     <script src="<?php echo $mediaURL . '/js/jquery.js'; ?>"></script>
@@ -50,13 +51,13 @@ defined('_JEXEC') or die();
             <?php if ($extension->isPro()) : ?>
                 Powered by
                 <a href="https://www.alledia.com" target="_blank">
-                    <img class="alledia-logo" src="<?php echo $mediaURL . "/images/logo-alledia.png"; ?>" />
+                    <img class="alledia-logo" src="<?php echo $libMediaURL . "/images/alledia_logo.png"; ?>" />
                 </a>
                 <span>
-                    &copy; 2014 Alledia.com. All rights reserved.<br>
+                    &copy; 2014 Alledia.com. All rights reserved.
                 </span>
             <?php else : ?>
-                <div class="alert alert-success"><i class="icon-publish"></i> <a href="https://www.alledia.com/plans/" style="color:#ed8034;" target="_blank">Go Pro to access more features!</a></div>
+                <?php echo $goProAd; ?>
             <?php endif; ?>
         </div>
     </div>
