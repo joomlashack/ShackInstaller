@@ -40,7 +40,7 @@ defined('_JEXEC') or die();
         ?>
 
         <div class="alledia-footer">
-            <?php if ($extension->isPro()) : ?>
+            <?php if (empty($goProAdHtml)) : ?>
                 Powered by
                 <a href="https://www.alledia.com" target="_blank">
                     <img class="alledia-logo" src="<?php echo $libMediaURL . "/images/alledia_logo.png"; ?>" />
@@ -49,7 +49,7 @@ defined('_JEXEC') or die();
                     &copy; 2014 Alledia.com. All rights reserved.
                 </span>
             <?php else : ?>
-                <?php echo $goProAd; ?>
+                <?php echo $goProAdHtml; ?>
             <?php endif; ?>
         </div>
     </div>

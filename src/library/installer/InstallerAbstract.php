@@ -192,7 +192,7 @@ abstract class AllediaInstallerAbstract
         );
 
         // If Free, remove any missed Pro library
-        $goProAd = '';
+        $goProAdHtml = '';
         if (!$extension->isPro()) {
             $proLibraryPath = $extension->getProLibraryPath();
             if (file_exists($proLibraryPath)) {
@@ -200,12 +200,18 @@ abstract class AllediaInstallerAbstract
                 JFolder::delete($proLibraryPath);
             }
 
-            // Load the Pro ad field
-            require_once ALLEDIA_FRAMEWORK_PATH . '/joomla/fields/GoPro.php';
-            $field = new JFormFieldGoPro();
-            $field->fromInstaller = true;
-            $goProAd = $field->getInput();
-            unset($field);
+            // Load the Pro ad field, if we have a pro version available
+            $goProField = $this->manifest->xpath('//field[@type="gopro"]');
+
+            if (!empty($goProField)) {
+                require_once ALLEDIA_FRAMEWORK_PATH . '/joomla/fields/GoPro.php';
+
+                $field = new JFormFieldGoPro();
+                $field->fromInstaller = true;
+                $goProAdHtml = $field->getInput();
+
+                unset($field);
+            }
         }
 
         // Show additional installation messages
