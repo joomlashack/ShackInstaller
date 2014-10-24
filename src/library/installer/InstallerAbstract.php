@@ -239,7 +239,7 @@ abstract class AllediaInstallerAbstract
         }
         $welcomeMessage = JText::sprintf(
             $string,
-            $this->manifest->alledia->namespace . ' ' . ($extension->isPro() ? 'Pro' : '')
+            $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '')
         );
 
         // Include the installer template
