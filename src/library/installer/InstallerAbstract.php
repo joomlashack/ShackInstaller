@@ -436,9 +436,16 @@ abstract class AllediaInstallerAbstract
             'module'    => 'mod_'
         );
 
+        // Fix the element, if the prefix is not found
+        if (array_key_exists($type, $prefixes)) {
+            if (substr_count($element, $prefixes[$type]) === 0) {
+                $element = $prefixes[$type] . $element;
+            }
+        }
+
         $terms = array(
             'type'    => $type,
-            'element' => (array_key_exists($type, $prefixes) ? $prefixes[$type] : '') . $element
+            'element' => $element
         );
 
         if ($type === 'plugin') {
@@ -765,21 +772,36 @@ abstract class AllediaInstallerAbstract
         $basePath = '';
 
         $folders = array(
-            'component' => 'administrator/components/com_',
+            'component' => 'administrator/components/',
             'plugin'    => 'plugins/',
             'template'  => 'templates/',
-            'library'   => 'administrator/manifests/libraries/',
+            'library'   => 'libraries/',
             'cli'       => 'cli/',
-            'module'    => 'modules/mod_'
+            'module'    => 'modules/'
         );
 
         $basePath = JPATH_SITE . '/' . $folders[$type];
 
-        if ($type === 'plugin') {
-            $basePath .= $group . '/' . $element;
-        } else {
-            $basePath .= $element;
+        switch ($type) {
+            case 'plugin':
+                $basePath .= $group . '/';
+                break;
+
+            case 'module':
+                if (!preg_match('/^mod_/', $element)) {
+                    $basePath .= 'mod_';
+                }
+                break;
+
+            case 'component':
+                if (!preg_match('/^com_/', $element)) {
+                    $basePath .= 'com_';
+                }
+                break;
         }
+
+        $basePath .= $element;
+
 
         return $basePath;
     }
@@ -814,20 +836,17 @@ abstract class AllediaInstallerAbstract
      */
     protected function getManifestPath($type, $element, $group = '')
     {
-        $basePath = $this->getExtensionPath($type, $element, $group);
-
         $installer = new JInstaller();
+
         if ($type !== 'library') {
+            $basePath = $this->getExtensionPath($type, $element, $group);
+
             $installer->setPath('source', $basePath);
             $installer->getManifest();
 
             $manifestPath = $installer->getPath('manifest');
         } else {
-            $manifestPath = $basePath . '.xml';
-
-            if (!file_exists($manifestPath)) {
-                $manifestPath = str_replace($element, 'lib_' . $element, $basePath) . '.xml';
-            }
+            $manifestPath = JPATH_SITE . '/administrator/manifests/libraries/' . $element . '.xml';
 
             if (!$installer->isManifest($manifestPath)) {
                 $manifestPath = '';
