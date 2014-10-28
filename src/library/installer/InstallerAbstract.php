@@ -341,17 +341,19 @@ abstract class AllediaInstallerAbstract
                         if ($isNew) {
                             $current = $this->findExtension($type, $element, $group);
 
-                            if (isset($attributes['publish']) && (bool) $attributes['publish']) {
-                                $current->publish();
+                            if (is_object($current)) {
+                                if ($type === 'plugin') {
+                                    if (isset($attributes['publish']) && (bool) $attributes['publish']) {
+                                        $current->publish();
 
-                                $this->storeFeedbackForRelatedExtension($element, 'publish', true);
-                            }
+                                        $this->storeFeedbackForRelatedExtension($element, 'publish', true);
+                                    }
 
-                            if ($type === 'plugin') {
-                                if (isset($attributes['ordering'])) {
-                                    $this->setPluginOrder($current, $attributes['ordering']);
+                                    if (isset($attributes['ordering'])) {
+                                        $this->setPluginOrder($current, $attributes['ordering']);
 
-                                    $this->storeFeedbackForRelatedExtension($element, 'ordering', true);
+                                        $this->storeFeedbackForRelatedExtension($element, 'ordering', true);
+                                    }
                                 }
                             }
                         }
