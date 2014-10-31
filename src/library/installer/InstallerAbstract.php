@@ -857,8 +857,8 @@ abstract class AllediaInstallerAbstract
         } else {
             $manifestPath = JPATH_SITE . '/administrator/manifests/libraries/' . $element . '.xml';
 
-            if (!$installer->isManifest($manifestPath)) {
-                $manifestPath = '';
+            if (!file_exists($manifestPath) || !$installer->isManifest($manifestPath)) {
+                $manifestPath = false;
             }
         }
 
