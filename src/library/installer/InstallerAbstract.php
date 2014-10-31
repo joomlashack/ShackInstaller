@@ -179,7 +179,7 @@ abstract class AllediaInstallerAbstract
 
         $this->loadAllediaFramework();
 
-        // Load the extension instance from the framework
+        // Load the extension instance using the framework
         $extension = Factory::getExtension(
             (string) $this->manifest->alledia->namespace,
             $this->type,
@@ -239,6 +239,7 @@ abstract class AllediaInstallerAbstract
             $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '')
         );
 
+        // Variables for the template
         $name         = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
         $mediaPath    = JPATH_SITE . '/media/' . $extension->getFullElement();
         $libMediaPath = JPATH_SITE . '/media/lib_allediaframework';
@@ -250,7 +251,7 @@ abstract class AllediaInstallerAbstract
             $libMediaPath . '/css/style_gopro_field.css',
         ));
 
-        // Include the installer template
+        // Include the template
         include $extensionPath . '/views/installer/tmpl/default.php';
 
         $this->showMessages();
