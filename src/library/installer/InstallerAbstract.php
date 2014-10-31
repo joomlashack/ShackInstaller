@@ -634,7 +634,7 @@ abstract class AllediaInstallerAbstract
                 jimport('joomla.filesystem.file');
 
                 foreach ($obsolete->file as $file) {
-                    $path = JPATH_SITE . (string) $file;
+                    $path = JPATH_SITE . '/' . (string) $file;
                     if (file_exists($path)) {
                         JFile::delete($path);
                     }
@@ -646,7 +646,7 @@ abstract class AllediaInstallerAbstract
                 jimport('joomla.filesystem.folder');
 
                 foreach ($obsolete->folder as $folder) {
-                    $path = JPATH_SITE . (string) $folder;
+                    $path = JPATH_SITE . '/' . (string) $folder;
                     if (file_exists($path)) {
                         JFolder::delete($path);
                     }
