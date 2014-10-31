@@ -295,7 +295,6 @@ abstract class AllediaInstallerAbstract
                     $tmpInstaller = new JInstaller();
                     $tmpInstaller->setPath('source', $path);
                     $newManifest = $tmpInstaller->getManifest();
-                    unset($tmpInstaller);
                     $newVersion = (string)$newManifest->version;
 
                     $this->storeFeedbackForRelatedExtension($element, 'name', (string) $newManifest->name);
@@ -337,7 +336,7 @@ abstract class AllediaInstallerAbstract
                     }
 
                     $text = 'LIB_ALLEDIAINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
-                    if ($installer->install($path)) {
+                    if ($tmpInstaller->install($path)) {
                         $this->setMessage(JText::sprintf($text, $typeName, $element));
                         if ($isNew) {
                             $current = $this->findExtension($type, $element, $group);
@@ -380,6 +379,7 @@ abstract class AllediaInstallerAbstract
                             )
                         );
                     }
+                    unset($tmpInstaller);
                 }
             }
         }
