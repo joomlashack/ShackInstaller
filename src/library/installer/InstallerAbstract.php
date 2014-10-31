@@ -146,7 +146,7 @@ abstract class AllediaInstallerAbstract
             $allediaFrameworkPath = JPATH_SITE . '/libraries/allediaframework/include.php';
 
             if (!file_exists($allediaFrameworkPath)) {
-                throw new Exception('Alledia framework not found [AllediaInstaller]');
+                throw new Exception('[AllediaInstaller] Alledia framework not found');
             }
 
             require_once $allediaFrameworkPath;
