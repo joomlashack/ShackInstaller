@@ -391,8 +391,8 @@ abstract class AllediaInstallerAbstract
     protected function uninstallRelated()
     {
         if ($this->manifest->alledia->relatedExtensions) {
-            $installer      = new JInstaller();
-            $source         = $this->installer->getPath('source');
+            $installer = new JInstaller();
+            $source    = $this->installer->getPath('source');
 
             foreach ($this->manifest->alledia->relatedExtensions->extension as $extension) {
                 $attributes = (array) $extension->attributes();
