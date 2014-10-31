@@ -34,12 +34,12 @@ defined('_JEXEC') or die();
                                 <?php
                                 $messages = array($data['message']);
 
-                                if (isset($data['publish'])) {
+                                if (isset($data['publish']) && $data['publish']) {
                                     $messages[] = JText::_('LIB_ALLEDIAINSTALLER_PUBLISHED');
                                 }
 
                                 if (isset($data['ordering'])) {
-                                    $messages[] = JText::_('LIB_ALLEDIAINSTALLER_SORTED');
+                                    $messages[] = JText::sprintf('LIB_ALLEDIAINSTALLER_SORTED', $data['ordering']);
                                 }
 
                                 $messages = implode(', ', $messages);
