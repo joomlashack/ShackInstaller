@@ -760,6 +760,12 @@ abstract class AllediaInstallerAbstract
                     $info->set($e->getName(), (string)$e);
                 }
             }
+        } else {
+            $relativePath = str_replace(JPATH_SITE . '/', '', $manifestPath);
+            $this->setMessage(
+                JText::sprintf('LIB_ALLEDIAINSTALLER_MANIFEST_NOT_FOUND', $relativePath),
+                'error'
+            );
         }
 
         return $info;
