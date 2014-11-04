@@ -71,8 +71,7 @@ abstract class AbstractScript
         $this->messages  = array();
 
         if ($media = $this->manifest->media) {
-            $path              = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
-            $this->mediaFolder = $path;
+            $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
         }
 
         $attributes  = (array) $this->manifest->attributes();
@@ -237,15 +236,12 @@ abstract class AbstractScript
         );
 
         // Variables for the template
-        $name         = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
-        $mediaPath    = JPATH_SITE . '/media/' . $extension->getFullElement();
-        $libMediaPath = JPATH_SITE . '/media/lib_allediaframework';
-        $mediaURL     = JURI::root() . 'media/' . $extension->getFullElement();
-        $libMediaURL  = JURI::root() . 'media/lib_allediaframework';
+        $name     = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
+        $mediaURL = JURI::root() . 'media/' . $extension->getFullElement();
 
         $this->addStyles(array(
-            $mediaPath . '/css/installer.css',
-            $libMediaPath . '/css/style_gopro_field.css',
+            $this->mediaFolder . '/css/installer.css',
+            $this->mediaFolder . '/css/style_gopro_field.css',
         ));
 
         // Include the template
