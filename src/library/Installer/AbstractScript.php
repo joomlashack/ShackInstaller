@@ -239,10 +239,12 @@ abstract class AbstractScript
         $name     = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
         $mediaURL = JURI::root() . 'media/' . $extension->getFullElement();
 
-        $this->addStyles(array(
-            $this->mediaFolder . '/css/installer.css',
-            $this->mediaFolder . '/css/style_gopro_field.css',
-        ));
+        $this->addStyles(
+            array(
+                $this->mediaFolder . '/css/installer.css',
+                $this->mediaFolder . '/css/style_gopro_field.css',
+            )
+        );
 
         // Include the template
         include $extensionPath . '/views/installer/tmpl/default.php';
