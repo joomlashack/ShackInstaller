@@ -6,11 +6,10 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
-namespace Alledia\Installer;
+namespace Alledia\Installer\Joomla;
 
 defined('_JEXEC') or die();
 
-use Alledia\Framework\Factory;
 use JFactory;
 use JTable;
 use JInstaller;
@@ -149,22 +148,6 @@ abstract class AbstractScript
     }
 
     /**
-     * Load Alledia Framework
-     */
-    protected function loadAllediaFramework()
-    {
-        if (!defined('ALLEDIA_FRAMEWORK_LOADED')) {
-            $allediaFrameworkPath = JPATH_SITE . '/libraries/allediaframework/include.php';
-
-            if (!file_exists($allediaFrameworkPath)) {
-                throw new Exception('[AllediaInstaller] Alledia framework not found');
-            }
-
-            require_once $allediaFrameworkPath;
-        }
-    }
-
-    /**
      * @param string                     $type
      * @param JInstallerAdapterComponent $parent
      *
@@ -188,10 +171,8 @@ abstract class AbstractScript
             $ordering  = $this->reorderThisPlugin();
         }
 
-        $this->loadAllediaFramework();
-
         // Load the extension instance using the framework
-        $extension = Factory::getExtension(
+        $extension = new Extension(
             (string) $this->manifest->alledia->namespace,
             $this->type,
             $this->group
@@ -229,7 +210,7 @@ abstract class AbstractScript
         // If Pro extension, includes the license form view
         if ($extension->isPro()) {
             // Get the OSMyLicensesManager extension to handle the license key
-            $licensesManagerExtension = Factory::getExtension('osmylicensesmanager', 'plugin', 'system');
+            $licensesManagerExtension = new Extension('osmylicensesmanager', 'plugin', 'system');
             $isLicensesManagerInstalled = false;
 
             if (!empty($licensesManagerExtension)) {
@@ -484,6 +465,7 @@ abstract class AbstractScript
             $row->load($eid);
             return $row;
         }
+
         return null;
     }
 
@@ -952,6 +934,7 @@ abstract class AbstractScript
         $db = JFactory::getDbo();
 
         // Update the extension
+        // @TODO: merge the author with possible existent custom_data
         $db->setQuery('UPDATE `#__extensions` SET custom_data="{\"author\":\"Alledia\"}"
                        WHERE extension_id=' . (int)$extension->extension_id);
         $db->execute();
