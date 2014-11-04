@@ -84,7 +84,7 @@ abstract class AbstractScript
 
         // Load the installer default language
         $language = JFactory::getLanguage();
-        $language->load('lib_allediainstaller.sys', ALLEDIA_INSTALLER_EXTENSION_PATH);
+        $language->load('lib_allediainstaller.sys', __DIR__ . '/../../');
     }
 
     /**
@@ -190,7 +190,7 @@ abstract class AbstractScript
 
             if (!empty($goProField)) {
                 if (!class_exists('JFormFieldGoPro')) {
-                    require_once ALLEDIA_INSTALLER_EXTENSION_PATH . '/form/fields/gopro.php';
+                    require_once $$extension->getExtensionPath() . '/form/fields/gopro.php';
                 }
 
                 $field = new JFormFieldGoPro();

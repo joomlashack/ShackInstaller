@@ -8,13 +8,11 @@
 
 defined('_JEXEC') or die();
 
-if (!defined('ALLEDIA_INSTALLER_LOADED')) {
-    define('ALLEDIA_INSTALLER_LOADED', 1);
-
-    define('ALLEDIA_INSTALLER_LIBRARY_PATH', __DIR__);
-    define('ALLEDIA_INSTALLER_EXTENSION_PATH', realpath(__DIR__ . '/../../'));
-
-    require_once __DIR__ . '/AbstractScript.php';
-    require_once __DIR__ . '/Extension/Generic.php';
-    require_once __DIR__ . '/Extension/Licensed.php';
+// Setup autoloaded libraries
+if (! class_exists('AllediaInstallerPsr4AutoLoader')) {
+    require_once __DIR__ . '/AllediaInstallerPsr4AutoLoader.php';
 }
+
+$loader = new AllediaInstallerPsr4AutoLoader();
+$loader->register();
+$loader->addNamespace('Alledia\Installer', __DIR__);
