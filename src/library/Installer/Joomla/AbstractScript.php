@@ -64,7 +64,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    public function initprops($parent)
+    public function initProperties($parent)
     {
         $this->installer = $parent->get('parent');
         $this->manifest  = $this->installer->getManifest();
@@ -115,7 +115,7 @@ abstract class AbstractScript
      */
     public function uninstall($parent)
     {
-        $this->initprops($parent);
+        $this->initProperties($parent);
         $this->uninstallRelated();
         $this->showMessages();
     }
@@ -138,7 +138,7 @@ abstract class AbstractScript
      */
     public function preFlight($type, $parent)
     {
-        $this->initprops($parent);
+        $this->initProperties($parent);
 
         if ($type === 'update') {
             $this->clearUpdateServers();
