@@ -334,8 +334,9 @@ class Generic
     {
         $db     = JFactory::getDbo();
         $params = $db->q($this->params->toString());
+        $id     = $db->q($this->id);
 
-        $query = "UPDATE #__extensions SET params = {$params} WHERE extension_id = \"{$this->id}\"";
+        $query = "UPDATE `#__extensions` SET params = {$params} WHERE extension_id = {$id}";
         $db->setQuery($query);
         $db->execute();
     }
