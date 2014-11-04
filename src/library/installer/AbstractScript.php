@@ -6,11 +6,13 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+namespace Alledia\Installer;
+
 defined('_JEXEC') or die();
 
 use Alledia\Framework\Factory;
 
-abstract class AllediaInstallerAbstract
+abstract class AbstractScript
 {
     /**
      * @var JInstaller
@@ -222,7 +224,12 @@ abstract class AllediaInstallerAbstract
             $isLicensesManagerInstalled = false;
 
             if (!empty($licensesManagerExtension)) {
-                $licenseKey = $licensesManagerExtension->params->get('license-keys', '');
+                // Check if the params is set because a legacy framework can be already loaded on the memory
+                if (isset($licensesManagerExtension->params)) {
+                    $licenseKey = $licensesManagerExtension->params->get('license-keys', '');
+                } else {
+                    $licenseKey = '';
+                }
 
                 $isLicensesManagerInstalled = true;
             }
