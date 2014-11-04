@@ -39,7 +39,7 @@ defined('_JEXEC') or die();
             <?php if (empty($goProAdHtml)) : ?>
                 Powered by
                 <a href="https://www.alledia.com" target="_blank">
-                    <img class="alledia-logo" src="<?php echo $libMediaURL . "/images/alledia_logo.png"; ?>" />
+                    <img class="alledia-logo" src="<?php echo $mediaURL . "/images/alledia_logo.png"; ?>" />
                 </a>
                 <span>
                     &copy; 2014 Alledia.com. All rights reserved.
