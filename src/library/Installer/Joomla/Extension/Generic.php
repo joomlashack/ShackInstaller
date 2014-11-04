@@ -109,17 +109,17 @@ class Generic
         $db = JFactory::getDbo();
         $query = $db->getQuery(true)
             ->select(array(
-                $db->quoteName('extension_id'),
-                $db->quoteName('name'),
-                $db->quoteName('enabled'),
-                $db->quoteName('params')
+                $db->qn('extension_id'),
+                $db->qn('name'),
+                $db->qn('enabled'),
+                $db->qn('params')
             ))
             ->from('#__extensions')
-            ->where($db->quoteName('type') . ' = ' . $db->quote($this->type))
-            ->where($db->quoteName('element') . ' = ' . $db->quote($element));
+            ->where($db->qn('type') . ' = ' . $db->q($this->type))
+            ->where($db->qn('element') . ' = ' . $db->q($element));
 
         if ($this->type === 'plugin') {
-            $query->where($db->quoteName('folder') . ' = ' . $db->quote($this->folder));
+            $query->where($db->qn('folder') . ' = ' . $db->q($this->folder));
         }
 
         $db->setQuery($query);
@@ -305,11 +305,11 @@ class Generic
         $db = JFactory::getDbo();
 
         // Get the update site id
-        $join = $db->quoteName('#__update_sites_extensions') . ' AS extensions '
+        $join = $db->qn('#__update_sites_extensions') . ' AS extensions '
             . 'ON (sites.update_site_id = extensions.update_site_id)';
         $query = $db->getQuery(true)
             ->select('sites.update_site_id')
-            ->from($db->quoteName('#__update_sites') . ' AS sites')
+            ->from($db->qn('#__update_sites') . ' AS sites')
             ->join('LEFT', $join)
             ->where('extensions.extension_id = ' . $this->id);
         $db->setQuery($query);
@@ -317,9 +317,9 @@ class Generic
 
         if (!empty($siteId)) {
             $query = $db->getQuery(true)
-                ->update($db->quoteName('#__update_sites'))
-                ->set($db->quoteName('location') . ' = ' . $db->quote($url))
-                ->where($db->quoteName('update_site_id') . ' = ' . $siteId);
+                ->update($db->qn('#__update_sites'))
+                ->set($db->qn('location') . ' = ' . $db->q($url))
+                ->where($db->qn('update_site_id') . ' = ' . $siteId);
             $db->setQuery($query);
             $db->execute();
         }
