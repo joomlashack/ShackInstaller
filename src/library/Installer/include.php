@@ -14,5 +14,7 @@ if (!defined('ALLEDIA_INSTALLER_LOADED')) {
     define('ALLEDIA_INSTALLER_LIBRARY_PATH', __DIR__);
     define('ALLEDIA_INSTALLER_EXTENSION_PATH', realpath(__DIR__ . '/../../'));
 
-    require_once 'AbstractScript.php';
+    require_once __DIR__ . '/AbstractScript.php';
+    require_once __DIR__ . '/Extension/Generic.php';
+    require_once __DIR__ . '/Extension/Licensed.php';
 }
