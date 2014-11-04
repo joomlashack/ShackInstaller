@@ -10,10 +10,10 @@ namespace Alledia\Installer\Joomla\Extension;
 
 defined('_JEXEC') or die();
 
-use JFactory;
-use JRegistry;
-
-class Licensed
+/**
+ * Licensed class, for extensions with Free and Pro versions
+ */
+class Licensed extends Generic
 {
     /**
      * License type: free or pro
@@ -44,5 +44,15 @@ class Licensed
     public function isPro()
     {
         return $this->license === 'pro';
+    }
+
+    /**
+     * Check if the license is free
+     *
+     * @return boolean True for free license
+     */
+    public function isFree()
+    {
+        return ! $this->isPro();
     }
 }

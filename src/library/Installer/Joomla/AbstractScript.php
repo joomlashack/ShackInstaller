@@ -172,7 +172,7 @@ abstract class AbstractScript
         }
 
         // Load the extension instance using the framework
-        $extension = new Extension(
+        $extension = new Extension\Licensed(
             (string) $this->manifest->alledia->namespace,
             $this->type,
             $this->group
@@ -210,7 +210,7 @@ abstract class AbstractScript
         // If Pro extension, includes the license form view
         if ($extension->isPro()) {
             // Get the OSMyLicensesManager extension to handle the license key
-            $licensesManagerExtension = new Extension('osmylicensesmanager', 'plugin', 'system');
+            $licensesManagerExtension = new Extension\Generic('osmylicensesmanager', 'plugin', 'system');
             $isLicensesManagerInstalled = false;
 
             if (!empty($licensesManagerExtension)) {

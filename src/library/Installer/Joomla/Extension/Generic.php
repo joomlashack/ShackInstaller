@@ -13,6 +13,9 @@ defined('_JEXEC') or die();
 use JFactory;
 use JRegistry;
 
+/**
+ * Generic extension class
+ */
 class Generic
 {
     /**
