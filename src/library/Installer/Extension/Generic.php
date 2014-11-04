@@ -6,7 +6,7 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
-namespace Alledia\Installer\Joomla\Extension;
+namespace Alledia\Installer\Extension;
 
 defined('_JEXEC') or die();
 

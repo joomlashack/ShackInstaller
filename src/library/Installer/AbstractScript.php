@@ -6,7 +6,7 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
-namespace Alledia\Installer\Joomla;
+namespace Alledia\Installer;
 
 defined('_JEXEC') or die();
 
@@ -171,7 +171,6 @@ abstract class AbstractScript
             $ordering  = $this->reorderThisPlugin();
         }
 
-        // Load the extension instance using the framework
         $extension = new Extension\Licensed(
             (string) $this->manifest->alledia->namespace,
             $this->type,
@@ -191,7 +190,9 @@ abstract class AbstractScript
             $goProField = $this->manifest->xpath('//field[@type="gopro"]');
 
             if (!empty($goProField)) {
-                require_once ALLEDIA_FRAMEWORK_PATH . '/joomla/fields/GoPro.php';
+                if (!class_exists('JFormFieldGoPro')) {
+                    require_once ALLEDIA_INSTALLER_EXTENSION_PATH . '/form/fields/gopro.php';
+                }
 
                 $field = new JFormFieldGoPro();
                 $field->fromInstaller = true;
@@ -214,7 +215,6 @@ abstract class AbstractScript
             $isLicensesManagerInstalled = false;
 
             if (!empty($licensesManagerExtension)) {
-                // Check if the params is set because a legacy framework can be already loaded on the memory
                 if (isset($licensesManagerExtension->params)) {
                     $licenseKey = $licensesManagerExtension->params->get('license-keys', '');
                 } else {
