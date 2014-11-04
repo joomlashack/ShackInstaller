@@ -11,6 +11,15 @@ namespace Alledia\Installer;
 defined('_JEXEC') or die();
 
 use Alledia\Framework\Factory;
+use JFactory;
+use JTable;
+use JInstaller;
+use JRegistry;
+use JText;
+use JURI;
+use JFolder;
+use JFormFieldGoPro;
+use JModelLegacy;
 
 abstract class AbstractScript
 {
