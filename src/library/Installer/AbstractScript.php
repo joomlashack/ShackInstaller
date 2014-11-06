@@ -195,7 +195,7 @@ abstract class AbstractScript
 
                 $field = new JFormFieldGoPro();
                 $field->fromInstaller = true;
-                $goProAdHtml = $field->getInput();
+                $goProAdHtml = $field->getInputCustomElement(array('media' => $this->getFullElement()));
 
                 unset($field);
             }
