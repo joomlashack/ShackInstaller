@@ -190,7 +190,7 @@ abstract class AbstractScript
 
             if (!empty($goProField)) {
                 if (!class_exists('JFormFieldGoPro')) {
-                    require_once $$extension->getExtensionPath() . '/form/fields/gopro.php';
+                    require_once $extension->getExtensionPath() . '/form/fields/gopro.php';
                 }
 
                 $field = new JFormFieldGoPro();
