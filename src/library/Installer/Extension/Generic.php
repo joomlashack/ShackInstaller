@@ -346,4 +346,14 @@ class Generic
         $db->setQuery($query);
         $db->execute();
     }
+
+    /**
+     * Get extension name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 }
