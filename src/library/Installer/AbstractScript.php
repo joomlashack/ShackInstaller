@@ -19,6 +19,7 @@ use JURI;
 use JFolder;
 use JFormFieldGoPro;
 use JModelLegacy;
+use JFile;
 
 abstract class AbstractScript
 {
