@@ -404,10 +404,10 @@ abstract class AbstractScript
                     $attributes = $attributes['@attributes'];
                 }
 
-                if (isset($attributes['uninstall']) && (bool) $attributes['uninstall']) {
-                    $type    = $attributes['type'];
-                    $element = $attributes['element'];
+                $type    = $attributes['type'];
+                $element = $attributes['element'];
 
+                if (isset($attributes['uninstall']) && (bool) $attributes['uninstall']) {
                     $group = '';
                     if (isset($attributes['group'])) {
                         $group  = $attributes['group'];
@@ -420,8 +420,16 @@ abstract class AbstractScript
                             $msg .= '_FAIL';
                             $msgtype = 'error';
                         }
-                        $this->setMessage(JText::sprintf($msg, ucfirst($type), $element), $msgtype);
+                        $this->setMessage(
+                            JText::sprintf($msg, ucfirst($type), $element),
+                            $msgtype
+                        );
                     }
+                } else {
+                    $this->setMessage(
+                        JText::sprintf('LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED', ucfirst($type), $element),
+                        'warning'
+                    );
                 }
             }
         }
