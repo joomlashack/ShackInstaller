@@ -700,19 +700,22 @@ abstract class AbstractScript
         $extension = $this->findThisExtension();
 
         $db = JFactory::getDbo();
-        $db->setQuery('SELECT `update_site_id`
-                       FROM `#__update_sites_extensions`
-                       WHERE extension_id = ' . (int)$extension->extension_id
-        );
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('update_site_id'))
+            ->from($db->quoteName('#__update_sites_extensions'))
+            ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
 
-        if ($list = $db->loadColumn()) {
-            $db->setQuery('DELETE FROM `#__update_sites_extensions`
-                           WHERE extension_id=' . (int)$extension->extension_id);
-            $db->execute();
+        if ($list = $db->setQuery($query)->loadColumn()) {
+            $query = $db->getQuery(true)
+                ->delete($db->quoteName('#__update_sites_extensions'))
+                ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
+            $db->setQuery($query)->execute();
 
-            $db->setQuery('DELETE FROM `#__update_sites`
-                           WHERE update_site_id IN (' . join(',', $list) . ')');
-            $db->execute();
+            array_walk($list, 'intval');
+            $query = $db->getQuery(true)
+                ->delete($db->quoteName('#__update_sites'))
+                ->where($db->quoteName('update_site_id') . ' IN (' . join(',', $list) . ')');
+            $db->setQuery($query)->execute();
         }
     }
 
@@ -942,15 +945,24 @@ abstract class AbstractScript
 
         // Update the extension
         // @TODO: merge the author with possible existent custom_data
-        $db->setQuery('UPDATE `#__extensions` SET custom_data="{\"author\":\"Alledia\"}"
-                       WHERE extension_id=' . (int)$extension->extension_id);
-        $db->execute();
+        $query = $db->getQuery(true)
+            ->update($db->quoteName('#__extensions'))
+            ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Alledia"}'))
+            ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
+        $db->setQuery($query)->execute();
 
         // Update the Alledia framework
         // @TODO: remove this after libraries be able to have a custom install script
-        $db->setQuery('UPDATE `#__extensions` SET custom_data="{\"author\":\"Alledia\"}"
-                       WHERE type="library" AND element="allediaframework"');
-        $db->execute();
+        $query = $db->getQuery(true)
+            ->update($db->quoteName('#__extensions'))
+            ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Alledia"}'))
+            ->where(
+                array(
+                    $db->quoteName('type') . '=' . $db->quote('library'),
+                    $db->quoteName('element' . '=' . $db->quote('allediaframework'))
+                )
+            );
+        $db->setQuery($query)->execute();
     }
 
     /**
