@@ -18,8 +18,10 @@ use JText;
 use JURI;
 use JFolder;
 use JFormFieldGoPro;
+use JInstallerAdapterComponent;
 use JModelLegacy;
 use JFile;
+use SimpleXMLElement;
 
 abstract class AbstractScript
 {
