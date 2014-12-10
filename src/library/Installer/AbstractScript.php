@@ -36,6 +36,11 @@ abstract class AbstractScript
     /**
      * @var string
      */
+    protected $previousVersion = '0.0.0';
+
+    /**
+     * @var string
+     */
     protected $mediaFolder = null;
 
     /**
@@ -81,6 +86,14 @@ abstract class AbstractScript
 
         if ($this->type === 'plugin') {
             $this->group = $attributes['group'];
+        }
+
+        // Get the previous version number for upgrades
+        $path = $this->installer->getPath('extension_administrator');
+        $path .= '/' . basename($this->installer->getPath('manifest'));
+        if (is_file($path)) {
+            $previousManifest      = JInstaller::parseXMLInstallFile($path);
+            $this->previousVersion = (string)$previousManifest['version'] ? : '0.0.0';
         }
 
         // Load the installer default language
