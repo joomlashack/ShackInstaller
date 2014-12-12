@@ -995,6 +995,17 @@ abstract class AbstractScript
                         )
                     );
                 $db->setQuery($query)->execute();
+
+                // Check hidden admin menu option
+                // @TODO:  Remove after Joomla! incorporates this natively
+                $menuElement = $this->manifest->administration->menu;
+                if (in_array((string) $menuElement['hidden'], array('true', 'hidden'))) {
+                    $menu = JTable::getInstance('Menu');
+                    $menu->load(array('component_id' => $id));
+                    if ($menu->id) {
+                        $menu->delete();
+                    }
+                }
             }
         }
     }
