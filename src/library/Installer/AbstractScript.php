@@ -18,8 +18,10 @@ use JText;
 use JURI;
 use JFolder;
 use JFormFieldGoPro;
+use JInstallerAdapterComponent;
 use JModelLegacy;
 use JFile;
+use SimpleXMLElement;
 
 abstract class AbstractScript
 {
@@ -32,6 +34,11 @@ abstract class AbstractScript
      * @var SimpleXMLElement
      */
     protected $manifest = null;
+
+    /**
+     * @var string
+     */
+    protected $previousVersion = '0.0.0';
 
     /**
      * @var string
@@ -81,6 +88,14 @@ abstract class AbstractScript
 
         if ($this->type === 'plugin') {
             $this->group = $attributes['group'];
+        }
+
+        // Get the previous version number for upgrades
+        $path = $this->installer->getPath('extension_administrator');
+        $path .= '/' . basename($this->installer->getPath('manifest'));
+        if (is_file($path)) {
+            $previousManifest      = JInstaller::parseXMLInstallFile($path);
+            $this->previousVersion = (string)$previousManifest['version'] ? : '0.0.0';
         }
 
         // Load the installer default language
