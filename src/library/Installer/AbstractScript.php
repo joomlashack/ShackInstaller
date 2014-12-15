@@ -969,4 +969,44 @@ abstract class AbstractScript
             }
         }
     }
+
+    /**
+     * On new component install, this will check and fix any menus
+     * that may have been created in a previous installation.
+     *
+     * @return void
+     */
+    protected function fixMenus()
+    {
+        if ($this->type == 'component') {
+            $db = JFactory::getDbo();
+
+            if ($extension = $this->findThisExtension()) {
+                $id     = $extension->extension_id;
+                $option = $extension->name;
+
+                $query = $db->getQuery(true)
+                    ->update('#__menu')
+                    ->set('component_id = ' . $db->quote($id))
+                    ->where(
+                        array(
+                            'type = ' . $db->quote('component'),
+                            'link LIKE ' . $db->quote("%option={$option}%")
+                        )
+                    );
+                $db->setQuery($query)->execute();
+
+                // Check hidden admin menu option
+                // @TODO:  Remove after Joomla! incorporates this natively
+                $menuElement = $this->manifest->administration->menu;
+                if (in_array((string) $menuElement['hidden'], array('true', 'hidden'))) {
+                    $menu = JTable::getInstance('Menu');
+                    $menu->load(array('component_id' => $id));
+                    if ($menu->id) {
+                        $menu->delete();
+                    }
+                }
+            }
+        }
+    }
 }
