@@ -974,7 +974,7 @@ abstract class AbstractScript
             ->where(
                 array(
                     $db->quoteName('type') . '=' . $db->quote('library'),
-                    $db->quoteName('element' . '=' . $db->quote('allediaframework'))
+                    $db->quoteName('element') . '=' . $db->quote('allediaframework')
                 )
             );
         $db->setQuery($query)->execute();
