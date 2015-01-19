@@ -61,6 +61,12 @@ abstract class AbstractScript
     protected $group;
 
     /**
+     * List of tables and respective columns
+     * @var array
+     */
+    protected $columns;
+
+    /**
      * Feedback of the install by related extension
      *
      * @var array
@@ -1033,6 +1039,71 @@ abstract class AbstractScript
                         $menu->delete();
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Get and store a cache of columns of a table
+     *
+     * @param  string $table The table name
+     * @return array         A list of columns from a table
+     */
+    protected function getColumnsFromTable($table)
+    {
+        if (!isset($this->columns[$table])) {
+            $db = JFactory::getDbo();
+            $db->setQuery("SHOW COLUMNS FROM " . $db->quoteName($table));
+            $rows = $db->loadObjectList();
+
+            $columns = array();
+            foreach ($rows as $row) {
+                $columns[] = $row->Field;
+            }
+
+            $this->columns[$table] = $columns;
+        }
+
+        return $this->columns[$table];
+    }
+
+    /**
+     * Add columns to a table if they doesn't exists
+     *
+     * @param string $table   The table name
+     * @param array  $columns The column's names that needed to be checked and added
+     */
+    protected function addColumnsIfNotExists($table, $columns)
+    {
+        $db = JFactory::getDbo();
+
+        $existentColumns = $this->getColumnsFromTable($table);
+
+        foreach ($columns as $column => $specification) {
+            if (! in_array($column, $existentColumns)) {
+                $db->setQuery('ALTER TABLE ' . $db->quoteName($table)
+                    . ' ADD COLUMN ' . $column . ' ' . $specification);
+                $db->execute();
+            }
+        }
+    }
+
+    /**
+     * Drop columns from a table if they exists
+     *
+     * @param string $table   The table name
+     * @param array  $columns The column's names that needed to be checked and added
+     */
+    protected function dropColumnsIfExists($table, $columns)
+    {
+        $db = JFactory::getDbo();
+
+        $existentColumns = $this->getColumnsFromTable($table);
+
+        foreach ($columns as $column) {
+            if (in_array($column, $existentColumns)) {
+                $db->setQuery('ALTER TABLE ' . $db->quoteName($table) . ' DROP COLUMN ' . $column);
+                $db->execute();
             }
         }
     }
