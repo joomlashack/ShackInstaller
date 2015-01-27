@@ -6,13 +6,13 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+use Alledia\Installer\AutoLoader;
+
 defined('_JEXEC') or die();
 
 // Setup autoloaded libraries
-if (! class_exists('AllediaInstallerPsr4AutoLoader')) {
-    require_once __DIR__ . '/AllediaInstallerPsr4AutoLoader.php';
+if (!class_exists('\\Alledia\\Installer\\AutoLoader')) {
+    require_once __DIR__ . '/AutoLoader.php';
 }
 
-$loader = new AllediaInstallerPsr4AutoLoader();
-$loader->register();
-$loader->addNamespace('Alledia\Installer', __DIR__);
+Autoloader::register('Alledia\\Installer', __DIR__);
