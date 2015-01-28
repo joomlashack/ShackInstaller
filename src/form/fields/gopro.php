@@ -1,10 +1,9 @@
 <?php
 /**
- * @package     Joomla.Platform
- * @subpackage  Form
- *
- * @copyright   Copyright (C) 2005 - 2014 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE
+ * @package   AllediaInstaller
+ * @contact   www.alledia.com, hello@alledia.com
+ * @copyright 2015 Alledia.com, All rights reserved
+ * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
 defined('_JEXEC') or die('Restricted access');
@@ -44,7 +43,7 @@ class JFormFieldGoPro extends JFormField
                 <i class="icon-publish"></i> Go Pro to access more features
             </a>
             <img src="' . $mediaURI . '/images/alledia_logo.png" style="width:120px; height:auto;" alt=""/>
-            ' . ($this->fromInstaller ? '<span>&copy; 2014 Alledia.com. All rights reserved.</span>':'' ) . '
+            ' . ($this->fromInstaller ? '<span>&copy; 2015 Alledia.com. All rights reserved.</span>':'' ) . '
         </div>';
 
         return $html;

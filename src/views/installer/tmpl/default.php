@@ -2,7 +2,7 @@
 /**
  * @package   AllediaInstaller
  * @contact   www.alledia.com, hello@alledia.com
- * @copyright 2014 Alledia.com, All rights reserved
+ * @copyright 2015 Alledia.com, All rights reserved
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
@@ -42,7 +42,7 @@ defined('_JEXEC') or die();
                     <img class="alledia-logo" src="<?php echo $mediaURL . "/images/alledia_logo.png"; ?>" />
                 </a>
                 <span>
-                    &copy; 2014 Alledia.com. All rights reserved.
+                    &copy; 2015 Alledia.com. All rights reserved.
                 </span>
             <?php else : ?>
                 <?php echo $goProAdHtml; ?>
