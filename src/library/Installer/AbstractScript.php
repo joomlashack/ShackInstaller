@@ -17,7 +17,7 @@ use JRegistry;
 use JText;
 use JURI;
 use JFolder;
-use JFormFieldGoPro;
+use JFormFieldAllediaFooter;
 use JInstallerAdapterComponent;
 use JModelLegacy;
 use JFile;
@@ -199,28 +199,27 @@ abstract class AbstractScript
         );
 
         // If Free, remove any missed Pro library
-        $goProAdHtml = '';
         if (!$extension->isPro()) {
             $proLibraryPath = $extension->getProLibraryPath();
             if (file_exists($proLibraryPath)) {
                 jimport('joomla.filesystem.folder');
                 JFolder::delete($proLibraryPath);
             }
+        }
 
-            // Load the Pro ad field, if we have a pro version available
-            $goProField = $this->manifest->xpath('//field[@type="gopro"]');
-
-            if (!empty($goProField)) {
-                if (!class_exists('JFormFieldGoPro')) {
-                    require_once $extension->getExtensionPath() . '/form/fields/gopro.php';
-                }
-
-                $field = new JFormFieldGoPro();
-                $field->fromInstaller = true;
-                $goProAdHtml = $field->getInputCustomElement(array('media' => $this->getFullElement()));
-
-                unset($field);
+        // Get the footer content
+        $footer       = '';
+        $footerElement = $this->manifest->xpath('//field[@type="allediafooter"]');
+        if (!empty($footerElement)) {
+            if (!class_exists('JFormFieldAllediaFooter')) {
+                require_once $extension->getExtensionPath() . '/form/fields/allediafooter.php';
             }
+
+            $field = new JFormFieldAllediaFooter();
+            $field->fromInstaller = true;
+            $footer = $field->getInputUsingCustomElement($footerElement[0]);
+
+            unset($field);
         }
 
         // Show additional installation messages
@@ -261,12 +260,7 @@ abstract class AbstractScript
         $name     = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
         $mediaURL = JURI::root() . 'media/' . $extension->getFullElement();
 
-        $this->addStyles(
-            array(
-                $this->mediaFolder . '/css/installer.css',
-                $this->mediaFolder . '/css/style_gopro_field.css',
-            )
-        );
+        $this->addStyle($this->mediaFolder . '/css/installer.css');
 
         // Include the template
         include $extensionPath . '/views/installer/tmpl/default.php';
@@ -990,10 +984,14 @@ abstract class AbstractScript
      * Add styles to the output. Used because when the postFlight
      * method is called, we can't add stylesheets to the head.
      *
-     * @param array $stylesheets
+     * @param mixed $stylesheets
      */
-    protected function addStyles($stylesheets)
+    protected function addStyle($stylesheets)
     {
+        if (is_string($stylesheets)) {
+            $stylesheets = array($stylesheets);
+        }
+
         foreach ($stylesheets as $path) {
             if (file_exists($path)) {
                 $style = file_get_contents($path);

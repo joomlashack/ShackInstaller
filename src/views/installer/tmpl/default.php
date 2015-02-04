@@ -35,19 +35,7 @@ defined('_JEXEC') or die();
 
         ?>
 
-        <div class="alledia-footer">
-            <?php if (empty($goProAdHtml)) : ?>
-                Powered by
-                <a href="https://www.alledia.com" target="_blank">
-                    <img class="alledia-logo" src="<?php echo $mediaURL . "/images/alledia_logo.png"; ?>" />
-                </a>
-                <span>
-                    &copy; 2015 Alledia.com. All rights reserved.
-                </span>
-            <?php else : ?>
-                <?php echo $goProAdHtml; ?>
-            <?php endif; ?>
-        </div>
+        <?php echo $footer; ?>
     </div>
 
 </div>

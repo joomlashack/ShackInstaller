@@ -109,20 +109,10 @@
 
 .alledia-wrapper .alledia-footer {
     box-sizing: border-box;
-    height: 60px;
-    margin-bottom: 50px;
-    margin-top: 20px;
+    height: auto;
+    margin-bottom: 65px;
+    margin-top: 30px;
     padding-top: 25px;
-}
-
-.alledia-wrapper .alledia-footer span{
-    color: gray;
-    font-size: 10px;
-    float: right
-}
-
-.alledia-wrapper img.alledia-logo {
-    width: 90px;
 }
 
 .alledia-wrapper .alledia-license {
@@ -140,4 +130,9 @@
     -o-border-radius: 2px;
     padding: 10px;
     color: #8a6d3b;
+}
+
+.alledia-wrapper .copyright {
+    font-size: 10px;
+    color: #808080;
 }
