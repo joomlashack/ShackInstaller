@@ -10,6 +10,8 @@ namespace Alledia\Installer\Extension;
 
 defined('_JEXEC') or die();
 
+use Alledia\Installer\AutoLoader;
+
 /**
  * Licensed class, for extensions with Free and Pro versions
  */
@@ -124,9 +126,7 @@ class Licensed extends Generic
                 }
             }
             // Setup autoloaded libraries
-            $loader = new \AllediaPsr4AutoLoader();
-            $loader->register();
-            $loader->addNamespace('Alledia\\' . $this->namespace, $libraryPath);
+            AutoLoader::register('Alledia\\' . $this->namespace, $libraryPath);
 
             return true;
         }
