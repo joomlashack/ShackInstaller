@@ -208,8 +208,21 @@ abstract class AbstractScript
         }
 
         // Get the footer content
-        $footer       = '';
-        $footerElement = $this->manifest->xpath('//field[@type="allediafooter"]');
+        $footer        = '';
+        $footerElement = null;
+
+        // Check if we have a dedicated config.xml file
+        $configPath = $extension->getExtensionPath() . '/config.xml';
+        if (JFile::exists($configPath)) {
+            $config = $extension->getConfig();
+
+            if (!empty($config)) {
+                $footerElement = $config->xpath('//field[@type="allediafooter"]');
+            }
+        } else {
+            $footerElement = $this->manifest->xpath('//field[@type="allediafooter"]');
+        }
+
         if (!empty($footerElement)) {
             if (!class_exists('JFormFieldAllediaFooter')) {
                 require_once $extension->getExtensionPath() . '/form/fields/allediafooter.php';
