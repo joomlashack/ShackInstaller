@@ -17,7 +17,7 @@ use JRegistry;
 use JText;
 use JURI;
 use JFolder;
-use JFormFieldAllediaFooter;
+use JFormFieldCustomFooter;
 use JInstallerAdapterComponent;
 use JModelLegacy;
 use JFile;
@@ -217,18 +217,18 @@ abstract class AbstractScript
             $config = $extension->getConfig();
 
             if (!empty($config)) {
-                $footerElement = $config->xpath('//field[@type="allediafooter"]');
+                $footerElement = $config->xpath('//field[@type="customfooter"]');
             }
         } else {
-            $footerElement = $this->manifest->xpath('//field[@type="allediafooter"]');
+            $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
         }
 
         if (!empty($footerElement)) {
-            if (!class_exists('JFormFieldAllediaFooter')) {
-                require_once $extension->getExtensionPath() . '/form/fields/allediafooter.php';
+            if (!class_exists('JFormFieldCustomFooter')) {
+                require_once $extension->getExtensionPath() . '/form/fields/customfooter.php';
             }
 
-            $field = new JFormFieldAllediaFooter();
+            $field = new JFormFieldCustomFooter();
             $field->fromInstaller = true;
             $footer = $field->getInputUsingCustomElement($footerElement[0]);
 
