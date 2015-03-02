@@ -68,6 +68,12 @@ abstract class AbstractScript
     protected $columns;
 
     /**
+     * List of tables
+     * @var array
+     */
+    protected $tables;
+
+    /**
      * Feedback of the install by related extension
      *
      * @var array
@@ -1120,5 +1126,45 @@ abstract class AbstractScript
                 $db->execute();
             }
         }
+    }
+
+    /**
+     * Check if a table exists
+     *
+     * @param  string $name The table name
+     * @return bool         True if the table exists
+     */
+    protected function tableExists($name)
+    {
+        $config = JFactory::getConfig();
+        $tables = $this->getTables();
+
+        // Replace the table prefix
+        $name = str_replace('#__', $config->get('dbprefix'), $name);
+
+        return in_array($name, $tables);
+    }
+
+    /**
+     * Get a list of tables found in the db
+     *
+     * @param  bool  Force to get a fresh list of tables
+     * @return array List of tables
+     */
+    protected function getTables($force = false)
+    {
+        if (empty($this->tables) || $force) {
+            $normalizeTableArray = function($item) {
+                return $item[0];
+            };
+
+            $db = JFactory::getDbo();
+            $db->setQuery('SHOW TABLES');
+            $tables = $db->loadRowList();
+
+            $this->tables = array_map($normalizeTableArray, $tables);
+        }
+
+        return $this->tables;
     }
 }
