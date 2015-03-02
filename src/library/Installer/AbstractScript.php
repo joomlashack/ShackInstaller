@@ -601,6 +601,8 @@ abstract class AbstractScript
         foreach ($this->messages as $msg) {
             $app->enqueueMessage($msg[0], $msg[1]);
         }
+
+        $this->messages = array();
     }
 
     /**
