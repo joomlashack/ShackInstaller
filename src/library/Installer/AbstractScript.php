@@ -12,6 +12,7 @@ defined('_JEXEC') or die();
 
 use JFactory;
 use JTable;
+use JTableExtension;
 use JInstaller;
 use JRegistry;
 use JText;
