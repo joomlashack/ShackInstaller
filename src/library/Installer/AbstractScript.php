@@ -1054,7 +1054,7 @@ abstract class AbstractScript
                 $menuElement = $this->manifest->administration->menu;
                 if (in_array((string) $menuElement['hidden'], array('true', 'hidden'))) {
                     $menu = JTable::getInstance('Menu');
-                    $menu->load(array('component_id' => $id));
+                    $menu->load(array('component_id' => $id, 'client_id' => 1));
                     if ($menu->id) {
                         $menu->delete();
                     }
