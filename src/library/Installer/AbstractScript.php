@@ -981,10 +981,12 @@ abstract class AbstractScript
         $db = JFactory::getDbo();
 
         // Update the extension
-        // @TODO: merge the author with possible existent custom_data
+        $customData = json_decode($extension->custom_data) ?: new \stdClass();
+        $customData->author = 'Alledia';
+
         $query = $db->getQuery(true)
             ->update($db->quoteName('#__extensions'))
-            ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Alledia"}'))
+            ->set($db->quoteName('custom_data') . '=' . $db->quote(json_encode($customData)))
             ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
         $db->setQuery($query)->execute();
 
