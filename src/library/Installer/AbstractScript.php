@@ -374,7 +374,7 @@ abstract class AbstractScript
 
                             if (is_object($current)) {
                                 if ($type === 'plugin') {
-                                    if (isset($attributes['publish']) && (bool) $attributes['publish']) {
+                                    if (isset($attributes['publish']) && $this->parseConditionalExpression($attributes['publish']) ) {
                                         $current->publish();
 
                                         $this->storeFeedbackForRelatedExtension(
@@ -1168,5 +1168,93 @@ abstract class AbstractScript
         }
 
         return $this->tables;
+    }
+
+    /**
+     * Parses a conditional string, returning a Boolean value (default: false).
+     * For now it only supports an extension name and * as version.
+     *
+     * @param  string $expression The conditional expression
+     * @return bool                According to the evaluation of the expression
+     * @todo   Compare the version of the extension
+     */
+    protected function parseConditionalExpression($expression)
+    {
+        $expression = strtolower($expression);
+        $terms      = explode('=', $expression);
+        $term0      = trim($terms[0]);
+
+        if (count($terms) === 1) {
+            return ! (empty($terms[0]) || $terms[0] === 'null');
+        } else {
+            $term1 = trim($terms[1]);
+
+            // Is the first term a name of extension?
+            if (preg_match('/^(com_|plg_|mod_|lib_|tpl_|cli_)/', $term0)) {
+                $info = $this->getExtensionInfoFromElement($term0);
+
+                $extension = $this->findExtension($info['type'], $term0, $info['group']);
+
+                // @TODO: compare the version, if specified, or different than *
+
+                if (! empty($extension)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get extension's info from element string, or extension name
+     *
+     * @param  string $element The extension name, as element
+     * @return array           An associative array with information about the extension
+     */
+    public static function getExtensionInfoFromElement($element)
+    {
+        $result = array(
+            'type'      => null,
+            'name'      => null,
+            'group'     => null,
+            'prefix'    => null,
+            'namespace' => null
+        );
+
+        $types = array(
+            'com' => 'component',
+            'plg' => 'plugin',
+            'mod' => 'module',
+            'lib' => 'library',
+            'tpl' => 'template',
+            'cli' => 'cli'
+        );
+
+        $element = explode('_', $element);
+
+        $result['prefix'] = $element[0];
+
+        if (array_key_exists($result['prefix'], $types)) {
+            $result['type']  = $types[$result['prefix']];
+
+            if ($result['prefix'] === 'plg') {
+                $result['group'] = $element[1];
+                $result['name']  = $element[2];
+            } else {
+                $result['name']  = $element[1];
+                $result['group'] = null;
+            }
+        }
+
+        $result['namespace'] = preg_replace_callback(
+            '/^(os[a-z])(.*)/i',
+            function($matches) {
+                return strtoupper($matches[1]) . $matches[2];
+            },
+            $result['name']
+        );
+
+        return $result;
     }
 }
