@@ -1176,7 +1176,6 @@ abstract class AbstractScript
      *
      * @param  string $expression The conditional expression
      * @return bool                According to the evaluation of the expression
-     * @todo   Compare the version of the extension
      */
     protected function parseConditionalExpression($expression)
     {
@@ -1196,6 +1195,7 @@ abstract class AbstractScript
                 $extension = $this->findExtension($info['type'], $term0, $info['group']);
 
                 // @TODO: compare the version, if specified, or different than *
+                // @TODO: Check if the extension is enabled, not just installed
 
                 if (! empty($extension)) {
                     return true;
