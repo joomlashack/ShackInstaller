@@ -265,19 +265,23 @@ abstract class AbstractScript
             }
         }
 
+        // Get the extension name. If no custom name is set, uses the namespace
+        if (isset($this->manifest->alledia->name)) {
+            $name = $this->manifest->alledia->name;
+        } else {
+            $name = $this->manifest->alledia->namespace;
+        }
+        $name .= ($extension->isPro() ? ' Pro' : '');
+
         // Welcome message
         if ($type === 'install') {
             $string = 'LIB_ALLEDIAINSTALLER_THANKS_INSTALL';
         } else {
             $string = 'LIB_ALLEDIAINSTALLER_THANKS_UPDATE';
         }
-        $welcomeMessage = JText::sprintf(
-            $string,
-            $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '')
-        );
+        $welcomeMessage = JText::sprintf($string, $name);
 
         // Variables for the template
-        $name     = $this->manifest->alledia->namespace . ($extension->isPro() ? ' Pro' : '');
         $mediaURL = JURI::root() . 'media/' . $extension->getFullElement();
 
         $this->addStyle($this->mediaFolder . '/css/installer.css');
