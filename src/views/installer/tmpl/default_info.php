@@ -16,7 +16,7 @@ defined('_JEXEC') or die();
 
     <div id="alledia-installer-footer" style="display: none;">
         <div class="alledia-license">
-            <?php echo JText::_('LIB_ALLEDIAINSTALLER_RELEASE_V', (string)$this->manifest->version); ?>
+            <?php echo JText::sprintf('LIB_ALLEDIAINSTALLER_RELEASE_V', (string)$this->manifest->version); ?>
         </div>
         <br>
         <?php if (!empty($this->manifest->alledia->relatedExtensions)) : ?>
