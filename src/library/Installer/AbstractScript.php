@@ -74,6 +74,12 @@ abstract class AbstractScript
     protected $tables;
 
     /**
+     * Flag to cancel the installation
+     * @var bool
+     */
+    protected $cancelInstallation = false;
+
+    /**
      * Feedback of the install by related extension
      *
      * @var array
@@ -172,6 +178,24 @@ abstract class AbstractScript
             $this->clearUpdateServers();
         }
 
+        if (in_array($type, array('install', 'update'))) {
+            // Check minimum target platform
+            if (isset($this->manifest->alledia->targetplatform)) {
+                $targetPlatform = (string) $this->manifest->alledia->targetplatform;
+
+                if (!$this->validateTargetPlatform($targetPlatform)) {
+                    // Platform version is invalid. Displays a warning and cancel the install
+                    $targetPlatform = str_replace('*', 'x', $targetPlatform);
+                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $targetPlatform);
+                    JFactory::getApplication()->enqueueMessage($msg, 'warning');
+
+                    $this->cancelInstallation = true;
+
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -183,6 +207,13 @@ abstract class AbstractScript
      */
     public function postFlight($type, $parent)
     {
+        if ($this->cancelInstallation) {
+            JFactory::getApplication()
+                ->enqueueMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
+
+            return false;
+        }
+
         $this->clearObsolete();
         $this->installRelated();
         $this->addAllediaAuthorshipToExtension();
@@ -1260,5 +1291,25 @@ abstract class AbstractScript
         );
 
         return $result;
+    }
+
+    /**
+     * Check if the target platform is valid, comparing to Joomla! version.
+     *
+     * @param  string $targetPlatform  The required target platform
+     *
+     * @return bool                    True, if the platform is valid
+     */
+    protected function validateTargetPlatform($targetPlatform)
+    {
+        // If is universal, any Joomla! version is valid
+        if ($targetPlatform === '.*') {
+            return true;
+        }
+
+        $targetPlatform = str_replace('*', '0', $targetPlatform);
+
+        // Compare with the Joomla! version
+        return version_compare(JVERSION, $targetPlatform, 'ge');
     }
 }
