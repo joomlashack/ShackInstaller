@@ -321,6 +321,8 @@ abstract class AbstractScript
         include $extensionPath . '/views/installer/tmpl/default.php';
 
         $this->showMessages();
+
+        return true;
     }
 
     /**
