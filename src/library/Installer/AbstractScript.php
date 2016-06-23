@@ -87,6 +87,15 @@ abstract class AbstractScript
     protected $relatedExtensionFeedback = array();
 
     /**
+     * A cache for translation of messages for when uninstalling, make sure
+     * the message is displayed correctly after the language files where already
+     * removed.
+     *
+     * @var array
+     */
+    protected $messageCache = array();
+
+    /**
      * @param JInstallerAdapterComponent $parent
      *
      * @return void
@@ -195,6 +204,9 @@ abstract class AbstractScript
                 }
             }
         }
+
+        $this->messageCache['LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED'] =
+            JText::_('LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED');
 
         return true;
     }
@@ -501,7 +513,11 @@ abstract class AbstractScript
                     }
                 } else {
                     $this->setMessage(
-                        JText::sprintf('LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED', ucfirst($type), $element),
+                        JText::sprintf(
+                            $this->messageCache['LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED'],
+                            ucfirst($type),
+                            $element
+                        ),
                         'warning'
                     );
                 }
