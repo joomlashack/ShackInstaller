@@ -87,15 +87,6 @@ abstract class AbstractScript
     protected $relatedExtensionFeedback = array();
 
     /**
-     * A cache for translation of messages for when uninstalling, make sure
-     * the message is displayed correctly after the language files where already
-     * removed.
-     *
-     * @var array
-     */
-    protected $messageCache = array();
-
-    /**
      * @param JInstallerAdapterComponent $parent
      *
      * @return void
@@ -110,9 +101,9 @@ abstract class AbstractScript
             $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
         }
 
-        $attributes  = (array) $this->manifest->attributes();
-        $attributes  = $attributes['@attributes'];
-        $this->type  = $attributes['type'];
+        $attributes = (array) $this->manifest->attributes();
+        $attributes = $attributes['@attributes'];
+        $this->type = $attributes['type'];
 
         if ($this->type === 'plugin') {
             $this->group = $attributes['group'];
@@ -125,10 +116,6 @@ abstract class AbstractScript
             $previousManifest      = JInstaller::parseXMLInstallFile($path);
             $this->previousVersion = (string)$previousManifest['version'] ? : '0.0.0';
         }
-
-        // Load the installer default language
-        $language = JFactory::getLanguage();
-        $language->load('lib_allediainstaller.sys', __DIR__ . '/../../');
     }
 
     /**
@@ -159,6 +146,11 @@ abstract class AbstractScript
     public function uninstall($parent)
     {
         $this->initProperties($parent);
+
+        // Load the installer default language
+        $language = JFactory::getLanguage();
+        $language->load('lib_allediainstaller.sys', JPATH_ADMINISTRATOR);
+
         $this->uninstallRelated();
         $this->showMessages();
     }
@@ -183,6 +175,10 @@ abstract class AbstractScript
     {
         $this->initProperties($parent);
 
+        // Load the installer default language
+        $language = JFactory::getLanguage();
+        $language->load('lib_allediainstaller.sys', __DIR__ . '/../../');
+
         if ($type === 'update') {
             $this->clearUpdateServers();
         }
@@ -204,9 +200,6 @@ abstract class AbstractScript
                 }
             }
         }
-
-        $this->messageCache['LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED'] =
-            JText::_('LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED');
 
         return true;
     }
@@ -514,7 +507,7 @@ abstract class AbstractScript
                 } else {
                     $this->setMessage(
                         JText::sprintf(
-                            $this->messageCache['LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED'],
+                            'LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED',
                             ucfirst($type),
                             $element
                         ),
