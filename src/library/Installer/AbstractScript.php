@@ -1187,7 +1187,7 @@ abstract class AbstractScript
     protected function tableExists($name)
     {
         $config = JFactory::getConfig();
-        $tables = $this->getTables();
+        $tables = $this->getTables(true);
 
         // Replace the table prefix
         $name = str_replace('#__', $config->get('dbprefix'), $name);
