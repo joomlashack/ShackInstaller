@@ -1,6 +1,6 @@
-[![Alledia](https://www.alledia.com/images/logo_circle_small.png)](https://www.alledia.com)
+[![Joomlashack](https://www.joomlashack.com/images/logo_circle_small.png)](https://www.joomlashack.com)
 
-Alledia Installer
+Joomlashack Installer
 ============
 
 Common libraries for our extension installer scripts
@@ -31,7 +31,7 @@ For file and folder, use relative paths to the site root.
 
 ## Requirements
 
-Joomla 2.5.x or 3.x
+Joomla 3.x
 
 ## License
 
