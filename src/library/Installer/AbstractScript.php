@@ -1030,7 +1030,7 @@ abstract class AbstractScript
 
         // Update the extension
         $customData = json_decode($extension->custom_data) ?: new \stdClass();
-        $customData->author = 'Alledia';
+        $customData->author = 'Joomlashack';
 
         $query = $db->getQuery(true)
             ->update($db->quoteName('#__extensions'))
@@ -1042,7 +1042,7 @@ abstract class AbstractScript
         // @TODO: remove this after libraries be able to have a custom install script
         $query = $db->getQuery(true)
             ->update($db->quoteName('#__extensions'))
-            ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Alledia"}'))
+            ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Joomlashack"}'))
             ->where(
                 array(
                     $db->quoteName('type') . '=' . $db->quote('library'),
