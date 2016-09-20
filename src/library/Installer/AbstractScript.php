@@ -68,6 +68,12 @@ abstract class AbstractScript
     protected $columns;
 
     /**
+     * List of tables and respective indexes
+     * @var array
+     */
+    protected $indexes;
+
+    /**
      * List of tables
      * @var array
      */
@@ -1138,6 +1144,30 @@ abstract class AbstractScript
     }
 
     /**
+     * Get and store a cache of indexes of a table
+     *
+     * @param  string $table The table name
+     * @return array         A list of indexes from a table
+     */
+    protected function getIndexesFromTable($table)
+    {
+        if (!isset($this->indexes[$table])) {
+            $db = JFactory::getDbo();
+            $db->setQuery("SHOW INDEX FROM " . $db->quoteName($table));
+            $rows = $db->loadObjectList();
+
+            $indexes = array();
+            foreach ($rows as $row) {
+                $indexes[] = $row->Key_name;
+            }
+
+            $this->indexes[$table] = $indexes;
+        }
+
+        return $this->indexes[$table];
+    }
+
+    /**
      * Add columns to a table if they doesn't exists
      *
      * @param string $table   The table name
@@ -1153,6 +1183,26 @@ abstract class AbstractScript
             if (! in_array($column, $existentColumns)) {
                 $db->setQuery('ALTER TABLE ' . $db->quoteName($table)
                     . ' ADD COLUMN ' . $column . ' ' . $specification);
+                $db->execute();
+            }
+        }
+    }
+
+    /**
+     * Add indexes to a table if they doesn't exists
+     *
+     * @param string $table   The table name
+     * @param array  $indexes The names of the indexes that needed to be checked and added
+     */
+    protected function addIndexesIfNotExists($table, $indexes)
+    {
+        $db = JFactory::getDbo();
+
+        $existentIndexes = $this->getIndexesFromTable($table);
+
+        foreach ($indexes as $index => $specification) {
+            if (! in_array($index, $existentIndexes)) {
+                $db->setQuery('CREATE INDEX ' . $index . ' ON ' . $db->quoteName($table) . $specification);
                 $db->execute();
             }
         }
