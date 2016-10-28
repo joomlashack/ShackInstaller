@@ -256,6 +256,13 @@ abstract class AbstractScript
             }
         }
 
+        // Check if we are on the backend before display anything. This fixes an issue
+        // on the updates triggered by Watchful, which is always triggered on the frontend
+        if (JPATH_BASE === JPATH_ROOT) {
+            // Frontend
+            return true;
+        }
+
         // Get the footer content
         $this->footer        = '';
         $footerElement = null;
