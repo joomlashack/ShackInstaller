@@ -199,14 +199,30 @@ abstract class AbstractScript
         }
 
         if (in_array($type, array('install', 'update'))) {
-            // Check minimum target platform
+            // Check minimum target Joomla Platform
             if (isset($this->manifest->alledia->targetplatform)) {
                 $targetPlatform = (string)$this->manifest->alledia->targetplatform;
 
-                if (!$this->validateTargetPlatform($targetPlatform)) {
+                if (!$this->validateTargetVersion(JVERSION, $targetPlatform)) {
                     // Platform version is invalid. Displays a warning and cancel the install
                     $targetPlatform = str_replace('*', 'x', $targetPlatform);
                     $msg            = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $targetPlatform);
+                    JFactory::getApplication()->enqueueMessage($msg, 'warning');
+
+                    $this->cancelInstallation = true;
+
+                    return false;
+                }
+            }
+
+            // Check for minimum php version
+            if (isset($this->manifest->alledia->phpminimum)) {
+                $targetPhpVersion = (string)$this->manifest->alledia->phpminimum;
+
+                if (!$this->validateTargetVersion(phpversion(), $targetPhpVersion)) {
+                    // php version is too low
+                    $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
+                    $msg        = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $minimumPhp);
                     JFactory::getApplication()->enqueueMessage($msg, 'warning');
 
                     $this->cancelInstallation = true;
@@ -1375,22 +1391,23 @@ abstract class AbstractScript
     }
 
     /**
-     * Check if the target platform is valid, comparing to Joomla! version.
+     * Check if the actual version is at least the minimum target version.
      *
-     * @param  string $targetPlatform The required target platform
+     * @param string $actualVersion
+     * @param string $targetVersion The required target platform
      *
-     * @return bool                    True, if the platform is valid
+     * @return bool True, if the target version is greater than or equal to actual version
      */
-    protected function validateTargetPlatform($targetPlatform)
+    protected function validateTargetVersion($actualVersion, $targetVersion)
     {
-        // If is universal, any Joomla! version is valid
-        if ($targetPlatform === '.*') {
+        // If is universal, any version is valid
+        if ($targetVersion === '.*') {
             return true;
         }
 
-        $targetPlatform = str_replace('*', '0', $targetPlatform);
+        $targetVersion = str_replace('*', '0', $targetVersion);
 
-        // Compare with the Joomla! version
-        return version_compare(JVERSION, $targetPlatform, 'ge');
+        // Compare with the actual version
+        return version_compare($actualVersion, $targetVersion, 'ge');
     }
 }
