@@ -24,6 +24,8 @@ use JModelLegacy;
 use JFile;
 use SimpleXMLElement;
 
+require_once 'include.php';
+
 abstract class AbstractScript
 {
     /**
