@@ -363,7 +363,19 @@ abstract class AbstractScript
         $this->addStyle($this->mediaFolder . '/css/installer.css');
 
         // Include the template
-        include $extensionPath . '/views/installer/tmpl/default.php';
+        // Try to find the template in an alternative folder, since some extensions
+        // which uses FOF will display the "Installers" view on admin, errouniously.
+        // FOF look for views automatically reading the views folder. So on that
+        // case we move the installer view to another folder.
+        $path = $extensionPath . '/views/installer/tmpl/default.php';
+        if (JFile::exists($path)) {
+            include $path;
+        } else {
+            $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
+            if (JFile::exists($path)) {
+                include $path;
+            }
+        }
 
         $this->showMessages();
     }
