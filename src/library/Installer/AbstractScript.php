@@ -896,7 +896,8 @@ abstract class AbstractScript
      */
     protected function getInfoFromManifest($manifestPath)
     {
-        $info = new Registry();
+        $info = new Registry;
+
         if (file_exists($manifestPath)) {
             $xml = simplexml_load_file($manifestPath);
 
