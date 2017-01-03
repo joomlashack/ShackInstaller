@@ -871,7 +871,8 @@ abstract class AbstractScript
             'template'  => 'tpl',
             'library'   => 'lib',
             'cli'       => 'cli',
-            'module'    => 'mod'
+            'module'    => 'mod',
+            'file'      => 'file'
         );
 
         $type    = empty($type) ? $this->type : $type;
@@ -938,7 +939,8 @@ abstract class AbstractScript
             'template'  => 'templates/',
             'library'   => 'libraries/',
             'cli'       => 'cli/',
-            'module'    => 'modules/'
+            'module'    => 'modules/',
+            'file'      => 'administrator/manifests/files/'
         );
 
         $basePath = JPATH_SITE . '/' . $folders[$type];
@@ -961,8 +963,9 @@ abstract class AbstractScript
                 break;
         }
 
-        $basePath .= $element;
-
+        if ($type !== 'file') {
+            $basePath .= $element;
+        }
 
         return $basePath;
     }
