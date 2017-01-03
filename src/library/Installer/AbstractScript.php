@@ -1002,19 +1002,29 @@ abstract class AbstractScript
     {
         $installer = new JInstaller;
 
-        if ($type !== 'library') {
-            $basePath = $this->getExtensionPath($type, $element, $group);
+        switch ($type) {
+            case 'library':
+            case 'file':
+                $folders = array(
+                    'library' => 'libraries',
+                    'file'    => 'files'
+                );
 
-            $installer->setPath('source', $basePath);
-            $installer->getManifest();
+                $manifestPath = JPATH_SITE . '/administrator/manifests/' . $folders[$type] . '/' . $element . '.xml';
 
-            $manifestPath = $installer->getPath('manifest');
-        } else {
-            $manifestPath = JPATH_SITE . '/administrator/manifests/libraries/' . $element . '.xml';
+                if (!file_exists($manifestPath) || !$installer->isManifest($manifestPath)) {
+                    $manifestPath = false;
+                }
+                break;
 
-            if (!file_exists($manifestPath) || !$installer->isManifest($manifestPath)) {
-                $manifestPath = false;
-            }
+            default:
+                $basePath = $this->getExtensionPath($type, $element, $group);
+
+                $installer->setPath('source', $basePath);
+                $installer->getManifest();
+
+                $manifestPath = $installer->getPath('manifest');
+                break;
         }
 
         return $manifestPath;
