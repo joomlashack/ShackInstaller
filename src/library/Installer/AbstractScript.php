@@ -434,17 +434,6 @@ abstract class AbstractScript
                         $currentVersion = $currentManifest->get('version');
 
                         if (version_compare($currentVersion, $newVersion, '>')) {
-                            $this->setMessage(
-                                JText::sprintf(
-                                    'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_SKIPED',
-                                    strtolower($typeName),
-                                    $element,
-                                    $newVersion,
-                                    $currentVersion
-                                ),
-                                'warning'
-                            );
-
                             // Store the state of the install/update
                             $this->storeFeedbackForRelatedExtension(
                                 $element,
