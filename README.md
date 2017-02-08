@@ -15,6 +15,7 @@ of installation.
         <element>elementname</element>
         <namespace>ExtensionName</namespace>
         <name>CustomName</name>
+        <license>free | pro</license>
         <targetplatform>.*</targetplatform>
         <phpminimum>.*</phpminimum>
         <previousminimum>.*</previousminimum>
