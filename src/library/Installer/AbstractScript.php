@@ -125,7 +125,7 @@ abstract class AbstractScript
         $path = $this->installer->getPath('extension_administrator');
         $path .= '/' . basename($this->installer->getPath('manifest'));
         if (is_file($path)) {
-            $this->previousManifest = JInstaller::parseXMLInstallFile($path);
+            $this->previousManifest = simplexml_load_file($path);
         }
     }
 
@@ -204,7 +204,7 @@ abstract class AbstractScript
                     // Platform version is invalid. Displays a warning and cancel the install
                     $targetPlatform = str_replace('*', 'x', $targetPlatform);
 
-                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $targetPlatform);
+                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
                     JFactory::getApplication()->enqueueMessage($msg, 'warning');
                     $success = false;
                 }
@@ -218,7 +218,7 @@ abstract class AbstractScript
                     // php version is too low
                     $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
 
-                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $minimumPhp);
+                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
                     JFactory::getApplication()->enqueueMessage($msg, 'warning');
                     $success = false;
                 }
@@ -227,8 +227,9 @@ abstract class AbstractScript
             // Check for minimum previous version
             if ($type == 'update' && $this->previousManifest && isset($this->manifest->alledia->previousminimum)) {
                 $targetVersion  = (string)$this->manifest->alledia->previousminimum;
-                $currentVersion = (string)$this->previousManifest->version;
-                if ($this->validateTargetVersion($currentVersion, $targetVersion)) {
+                $lastVersion = (string)$this->previousManifest->version;
+
+                if (!$this->validateTargetVersion($lastVersion, $targetVersion)) {
                     // Previous minimum is not installed
                     $minimumVersion = str_replace('*', 'x', $targetVersion);
 
