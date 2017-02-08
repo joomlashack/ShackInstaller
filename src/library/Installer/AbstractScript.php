@@ -39,14 +39,9 @@ abstract class AbstractScript
     protected $manifest = null;
 
     /**
-     * @var string
+     * @var SimpleXMLElement
      */
-    protected $previousVersion = '0.0.0';
-
-    /**
-     * @var string
-     */
-    protected $phpDefaultMinimum = '5.3.0';
+    protected $previousManifest = null;
 
     /**
      * @var string
@@ -126,12 +121,11 @@ abstract class AbstractScript
             $this->group = $attributes['group'];
         }
 
-        // Get the previous version number for upgrades
+        // Get the previous manifest for use in upgrades
         $path = $this->installer->getPath('extension_administrator');
         $path .= '/' . basename($this->installer->getPath('manifest'));
         if (is_file($path)) {
-            $previousManifest      = JInstaller::parseXMLInstallFile($path);
-            $this->previousVersion = (string)$previousManifest['version'] ?: '0.0.0';
+            $this->previousManifest = JInstaller::parseXMLInstallFile($path);
         }
     }
 
@@ -191,6 +185,7 @@ abstract class AbstractScript
     public function preFlight($type, $parent)
     {
         $this->initProperties($parent);
+        $success = true;
 
         // Load the installer default language
         $language = JFactory::getLanguage();
@@ -208,12 +203,10 @@ abstract class AbstractScript
                 if (!$this->validateTargetVersion(JVERSION, $targetPlatform)) {
                     // Platform version is invalid. Displays a warning and cancel the install
                     $targetPlatform = str_replace('*', 'x', $targetPlatform);
-                    $msg            = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $targetPlatform);
+
+                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $targetPlatform);
                     JFactory::getApplication()->enqueueMessage($msg, 'warning');
-
-                    $this->cancelInstallation = true;
-
-                    return false;
+                    $success = false;
                 }
             }
 
@@ -224,17 +217,30 @@ abstract class AbstractScript
                 if (!$this->validateTargetVersion(phpversion(), $targetPhpVersion)) {
                     // php version is too low
                     $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
-                    $msg        = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $minimumPhp);
+
+                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $minimumPhp);
                     JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                    $success = false;
+                }
+            }
 
-                    $this->cancelInstallation = true;
+            // Check for minimum previous version
+            if ($type == 'update' && $this->previousManifest && isset($this->manifest->alledia->previousminimum)) {
+                $targetVersion  = (string)$this->manifest->alledia->previousminimum;
+                $currentVersion = (string)$this->previousManifest->version;
+                if ($this->validateTargetVersion($currentVersion, $targetVersion)) {
+                    // Previous minimum is not installed
+                    $minimumVersion = str_replace('*', 'x', $targetVersion);
 
-                    return false;
+                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
+                    JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                    $success = false;
                 }
             }
         }
 
-        return true;
+        $this->cancelInstallation = !$success;
+        return $success;
     }
 
     /**
@@ -341,13 +347,7 @@ abstract class AbstractScript
             }
         }
 
-        // Get the extension name. If no custom name is set, uses the namespace
-        if (isset($this->manifest->alledia->name)) {
-            $name = $this->manifest->alledia->name;
-        } else {
-            $name = $this->manifest->alledia->namespace;
-        }
-        $name .= ($extension->isPro() ? ' Pro' : '');
+        $name = $this->getName() . ($extension->isPro() ? ' Pro' : '');
 
         // Welcome message
         if ($type === 'install') {
@@ -1426,5 +1426,21 @@ abstract class AbstractScript
 
         // Compare with the actual version
         return version_compare($actualVersion, $targetVersion, 'ge');
+    }
+
+    /**
+     * Get the extension name. If no custom name is set, uses the namespace
+     *
+     * @return string
+     */
+    protected function getName()
+    {
+        // Get the extension name. If no custom name is set, uses the namespace
+        if (isset($this->manifest->alledia->name)) {
+            $name = $this->manifest->alledia->name;
+        } else {
+            $name = $this->manifest->alledia->namespace;
+        }
+        return (string)$name;
     }
 }
