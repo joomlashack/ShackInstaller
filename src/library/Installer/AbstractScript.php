@@ -13,13 +13,12 @@ defined('_JEXEC') or die();
 use JFactory;
 use Joomla\Registry\Registry;
 use JTable;
-use JTableExtension;
 use JInstaller;
 use JText;
 use JUri;
 use JFolder;
 use JFormFieldCustomFooter;
-use JInstallerAdapterComponent;
+use JInstallerAdapter;
 use JModelLegacy;
 use JFile;
 use SimpleXMLElement;
@@ -99,7 +98,7 @@ abstract class AbstractScript
     protected $relatedExtensionFeedback = array();
 
     /**
-     * @param JInstallerAdapterComponent $parent
+     * @param JInstallerAdapter $parent
      *
      * @return void
      */
@@ -130,7 +129,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapterComponent $parent
+     * @param JInstallerAdapter $parent
      *
      * @return bool
      */
@@ -140,7 +139,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapterComponent $parent
+     * @param JInstallerAdapter $parent
      *
      * @return bool
      */
@@ -150,7 +149,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapterComponent $parent
+     * @param JInstallerAdapter $parent
      *
      * @return void
      */
@@ -167,7 +166,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapterComponent $parent
+     * @param JInstallerAdapter $parent
      *
      * @return bool
      */
@@ -177,8 +176,8 @@ abstract class AbstractScript
     }
 
     /**
-     * @param string                     $type
-     * @param JInstallerAdapterComponent $parent
+     * @param string            $type
+     * @param JInstallerAdapter $parent
      *
      * @return bool
      */
@@ -226,8 +225,8 @@ abstract class AbstractScript
 
             // Check for minimum previous version
             if ($type == 'update' && $this->previousManifest && isset($this->manifest->alledia->previousminimum)) {
-                $targetVersion  = (string)$this->manifest->alledia->previousminimum;
-                $lastVersion = (string)$this->previousManifest->version;
+                $targetVersion = (string)$this->manifest->alledia->previousminimum;
+                $lastVersion   = (string)$this->previousManifest->version;
 
                 if (!$this->validateTargetVersion($lastVersion, $targetVersion)) {
                     // Previous minimum is not installed
@@ -245,8 +244,8 @@ abstract class AbstractScript
     }
 
     /**
-     * @param string                     $type
-     * @param JInstallerAdapterComponent $parent
+     * @param string            $type
+     * @param JInstallerAdapter $parent
      *
      * @return void
      */
