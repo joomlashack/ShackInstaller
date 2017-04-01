@@ -126,6 +126,25 @@ abstract class AbstractScript
         if (is_file($path)) {
             $this->previousManifest = simplexml_load_file($path);
         }
+
+        // Load additional language files
+        $language = JFactory::getLanguage();
+
+        $basePath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element, $this->group);
+        if (!is_dir($basePath)) {
+            $basePath = $this->installer->getPath('source');
+
+            if ($this->type == 'component') {
+                if ($files = $this->manifest->administration->files) {
+                    if ($files = (string)$files['folder']) {
+                        $basePath .= '/' . $files;
+                    }
+                }
+            }
+        }
+
+        $language->load('lib_allediainstaller.sys', $basePath);
+        $language->load($this->getFullElement(), $basePath);
     }
 
     /**
@@ -156,11 +175,6 @@ abstract class AbstractScript
     public function uninstall($parent)
     {
         $this->initProperties($parent);
-
-        // Load the installer default language
-        $language = JFactory::getLanguage();
-        $language->load('lib_allediainstaller.sys', JPATH_ADMINISTRATOR);
-
         $this->uninstallRelated();
         $this->showMessages();
     }
@@ -185,10 +199,6 @@ abstract class AbstractScript
     {
         $this->initProperties($parent);
         $success = true;
-
-        // Load the installer default language
-        $language = JFactory::getLanguage();
-        $language->load('lib_allediainstaller.sys', __DIR__ . '/../../');
 
         if ($type === 'update') {
             $this->clearUpdateServers();
@@ -326,9 +336,6 @@ abstract class AbstractScript
 
         // Show additional installation messages
         $extensionPath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element, $this->group);
-
-        // Load the extension language
-        JFactory::getLanguage()->load($this->getFullElement(), $extensionPath);
 
         // If Pro extension, includes the license form view
         if ($extension->isPro()) {
