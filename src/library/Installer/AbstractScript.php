@@ -98,6 +98,16 @@ abstract class AbstractScript
     protected $relatedExtensionFeedback = array();
 
     /**
+     * AbstractScript constructor.
+     *
+     * @param JInstallerAdapter $parent
+     */
+    public function __construct($parent)
+    {
+        $this->initProperties($parent);
+    }
+
+    /**
      * @param JInstallerAdapter $parent
      *
      * @return void
@@ -121,30 +131,39 @@ abstract class AbstractScript
         }
 
         // Get the previous manifest for use in upgrades
-        $path = $this->installer->getPath('extension_administrator');
-        $path .= '/' . basename($this->installer->getPath('manifest'));
-        if (is_file($path)) {
-            $this->previousManifest = simplexml_load_file($path);
+        $adminPath    = $this->installer->getPath('extension_administrator');
+        $manifestPath = $adminPath . '/' . basename($this->installer->getPath('manifest'));
+        if (is_file($manifestPath)) {
+            $this->previousManifest = simplexml_load_file($manifestPath);
         }
 
-        // Load additional language files
+        // Determine basepath for localized files
         $language = JFactory::getLanguage();
-
-        $basePath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element, $this->group);
-        if (!is_dir($basePath)) {
-            $basePath = $this->installer->getPath('source');
-
-            if ($this->type == 'component') {
+        $basePath = $this->installer->getPath('source');
+        if (is_dir($basePath)) {
+            if ($this->type == 'component' && $basePath != $adminPath) {
+                // For components sourced by manifest, need to find the admin folder
                 if ($files = $this->manifest->administration->files) {
                     if ($files = (string)$files['folder']) {
                         $basePath .= '/' . $files;
                     }
                 }
             }
+
+        } else {
+            $basePath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element, $this->group);
         }
 
-        $language->load('lib_allediainstaller.sys', $basePath);
-        $language->load($this->getFullElement(), $basePath);
+        // All the files we want to load
+        $languageFiles = array(
+            'lib_allediainstaller.sys',
+            $this->getFullElement()
+        );
+
+        // Load from localized or core language folder
+        foreach ($languageFiles as $languageFile) {
+            $language->load($languageFile, $basePath) || $language->load($languageFile, JPATH_ADMINISTRATOR);
+        }
     }
 
     /**
@@ -174,7 +193,6 @@ abstract class AbstractScript
      */
     public function uninstall($parent)
     {
-        $this->initProperties($parent);
         $this->uninstallRelated();
         $this->showMessages();
     }
@@ -197,7 +215,6 @@ abstract class AbstractScript
      */
     public function preFlight($type, $parent)
     {
-        $this->initProperties($parent);
         $success = true;
 
         if ($type === 'update') {
