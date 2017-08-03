@@ -730,9 +730,17 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function setMessage($msg, $type = 'message')
+    protected function setMessage($msg, $type = 'message', $prepend = null)
     {
-        $this->messages[] = array($msg, $type);
+        if ($prepend === null) {
+            $prepend = in_array($type, array('notice', 'error'));
+        }
+
+        if ($prepend) {
+            array_unshift($this->messages, array($msg, $type));
+        } else {
+            $this->messages[] = array($msg, $type);
+        }
     }
 
     /**
