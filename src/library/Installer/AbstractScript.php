@@ -559,7 +559,7 @@ abstract class AbstractScript
                         $msg     = 'LIB_ALLEDIAINSTALLER_RELATED_UNINSTALL';
                         $msgtype = 'message';
                         if (!$installer->uninstall($current->type, $current->extension_id)) {
-                            $msg .= '_FAIL';
+                            $msg     .= '_FAIL';
                             $msgtype = 'error';
                         }
                         $this->setMessage(
