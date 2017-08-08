@@ -896,9 +896,9 @@ abstract class AbstractScript
             'file'      => 'file'
         );
 
-        $type    = empty($type) ? $this->type : $type;
-        $element = empty($element) ? (string)$this->manifest->alledia->element : $element;
-        $group   = empty($group) ? $this->group : $group;
+        $type    = $type ?: $this->type;
+        $element = $element ?: (string)$this->manifest->alledia->element;
+        $group   = $group ?: $this->group;
 
         $fullElement = $prefixes[$type] . '_';
 
