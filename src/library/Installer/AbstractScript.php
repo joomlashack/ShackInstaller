@@ -567,7 +567,7 @@ abstract class AbstractScript
                             $msgtype
                         );
                     }
-                } else {
+                } elseif (JFactory::getApplication()->get('debug', 0)) {
                     $this->setMessage(
                         JText::sprintf(
                             'LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED',
