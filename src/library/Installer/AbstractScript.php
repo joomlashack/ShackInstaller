@@ -392,6 +392,7 @@ abstract class AbstractScript
         // FOF look for views automatically reading the views folder. So on that
         // case we move the installer view to another folder.
         $path = $extensionPath . '/views/installer/tmpl/default.php';
+        
         if (JFile::exists($path)) {
             include $path;
         } else {
@@ -972,6 +973,12 @@ abstract class AbstractScript
             case 'component':
                 if (!preg_match('/^com_/', $element)) {
                     $basePath .= 'com_';
+                }
+                break;
+
+            case 'template':
+                if (preg_match('/^tpl_/', $element)) {
+                    $element = str_replace('tpl_', '', $element);
                 }
                 break;
         }
