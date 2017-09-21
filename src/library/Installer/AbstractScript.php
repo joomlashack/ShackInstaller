@@ -560,7 +560,7 @@ abstract class AbstractScript
                         $msg     = 'LIB_ALLEDIAINSTALLER_RELATED_UNINSTALL';
                         $msgtype = 'message';
                         if (!$installer->uninstall($current->type, $current->extension_id)) {
-                            $msg .= '_FAIL';
+                            $msg     .= '_FAIL';
                             $msgtype = 'error';
                         }
                         $this->setMessage(
@@ -568,7 +568,7 @@ abstract class AbstractScript
                             $msgtype
                         );
                     }
-                } else {
+                } elseif (JFactory::getApplication()->get('debug', 0)) {
                     $this->setMessage(
                         JText::sprintf(
                             'LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED',
@@ -731,9 +731,17 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function setMessage($msg, $type = 'message')
+    protected function setMessage($msg, $type = 'message', $prepend = null)
     {
-        $this->messages[] = array($msg, $type);
+        if ($prepend === null) {
+            $prepend = in_array($type, array('notice', 'error'));
+        }
+
+        if ($prepend) {
+            array_unshift($this->messages, array($msg, $type));
+        } else {
+            $this->messages[] = array($msg, $type);
+        }
     }
 
     /**
@@ -889,9 +897,9 @@ abstract class AbstractScript
             'file'      => 'file'
         );
 
-        $type    = empty($type) ? $this->type : $type;
-        $element = empty($element) ? (string)$this->manifest->alledia->element : $element;
-        $group   = empty($group) ? $this->group : $group;
+        $type    = $type ?: $this->type;
+        $element = $element ?: (string)$this->manifest->alledia->element;
+        $group   = $group ?: $this->group;
 
         $fullElement = $prefixes[$type] . '_';
 
