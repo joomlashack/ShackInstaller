@@ -605,6 +605,11 @@ abstract class AbstractScript
             }
         }
 
+        // Fix the element for templates
+        if ('template' === $type) {
+            $element = str_replace('tpl_', '', $element);
+        }
+
         $terms = array(
             'type'    => $type,
             'element' => $element
@@ -613,8 +618,9 @@ abstract class AbstractScript
         if ($type === 'plugin') {
             $terms['folder'] = $group;
         }
-
+        
         $eid = $row->find($terms);
+
         if ($eid) {
             $row->load($eid);
             return $row;
