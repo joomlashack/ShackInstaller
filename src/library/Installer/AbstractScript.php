@@ -1070,7 +1070,7 @@ abstract class AbstractScript
     protected function publishThisPlugin()
     {
         $attributes = (array)$this->manifest->alledia->element->attributes();
-        $attributes = $attributes['@attributes'];
+        $attributes = (array)@$attributes['@attributes'];
 
         if (isset($attributes['publish']) && (bool)$attributes['publish']) {
             $extension = $this->findThisExtension();
@@ -1088,7 +1088,7 @@ abstract class AbstractScript
     protected function reorderThisPlugin()
     {
         $attributes = (array)$this->manifest->alledia->element->attributes();
-        $attributes = $attributes['@attributes'];
+        $attributes = (array)@$attributes['@attributes'];
 
         if (isset($attributes['ordering'])) {
             $extension = $this->findThisExtension();
