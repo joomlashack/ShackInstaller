@@ -386,13 +386,15 @@ abstract class AbstractScript
 
         $this->addStyle($this->mediaFolder . '/css/installer.css');
 
-        // Include the template
-        // Try to find the template in an alternative folder, since some extensions
-        // which uses FOF will display the "Installers" view on admin, errouniously.
-        // FOF look for views automatically reading the views folder. So on that
-        // case we move the installer view to another folder.
+        /*
+         * Include the template
+         * Try to find the template in an alternative folder, since some extensions
+         * which uses FOF will display the "Installers" view on admin, errouniously.
+         * FOF look for views automatically reading the views folder. So on that
+         * case we move the installer view to another folder.
+        */
         $path = $extensionPath . '/views/installer/tmpl/default.php';
-        
+
         if (JFile::exists($path)) {
             include $path;
         } else {
@@ -618,7 +620,7 @@ abstract class AbstractScript
         if ($type === 'plugin') {
             $terms['folder'] = $group;
         }
-        
+
         $eid = $row->find($terms);
 
         if ($eid) {
@@ -1275,8 +1277,14 @@ abstract class AbstractScript
 
         foreach ($columns as $column => $specification) {
             if (!in_array($column, $existentColumns)) {
-                $db->setQuery('ALTER TABLE ' . $db->quoteName($table)
-                    . ' ADD COLUMN ' . $column . ' ' . $specification);
+                $db->setQuery(
+                    sprintf(
+                        'ALTER TABLE %s ADD COLUMN %s %s',
+                        $db->quoteName($table),
+                        $db->quoteName($column),
+                        $specification
+                    )
+                );
                 $db->execute();
             }
         }
@@ -1296,8 +1304,8 @@ abstract class AbstractScript
 
         foreach ($indexes as $index => $specification) {
             if (!in_array($index, $existentIndexes)) {
-                $db->setQuery('CREATE INDEX ' . $index . ' ON ' . $db->quoteName($table) . $specification);
-                $db->execute();
+                $db->setQuery(sprintf('CREATE INDEX %s ON %s', $specification, $index, $db->quoteName($table)))
+                    ->execute();
             }
         }
     }
@@ -1316,8 +1324,8 @@ abstract class AbstractScript
 
         foreach ($columns as $column) {
             if (in_array($column, $existentColumns)) {
-                $db->setQuery('ALTER TABLE ' . $db->quoteName($table) . ' DROP COLUMN ' . $column);
-                $db->execute();
+                $db->setQuery(sprintf('ALTER TABLE %s DROP COLUMN %s', $db->quoteName($table), $column))
+                    ->execute();
             }
         }
     }
