@@ -422,6 +422,9 @@ abstract class AbstractScript
             $source         = $this->installer->getPath('source');
             $extensionsPath = $source . '/extensions';
 
+            $defaultDowngrade = (string)$this->manifest->alledia->relatedExtensions['downgrade'];
+            $defaultDowngrade = !empty($defaultDowngrade) && ($defaultDowngrade == 'true' || $defaultDowngrade == '1');
+
             foreach ($this->manifest->alledia->relatedExtensions->extension as $extension) {
                 $path = $extensionsPath . '/' . (string)$extension;
 
@@ -452,8 +455,13 @@ abstract class AbstractScript
 
                     $this->storeFeedbackForRelatedExtension($element, 'name', (string)$newManifest->name);
 
-                    // Check if we have a higher version installed
-                    if (!$isNew) {
+                    // Check if we have a higher version installed unless downgrades are okay
+                    $downgrade = empty($attributes['downgrade'])
+                        ? $defaultDowngrade
+                        : (string)$attributes['downgrade'];
+                    $downgrade = $downgrade === true || $downgrade == 'true' || $downgrade == '1';
+
+                    if (!$isNew && !$downgrade) {
                         $currentManifestPath = $this->getManifestPath($type, $element, $group);
                         $currentManifest     = $this->getInfoFromManifest($currentManifestPath);
 
