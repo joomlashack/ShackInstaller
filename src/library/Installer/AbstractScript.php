@@ -14,6 +14,7 @@ use JFactory;
 use Joomla\Registry\Registry;
 use JTable;
 use JInstaller;
+use JTableExtension;
 use JText;
 use JUri;
 use JFolder;
@@ -597,10 +598,11 @@ abstract class AbstractScript
      * @param string $element
      * @param string $group
      *
-     * @return JTable
+     * @return JTableExtension
      */
     protected function findExtension($type, $element, $group = null)
     {
+        /** @var JTableExtension $row */
         $row = JTable::getInstance('extension');
 
         $prefixes = array(
