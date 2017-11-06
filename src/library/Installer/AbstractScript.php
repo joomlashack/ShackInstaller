@@ -846,7 +846,7 @@ abstract class AbstractScript
     /**
      * Finds the extension row for the main extension
      *
-     * @return JTable
+     * @return JTableExtension
      */
     protected function findThisExtension()
     {
