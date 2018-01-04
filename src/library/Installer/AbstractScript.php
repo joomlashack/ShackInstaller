@@ -330,7 +330,7 @@ abstract class AbstractScript
 
         // Check if we have a dedicated config.xml file
         $configPath = $extension->getExtensionPath() . '/config.xml';
-        if (JFile::exists($configPath)) {
+        if (is_file($configPath)) {
             $config = $extension->getConfig();
 
             if (!empty($config)) {
@@ -396,11 +396,11 @@ abstract class AbstractScript
         */
         $path = $extensionPath . '/views/installer/tmpl/default.php';
 
-        if (JFile::exists($path)) {
+        if (is_file($path)) {
             include $path;
         } else {
             $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
-            if (JFile::exists($path)) {
+            if (is_file($path)) {
                 include $path;
             }
         }
