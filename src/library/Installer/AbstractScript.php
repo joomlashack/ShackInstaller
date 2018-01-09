@@ -268,11 +268,11 @@ abstract class AbstractScript
         }
 
         $this->cancelInstallation = !$success;
-        
+
         if ($type === 'update' && $success) {
             $this->preserveFavicon();
         }
-        
+
         return $success;
     }
 
@@ -382,7 +382,7 @@ abstract class AbstractScript
         if ($type === 'update') {
             $this->preserveFavicon();
         }
-        
+
         // Welcome message
         if ($type === 'install') {
             $string = 'LIB_ALLEDIAINSTALLER_THANKS_INSTALL';
@@ -1515,7 +1515,7 @@ abstract class AbstractScript
         }
         return (string)$name;
     }
-    
+
     /**
      * If a template, preserve the favicon during an update.
      * Rename favicon during preFlight(). Rename back during postFlight()
@@ -1526,12 +1526,11 @@ abstract class AbstractScript
 
         $extensionType = $this->getExtensionInfoFromElement($nameOfExtension);
 
-        if ($extensionType['prefix'] === 'tpl')
-        {
+        if ($extensionType['prefix'] === 'tpl') {
             $pathToTemplate = $this->getExtensionPath($this->type, $nameOfExtension);
-            
+
             // These will be used to preserve the favicon during an update
-            $favicon =  $pathToTemplate . '/favicon.ico';
+            $favicon     = $pathToTemplate . '/favicon.ico';
             $faviconTemp = $pathToTemplate . '/favicon-temp.ico';
 
             /**
@@ -1541,12 +1540,13 @@ abstract class AbstractScript
              * If the order is reversed, favicon in update package will replace
              * $faviconTemp during update, which we don't want to happen.
              */
-            if (is_file($faviconTemp))
-            {
-                rename($faviconTemp,$favicon);
-            } else if (is_file($favicon))
-            {
-                rename($favicon,$faviconTemp);
+            if (is_file($faviconTemp)) {
+                rename($faviconTemp, $favicon);
+
+            } else {
+                if (is_file($favicon)) {
+                    rename($favicon, $faviconTemp);
+                }
             }
         }
     }
