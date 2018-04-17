@@ -692,12 +692,12 @@ abstract class AbstractScript
      * (before:element) Before the named plugin
      * (after:element) After the named plugin
      *
-     * @param JTable $extension
-     * @param string $order
+     * @param JTableExtension $extension
+     * @param string          $order
      *
      * @return void
      */
-    protected function setPluginOrder(JTable $extension, $order)
+    protected function setPluginOrder(JTableExtension $extension, $order)
     {
         if ($extension->type == 'plugin' && !empty($order)) {
             $db    = JFactory::getDbo();
@@ -866,8 +866,6 @@ abstract class AbstractScript
 
             // Files
             if ($obsolete->file) {
-                jimport('joomla.filesystem.file');
-
                 foreach ($obsolete->file as $file) {
                     $path = JPATH_ROOT . '/' . trim((string)$file, '/');
                     if (file_exists($path)) {
@@ -1016,6 +1014,7 @@ abstract class AbstractScript
                     $info->set($e->getName(), (string)$e);
                 }
             }
+
         } else {
             $relativePath = str_replace(JPATH_SITE . '/', '', $manifestPath);
             $this->setMessage(
