@@ -527,7 +527,7 @@ abstract class AbstractScript
                                         $this->storeFeedbackForRelatedExtension($element, 'publish', true);
                                     }
 
-                                    if ($ordering = $this->getXmlValue($extension['ordering'], 'string')) {
+                                    if ($ordering = $this->getXmlValue($extension['ordering'])) {
                                         $this->setPluginOrder($current, $ordering);
 
                                         $this->storeFeedbackForRelatedExtension($element, 'ordering', $ordering);
@@ -1579,14 +1579,16 @@ abstract class AbstractScript
      *
      * @return bool|string
      */
-    protected function getXmlValue($element, $type = 'bool', $default = null)
+    protected function getXmlValue($element, $type = 'string', $default = null)
     {
         $value = $element ? (string)$element : $default;
 
         switch ($type) {
             case 'bool':
             case 'boolean':
-                $value = !empty($value) && ($value == 'true' || $value == '1');
+                $value = $element
+                    ? $value == 'true' || $value == '1'
+                    : (bool)$default;
                 break;
 
             case 'string':
