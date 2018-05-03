@@ -48,14 +48,13 @@ of installation. Note that boolean attribute values can be specified using true/
 
 #### Element tag
 
-This is the Joomla extension name.e.g. `com_mycomponent`. It also accepts a `publish` attribute.
-In the case of plugins, this will default to false. For all other extension types, the default
-is true
+This is the Joomla extension name.e.g. `com_mycomponent`.
 
 #### relatedExtensions tag
 
 related extensions can be installed as part of a main package. the attributes `publish`, `downgrade`
-and `uninstall` can be used as defaults for the enclosed `<extension>` items.
+and `uninstall` can be used as defaults for the enclosed `<extension>` items. All three default to false
+if not used.
 
 #### Obsolete items
 
@@ -72,10 +71,10 @@ Atributes available under
 |Tag |Valid|Values|
 |----|-----|------|
 |type|RO|plugin, module, component, etc.|
-|element|RO|extension element name (without prefix, e.g. 'com_'|
 |group|RO|For plugins, the plugin folder. Otherwise ignored.|
+|element|RO|extension element name (without prefix, e.g. 'com_'|
 |downgrade|R|true &#124; false -- okay to downgrade on a reinstall|
-|publish|R|true &#124; false -- for plugins
+|publish|R|true &#124; false -- used for plugins only
 |ordering|R|# &#124; first &#124; last &#124; before:pluginelement &#124; after:pluginelement<br/>Applies only for new installations
 |uninstall|R|true &#124; false -- uninstall during uninstall of the current extension|
 
