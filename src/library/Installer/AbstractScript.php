@@ -121,7 +121,7 @@ abstract class AbstractScript
      */
     public function initProperties($parent)
     {
-        $this->installer = $parent->get('parent');
+        $this->installer = $parent->getParent();
         $this->manifest  = $this->installer->getManifest();
         $this->messages  = array();
 
