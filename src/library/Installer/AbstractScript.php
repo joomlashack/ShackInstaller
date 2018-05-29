@@ -138,8 +138,10 @@ abstract class AbstractScript
         }
 
         // Get the previous manifest for use in upgrades
-        $adminPath    = $this->installer->getPath('extension_administrator');
-        $manifestPath = $adminPath . '/' . basename($this->installer->getPath('manifest'));
+        // @TODO: Is there a better way? This should work for components, modules and plugins.
+        $targetPath   = $this->installer->getPath('extension_administrator')
+            ?: $this->installer->getPath('extension_root');
+        $manifestPath = $targetPath . '/' . basename($this->installer->getPath('manifest'));
         if (is_file($manifestPath)) {
             $this->previousManifest = simplexml_load_file($manifestPath);
         }
