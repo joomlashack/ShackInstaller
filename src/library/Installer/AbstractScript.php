@@ -150,7 +150,7 @@ abstract class AbstractScript
         $language = JFactory::getLanguage();
         $basePath = $this->installer->getPath('source');
         if (is_dir($basePath)) {
-            if ($this->type == 'component' && $basePath != $adminPath) {
+            if ($this->type == 'component' && $basePath != $targetPath) {
                 // For components sourced by manifest, need to find the admin folder
                 if ($files = $this->manifest->administration->files) {
                     if ($files = (string)$files['folder']) {
