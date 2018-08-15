@@ -261,6 +261,32 @@ abstract class AbstractScript
                 }
             }
 
+            // Check for minimum mysql version
+            if ($targetMySQLVersion = $this->manifest->alledia->mysqlminimum) {
+                $targetMySQLVersion = (string)$targetMySQLVersion;
+
+                $db = JFactory::getDbo();
+                if ($db->getServerType() == 'mysql') {
+                    $dbVersion = $db->getVersion();
+                    if (stripos($dbVersion, 'maria') !== false) {
+                        // For MariaDB this is a bit of a punt. We'll assume v10.x will do
+                        $dbParts = explode('-', $dbVersion);
+                        if (count($dbParts) >= 3) {
+                            $dbVersion = $dbParts[1];
+                        }
+                    }
+
+                    if (!$this->validateTargetVersion($dbVersion, $targetMySQLVersion)) {
+                        // mySQL version too low
+                        $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
+
+                        $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
+                        JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                        $success = false;
+                    }
+                }
+            }
+
             // Check for minimum php version
             if (isset($this->manifest->alledia->phpminimum)) {
                 $targetPhpVersion = (string)$this->manifest->alledia->phpminimum;
