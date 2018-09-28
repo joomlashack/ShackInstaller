@@ -724,9 +724,11 @@ abstract class AbstractScript
                 if ((is_numeric($order) && $order <= 1) || $order == 'first') {
                     // First in order
                     $neworder = array_merge($target, $others);
+
                 } elseif (($order == '*') || ($order == 'last')) {
                     // Last in order
                     $neworder = array_merge($others, $target);
+
                 } elseif (preg_match('/^(before|after):(\S+)$/', $order, $match)) {
                     // place before or after named plugin
                     $place    = $match[1];
@@ -741,10 +743,12 @@ abstract class AbstractScript
                         $neworder[$plugin->element] = $plugin;
                         $previous                   = $plugin->element;
                     }
+
                     if (count($neworder) < count($plugins)) {
                         // Make it last if the requested plugin isn't installed
                         $neworder = array_merge($neworder, $target);
                     }
+
                 } else {
                     $neworder = array();
                 }
