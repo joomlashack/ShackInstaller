@@ -269,11 +269,8 @@ abstract class AbstractScript
                 if ($db->getServerType() == 'mysql') {
                     $dbVersion = $db->getVersion();
                     if (stripos($dbVersion, 'maria') !== false) {
-                        // For MariaDB this is a bit of a punt. We'll assume v10.x will do
-                        $dbParts = explode('-', $dbVersion);
-                        if (count($dbParts) >= 3) {
-                            $dbVersion = $dbParts[1];
-                        }
+                        // For MariaDB this is a bit of a punt. We'll assume any version of Maria will do
+                        $dbVersion = $targetMySQLVersion;
                     }
 
                     if (!$this->validateTargetVersion($dbVersion, $targetMySQLVersion)) {
