@@ -29,6 +29,8 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
+    const VERSION = '1.6.22';
+    
     /**
      * @var JInstaller
      */
