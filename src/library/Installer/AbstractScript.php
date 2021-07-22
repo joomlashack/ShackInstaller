@@ -1545,13 +1545,17 @@ abstract class AbstractScript
     /**
      * Check if the actual version is at least the minimum target version.
      *
-     * @param string $actualVersion
-     * @param string $targetVersion The required target platform
+     * @param string  $actualVersion
+     * @param string  $targetVersion
+     * @param ?string $compare
      *
      * @return bool True, if the target version is greater than or equal to actual version
      */
-    protected function validateTargetVersion($actualVersion, $targetVersion)
-    {
+    protected function validateTargetVersion(
+        string $actualVersion,
+        string $targetVersion,
+        ?string $compare = null
+    ): bool {
         // If is universal, any version is valid
         if ($targetVersion === '.*') {
             return true;
@@ -1559,21 +1563,21 @@ abstract class AbstractScript
 
         $targetVersion = str_replace('*', '0', $targetVersion);
 
-        // Compare with the actual version
-        return version_compare($actualVersion, $targetVersion, 'ge');
+        return version_compare($actualVersion, $targetVersion, $compare ?: 'ge');
     }
 
     /**
-     * @param string $targetVersion
+     * @param string  $targetVersion
+     * @param ?string $compare
      *
      * @return bool
      */
-    protected function validatePreviousVersion($targetVersion)
+    protected function validatePreviousVersion(string $targetVersion, ?string $compare = null): bool
     {
         if ($this->previousManifest) {
             $lastVersion = (string)$this->previousManifest->version;
 
-            return $this->validateTargetVersion($lastVersion, $targetVersion);
+            return $this->validateTargetVersion($lastVersion, $targetVersion, $compare);
         }
 
         return true;
