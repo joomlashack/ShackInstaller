@@ -11,18 +11,19 @@ namespace Alledia\Installer;
 defined('_JEXEC') or die();
 
 use Alledia\Installer\Extension\Licensed;
-use JFactory;
-use Joomla\Registry\Registry;
-use JTable;
-use JInstaller;
-use JTableExtension;
-use JText;
-use JUri;
-use JFolder;
 use JFormFieldCustomFooter;
-use JInstallerAdapter;
-use JModelLegacy;
-use JFile;
+use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
+use Joomla\CMS\Installer\Installer;
+use Joomla\CMS\Installer\InstallerAdapter;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Table\Extension;
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\Uri\Uri;
+use Joomla\Registry\Registry;
 use SimpleXMLElement;
 
 require_once 'include.php';
@@ -32,7 +33,17 @@ abstract class AbstractScript
     const VERSION = '1.6.24';
 
     /**
-     * @var JInstaller
+     * @var CMSApplication
+     */
+    protected $app = null;
+
+    /**
+     * @var \JDatabaseDriver
+     */
+    protected $dbo = null;
+
+    /**
+     * @var Installer
      */
     protected $installer = null;
 
@@ -109,7 +120,7 @@ abstract class AbstractScript
     /**
      * AbstractScript constructor.
      *
-     * @param JInstallerAdapter $parent
+     * @param InstallerAdapter $parent
      */
     public function __construct($parent)
     {
@@ -117,12 +128,14 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapter $parent
+     * @param InstallerAdapter $parent
      *
      * @return void
      */
     public function initProperties($parent)
     {
+        $this->app       = Factory::getApplication();
+        $this->dbo       = Factory::getDbo();
         $this->installer = $parent->getParent();
         $this->manifest  = $this->installer->getManifest();
         $this->messages  = array();
@@ -149,7 +162,7 @@ abstract class AbstractScript
         }
 
         // Determine basepath for localized files
-        $language = JFactory::getLanguage();
+        $language = Factory::getLanguage();
         $basePath = $this->installer->getPath('source');
         if (is_dir($basePath)) {
             if ($this->type == 'component' && $basePath != $targetPath) {
@@ -178,7 +191,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapter $parent
+     * @param InstallerAdapter $parent
      *
      * @return bool
      */
@@ -188,7 +201,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapter $parent
+     * @param InstallerAdapter $parent
      *
      * @return bool
      */
@@ -198,7 +211,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapter $parent
+     * @param InstallerAdapter $parent
      *
      * @return void
      * @throws \Exception
@@ -216,7 +229,7 @@ abstract class AbstractScript
             );
 
         } catch (\Throwable $e) {
-            JFactory::getApplication()->enqueueMessage(
+            $this->app->enqueueMessage(
                 sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
                 'error'
             );
@@ -224,7 +237,7 @@ abstract class AbstractScript
     }
 
     /**
-     * @param JInstallerAdapter $parent
+     * @param InstallerAdapter $parent
      *
      * @return bool
      */
@@ -234,8 +247,8 @@ abstract class AbstractScript
     }
 
     /**
-     * @param string            $type
-     * @param JInstallerAdapter $parent
+     * @param string           $type
+     * @param InstallerAdapter $parent
      *
      * @return bool
      * @throws \Exception
@@ -257,8 +270,8 @@ abstract class AbstractScript
                     // Platform version is invalid. Displays a warning and cancel the install
                     $targetPlatform = str_replace('*', 'x', $targetPlatform);
 
-                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
-                    JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                    $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
+                    $this->app->enqueueMessage($msg, 'warning');
                     $success = false;
                 }
             }
@@ -267,9 +280,8 @@ abstract class AbstractScript
             if ($targetMySQLVersion = $this->manifest->alledia->mysqlminimum) {
                 $targetMySQLVersion = (string)$targetMySQLVersion;
 
-                $db = JFactory::getDbo();
-                if ($db->getServerType() == 'mysql') {
-                    $dbVersion = $db->getVersion();
+                if ($this->dbo->getServerType() == 'mysql') {
+                    $dbVersion = $this->dbo->getVersion();
                     if (stripos($dbVersion, 'maria') !== false) {
                         // For MariaDB this is a bit of a punt. We'll assume any version of Maria will do
                         $dbVersion = $targetMySQLVersion;
@@ -279,8 +291,8 @@ abstract class AbstractScript
                         // mySQL version too low
                         $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
 
-                        $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
-                        JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
+                        $this->app->enqueueMessage($msg, 'warning');
                         $success = false;
                     }
                 }
@@ -294,8 +306,8 @@ abstract class AbstractScript
                     // php version is too low
                     $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
 
-                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
-                    JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                    $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
+                    $this->app->enqueueMessage($msg, 'warning');
                     $success = false;
                 }
             }
@@ -307,8 +319,8 @@ abstract class AbstractScript
                     // Previous minimum is not installed
                     $minimumVersion = str_replace('*', 'x', $targetVersion);
 
-                    $msg = JText::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
-                    JFactory::getApplication()->enqueueMessage($msg, 'warning');
+                    $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
+                    $this->app->enqueueMessage($msg, 'warning');
                     $success = false;
                 }
             }
@@ -324,8 +336,8 @@ abstract class AbstractScript
     }
 
     /**
-     * @param string            $type
-     * @param JInstallerAdapter $parent
+     * @param string           $type
+     * @param InstallerAdapter $parent
      *
      * @return void
      * @throws \Exception
@@ -334,8 +346,7 @@ abstract class AbstractScript
     {
         try {
             if ($this->cancelInstallation) {
-                JFactory::getApplication()
-                    ->enqueueMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
+                $this->app->enqueueMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
 
                 return;
             }
@@ -360,7 +371,7 @@ abstract class AbstractScript
                 $proLibraryPath = $license->getProLibraryPath();
                 if (file_exists($proLibraryPath)) {
                     jimport('joomla.filesystem.folder');
-                    JFolder::delete($proLibraryPath);
+                    Folder::delete($proLibraryPath);
                 }
             }
 
@@ -437,8 +448,8 @@ abstract class AbstractScript
             }
 
             // Variables for the included template
-            $this->welcomeMessage = JText::sprintf($string, $name);
-            $this->mediaURL       = JUri::root() . 'media/' . $license->getFullElement();
+            $this->welcomeMessage = Text::sprintf($string, $name);
+            $this->mediaURL       = Uri::root() . 'media/' . $license->getFullElement();
 
             $this->addStyle($this->mediaFolder . '/css/installer.css');
 
@@ -468,7 +479,7 @@ abstract class AbstractScript
                 'error'
             );
         } catch (\Throwable $e) {
-            JFactory::getApplication()->enqueueMessage(
+            $this->app->enqueueMessage(
                 sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
                 'error'
             );
@@ -483,8 +494,8 @@ abstract class AbstractScript
     protected function installRelated()
     {
         if ($this->manifest->alledia->relatedExtensions) {
-            // Directly unused var, but this resets the JInstaller instance
-            $installer = new JInstaller;
+            // Directly unused var, but this resets the Installer instance
+            $installer = new Installer();
             unset($installer);
 
             $source         = $this->installer->getPath('source');
@@ -508,7 +519,7 @@ abstract class AbstractScript
                     $typeName = ucfirst(trim($group . ' ' . $type));
 
                     // Get data from the manifest
-                    $tmpInstaller = new JInstaller;
+                    $tmpInstaller = new Installer();
                     $tmpInstaller->setPath('source', $path);
                     $newManifest = $tmpInstaller->getManifest();
                     $newVersion  = (string)$newManifest->version;
@@ -528,7 +539,7 @@ abstract class AbstractScript
                             $this->storeFeedbackForRelatedExtension(
                                 $element,
                                 'message',
-                                JText::sprintf(
+                                Text::sprintf(
                                     'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_SKIPED',
                                     $newVersion,
                                     $currentVersion
@@ -542,7 +553,7 @@ abstract class AbstractScript
 
                     $text = 'LIB_ALLEDIAINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
                     if ($tmpInstaller->install($path)) {
-                        $this->setMessage(JText::sprintf($text, $typeName, $element));
+                        $this->setMessage(Text::sprintf($text, $typeName, $element));
                         if ($isNew) {
                             $current = $this->findExtension($type, $element, $group);
 
@@ -566,16 +577,16 @@ abstract class AbstractScript
                         $this->storeFeedbackForRelatedExtension(
                             $element,
                             'message',
-                            JText::sprintf('LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
+                            Text::sprintf('LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
                         );
 
                     } else {
-                        $this->setMessage(JText::sprintf($text . '_FAIL', $typeName, $element), 'error');
+                        $this->setMessage(Text::sprintf($text . '_FAIL', $typeName, $element), 'error');
 
                         $this->storeFeedbackForRelatedExtension(
                             $element,
                             'message',
-                            JText::sprintf(
+                            Text::sprintf(
                                 'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_FAILED',
                                 $newVersion
                             )
@@ -596,7 +607,7 @@ abstract class AbstractScript
     protected function uninstallRelated()
     {
         if ($this->manifest->alledia->relatedExtensions) {
-            $installer = new JInstaller;
+            $installer = new Installer();
 
             $defaultAttributes = $this->manifest->alledia->relatedExtensions->attributes();
             $defaultUninstall  = $this->getXmlValue($defaultAttributes['uninstall'], 'bool');
@@ -616,13 +627,13 @@ abstract class AbstractScript
                             $msgtype = 'error';
                         }
                         $this->setMessage(
-                            JText::sprintf($msg, ucfirst($type), $element),
+                            Text::sprintf($msg, ucfirst($type), $element),
                             $msgtype
                         );
                     }
-                } elseif (JFactory::getApplication()->get('debug', 0)) {
+                } elseif ($this->app->get('debug', 0)) {
                     $this->setMessage(
-                        JText::sprintf(
+                        Text::sprintf(
                             'LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED',
                             ucfirst($type),
                             $element
@@ -639,12 +650,12 @@ abstract class AbstractScript
      * @param string $element
      * @param string $group
      *
-     * @return JTableExtension
+     * @return Extension
      */
     protected function findExtension($type, $element, $group = null)
     {
-        /** @var JTableExtension $row */
-        $row = JTable::getInstance('extension');
+        /** @var Extension $row */
+        $row = Table::getInstance('extension');
 
         $prefixes = array(
             'component' => 'com_',
@@ -690,15 +701,15 @@ abstract class AbstractScript
      * (before:element) Before the named plugin
      * (after:element) After the named plugin
      *
-     * @param JTableExtension $extension
-     * @param string          $order
+     * @param Extension $extension
+     * @param string    $order
      *
      * @return void
      */
-    protected function setPluginOrder(JTableExtension $extension, $order)
+    protected function setPluginOrder(Extension $extension, $order)
     {
         if ($extension->type == 'plugin' && !empty($order)) {
-            $db    = JFactory::getDbo();
+            $db    = $this->dbo;
             $query = $db->getQuery(true);
 
             $query->select('extension_id, element');
@@ -754,12 +765,12 @@ abstract class AbstractScript
 
                 if (count($neworder) == count($plugins)) {
                     // Only reorder if have a validated new order
-                    JModelLegacy::addIncludePath(
+                    BaseDatabaseModel::addIncludePath(
                         JPATH_ADMINISTRATOR . '/components/com_plugins/models',
                         'PluginsModels'
                     );
                     /** @var \PluginsModelPlugin $model */
-                    $model = JModelLegacy::getInstance('Plugin', 'PluginsModel');
+                    $model = BaseDatabaseModel::getInstance('Plugin', 'PluginsModel');
 
                     $ids = array();
                     foreach ($neworder as $plugin) {
@@ -780,9 +791,8 @@ abstract class AbstractScript
      */
     protected function showMessages()
     {
-        $app = JFactory::getApplication();
         foreach ($this->messages as $msg) {
-            $app->enqueueMessage($msg[0], $msg[1]);
+            $this->app->enqueueMessage($msg[0], $msg[1]);
         }
 
         $this->messages = array();
@@ -830,14 +840,14 @@ abstract class AbstractScript
                     $current = $this->findExtension($type, $element, $group);
                     if (!empty($current)) {
                         // Try to uninstall
-                        $tmpInstaller = new JInstaller;
+                        $tmpInstaller = new Installer();
                         $uninstalled  = $tmpInstaller->uninstall($type, $current->extension_id);
 
                         $typeName = ucfirst(trim(($group ?: '') . ' ' . $type));
 
                         if ($uninstalled) {
                             $this->setMessage(
-                                JText::sprintf(
+                                Text::sprintf(
                                     'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_SUCCESS',
                                     strtolower($typeName),
                                     $element
@@ -845,7 +855,7 @@ abstract class AbstractScript
                             );
                         } else {
                             $this->setMessage(
-                                JText::sprintf(
+                                Text::sprintf(
                                     'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_FAIL',
                                     strtolower($typeName),
                                     $element
@@ -862,7 +872,7 @@ abstract class AbstractScript
                 foreach ($obsolete->file as $file) {
                     $path = JPATH_ROOT . '/' . trim((string)$file, '/');
                     if (file_exists($path)) {
-                        JFile::delete($path);
+                        File::delete($path);
                     }
                 }
             }
@@ -874,7 +884,7 @@ abstract class AbstractScript
                 foreach ($obsolete->folder as $folder) {
                     $path = JPATH_ROOT . '/' . trim((string)$folder, '/');
                     if (file_exists($path)) {
-                        JFolder::delete($path);
+                        Folder::delete($path);
                     }
                 }
             }
@@ -884,7 +894,7 @@ abstract class AbstractScript
     /**
      * Finds the extension row for the main extension
      *
-     * @return JTableExtension
+     * @return Extension
      */
     protected function findThisExtension()
     {
@@ -904,7 +914,7 @@ abstract class AbstractScript
     {
         $extension = $this->findThisExtension();
 
-        $db    = JFactory::getDbo();
+        $db    = $this->dbo;
         $query = $db->getQuery(true)
             ->select($db->quoteName('update_site_id'))
             ->from($db->quoteName('#__update_sites_extensions'))
@@ -1003,7 +1013,7 @@ abstract class AbstractScript
         } else {
             $relativePath = str_replace(JPATH_SITE . '/', '', $manifestPath);
             $this->setMessage(
-                JText::sprintf('LIB_ALLEDIAINSTALLER_MANIFEST_NOT_FOUND', $relativePath),
+                Text::sprintf('LIB_ALLEDIAINSTALLER_MANIFEST_NOT_FOUND', $relativePath),
                 'error'
             );
         }
@@ -1070,7 +1080,7 @@ abstract class AbstractScript
      */
     protected function getExtensionId($type, $element, $group = '')
     {
-        $db    = JFactory::getDbo();
+        $db    = $this->dbo;
         $query = $db->getQuery(true)
             ->select('extension_id')
             ->from('#__extensions')
@@ -1093,7 +1103,7 @@ abstract class AbstractScript
      */
     protected function getManifestPath($type, $element, $group = '')
     {
-        $installer = new JInstaller;
+        $installer = new Installer();
 
         switch ($type) {
             case 'library':
@@ -1181,7 +1191,7 @@ abstract class AbstractScript
     {
         $extension = $this->findThisExtension();
 
-        $db = JFactory::getDbo();
+        $db = $this->dbo;
 
         // Update the extension
         $customData         = json_decode($extension->custom_data) ?: new \stdClass();
@@ -1237,7 +1247,7 @@ abstract class AbstractScript
     protected function fixMenus()
     {
         if ($this->type == 'component') {
-            $db = JFactory::getDbo();
+            $db = $this->dbo;
 
             if ($extension = $this->findThisExtension()) {
                 $id     = $extension->extension_id;
@@ -1258,7 +1268,7 @@ abstract class AbstractScript
                 // @TODO:  Remove after Joomla! incorporates this natively
                 $menuElement = $this->manifest->administration->menu;
                 if (in_array((string)$menuElement['hidden'], array('true', 'hidden'))) {
-                    $menu = JTable::getInstance('Menu');
+                    $menu = Table::getInstance('Menu');
                     $menu->load(array('component_id' => $id, 'client_id' => 1));
                     if ($menu->id) {
                         $menu->delete();
@@ -1278,7 +1288,7 @@ abstract class AbstractScript
     protected function getColumnsFromTable($table)
     {
         if (!isset($this->columns[$table])) {
-            $db = JFactory::getDbo();
+            $db = $this->dbo;
             $db->setQuery("SHOW COLUMNS FROM " . $db->quoteName($table));
             $rows = $db->loadObjectList();
 
@@ -1303,7 +1313,7 @@ abstract class AbstractScript
     protected function getIndexesFromTable($table)
     {
         if (!isset($this->indexes[$table])) {
-            $db = JFactory::getDbo();
+            $db = $this->dbo;
             $db->setQuery("SHOW INDEX FROM " . $db->quoteName($table));
             $rows = $db->loadObjectList();
 
@@ -1326,7 +1336,7 @@ abstract class AbstractScript
      */
     protected function addColumnsIfNotExists($table, $columns)
     {
-        $db = JFactory::getDbo();
+        $db = $this->dbo;
 
         $existentColumns = $this->getColumnsFromTable($table);
 
@@ -1353,7 +1363,7 @@ abstract class AbstractScript
      */
     protected function addIndexesIfNotExists($table, $indexes)
     {
-        $db = JFactory::getDbo();
+        $db = $this->dbo;
 
         $existentIndexes = $this->getIndexesFromTable($table);
 
@@ -1373,7 +1383,7 @@ abstract class AbstractScript
      */
     protected function dropColumnsIfExists($table, $columns)
     {
-        $db = JFactory::getDbo();
+        $db = $this->dbo;
 
         $existentColumns = $this->getColumnsFromTable($table);
 
@@ -1394,11 +1404,10 @@ abstract class AbstractScript
      */
     protected function tableExists($name)
     {
-        $config = JFactory::getConfig();
         $tables = $this->getTables(true);
 
         // Replace the table prefix
-        $name = str_replace('#__', $config->get('dbprefix'), $name);
+        $name = str_replace('#__', $this->app->get('dbprefix'), $name);
 
         return in_array($name, $tables);
     }
@@ -1417,7 +1426,7 @@ abstract class AbstractScript
                 return $item[0];
             };
 
-            $db = JFactory::getDbo();
+            $db = $this->dbo;
             $db->setQuery('SHOW TABLES');
             $tables = $db->loadRowList();
 
