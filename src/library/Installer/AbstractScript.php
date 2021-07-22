@@ -1460,31 +1460,31 @@ abstract class AbstractScript
      * Parses a conditional string, returning a Boolean value (default: false).
      * For now it only supports an extension name and * as version.
      *
-     * @param  string $expression The conditional expression
+     * @param string $expression
      *
-     * @return bool                According to the evaluation of the expression
+     * @return bool
      */
-    protected function parseConditionalExpression($expression)
+    protected function parseConditionalExpression(string $expression): bool
     {
         $expression = strtolower($expression);
         $terms      = explode('=', $expression);
-        $term0      = trim($terms[0]);
+        $firstTerm  = array_shift($terms);
 
-        if (count($terms) === 1) {
-            return !(empty($terms[0]) || $terms[0] === 'null');
-        } else {
-            // Is the first term a name of extension?
-            if (preg_match('/^(com_|plg_|mod_|lib_|tpl_|cli_)/', $term0)) {
-                $info = $this->getExtensionInfoFromElement($term0);
+        if (count($terms) == 0) {
+            return $firstTerm == 'true' || $firstTerm == '1';
 
-                $extension = $this->findExtension($info['type'], $term0, $info['group']);
+        } elseif (preg_match('/^(com_|plg_|mod_|lib_|tpl_|cli_)/', $firstTerm)) {
+            // The first term is the name of an extension
 
-                // @TODO: compare the version, if specified, or different than *
-                // @TODO: Check if the extension is enabled, not just installed
+            $info = $this->getExtensionInfoFromElement($firstTerm);
 
-                if (!empty($extension)) {
-                    return true;
-                }
+            $extension = $this->findExtension($info['type'], $firstTerm, $info['group']);
+
+            // @TODO: compare the version, if specified, or different than *
+            // @TODO: Check if the extension is enabled, not just installed
+
+            if (!empty($extension)) {
+                return true;
             }
         }
 
