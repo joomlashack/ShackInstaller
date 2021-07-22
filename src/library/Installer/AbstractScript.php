@@ -10,6 +10,7 @@ namespace Alledia\Installer;
 
 defined('_JEXEC') or die();
 
+use Alledia\Installer\Extension\Generic;
 use Alledia\Installer\Extension\Licensed;
 use JFormFieldCustomFooter;
 use Joomla\CMS\Application\CMSApplication;
@@ -30,7 +31,7 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
-    const VERSION = '1.6.24';
+    public const VERSION = '1.6.25b1';
 
     /**
      * @var CMSApplication
@@ -63,40 +64,70 @@ abstract class AbstractScript
     protected $mediaFolder = null;
 
     /**
-     * @var array
+     * @var string
      */
-    protected $messages = array();
+    protected $element = null;
+
+    /**
+     * @var bool
+     */
+    protected $isLicensesManagerInstalled = false;
+
+    /**
+     * @var Licensed
+     */
+    protected $license = null;
 
     /**
      * @var string
      */
-    protected $type;
+    protected $licenseKey = null;
 
     /**
      * @var string
      */
-    protected $group;
+    protected $footer = null;
+
+    /**
+     * @var string
+     */
+    protected $mediaURL = null;
+
+    /**
+     * @var string[]
+     */
+    protected $messages = [];
+
+    /**
+     * @var string
+     */
+    protected $type = null;
+
+    /**
+     * @var string
+     */
+    protected $group = null;
 
     /**
      * List of tables and respective columns
      *
      * @var array
      */
-    protected $columns;
+    protected $columns = null;
 
     /**
      * List of tables and respective indexes
      *
      * @var array
      */
-    protected $indexes;
+    protected $indexes = null;
 
     /**
      * List of tables
      *
      * @var array
      */
-    protected $tables;
+    protected $tables = null;
 
     /**
      * Flag to cancel the installation
@@ -110,19 +141,20 @@ abstract class AbstractScript
      *
      * @var array
      */
-    protected $relatedExtensionFeedback = array();
+    protected $relatedExtensionFeedback = [];
 
     /**
-     * @var Licensed
+     * @var string
      */
-    protected $license = null;
+    protected $welcomeMessage = null;
 
     /**
-     * AbstractScript constructor.
-     *
      * @param InstallerAdapter $parent
+     *
+     * @return void
+     * @throws \Exception
      */
-    public function __construct($parent)
+    public function __construct(InstallerAdapter $parent)
     {
         $this->initProperties($parent);
     }
@@ -131,14 +163,15 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return void
+     * @throws \Exception
      */
-    public function initProperties($parent)
+    public function initProperties(InstallerAdapter $parent)
     {
         $this->app       = Factory::getApplication();
         $this->dbo       = Factory::getDbo();
         $this->installer = $parent->getParent();
         $this->manifest  = $this->installer->getManifest();
-        $this->messages  = array();
+        $this->messages  = [];
 
         if ($media = $this->manifest->media) {
             $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
@@ -179,10 +212,10 @@ abstract class AbstractScript
         }
 
         // All the files we want to load
-        $languageFiles = array(
+        $languageFiles = [
             'lib_allediainstaller.sys',
             $this->getFullElement()
-        );
+        ];
 
         // Load from localized or core language folder
         foreach ($languageFiles as $languageFile) {
@@ -195,7 +228,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function install($parent)
+    public function install(InstallerAdapter $parent): bool
     {
         return true;
     }
@@ -205,7 +238,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function discover_install($parent)
+    public function discover_install(InstallerAdapter $parent): bool
     {
         return $this->install($parent);
     }
@@ -216,17 +249,11 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function uninstall($parent)
+    public function uninstall(InstallerAdapter $parent)
     {
         try {
             $this->uninstallRelated();
             $this->showMessages();
-
-        } catch (\Exception $e) {
-            JFactory::getApplication()->enqueueMessage(
-                sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
-                'error'
-            );
 
         } catch (\Throwable $e) {
             $this->app->enqueueMessage(
@@ -241,7 +268,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function update($parent)
+    public function update(InstallerAdapter $parent): bool
     {
         return true;
     }
@@ -253,7 +280,7 @@ abstract class AbstractScript
      * @return bool
      * @throws \Exception
      */
-    public function preFlight($type, $parent)
+    public function preFlight(string $type, InstallerAdapter $parent): bool
     {
         $success = true;
 
@@ -261,7 +288,7 @@ abstract class AbstractScript
             $this->clearUpdateServers();
         }
 
-        if (in_array($type, array('install', 'update'))) {
+        if (in_array($type, ['install', 'update'])) {
             // Check minimum target Joomla Platform
             if (isset($this->manifest->alledia->targetplatform)) {
                 $targetPlatform = (string)$this->manifest->alledia->targetplatform;
@@ -342,7 +369,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function postFlight($type, $parent)
+    public function postFlight(string $type, InstallerAdapter $parent)
     {
         try {
             if ($this->cancelInstallation) {
@@ -370,10 +397,13 @@ abstract class AbstractScript
             if (!$license->isPro()) {
                 $proLibraryPath = $license->getProLibraryPath();
                 if (file_exists($proLibraryPath)) {
-                    jimport('joomla.filesystem.folder');
                     Folder::delete($proLibraryPath);
                 }
             }
+            \JLoader::register(
+                '\\JFormFieldCustomFooter',
+                $license->getExtensionPath() . '/form/fields/customfooter.php'
+            );
 
             // Check if we are on the backend before display anything. This fixes an issue
             // on the updates triggered by Watchful, which is always triggered on the frontend
@@ -398,11 +428,7 @@ abstract class AbstractScript
                 $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
             }
 
-            if (!empty($footerElement)) {
-                if (!class_exists('JFormFieldCustomFooter')) {
-                    require_once $license->getExtensionPath() . '/form/fields/customfooter.php';
-                }
-
+            if (class_exists('\\JFormFieldCustomFooter') && $footerElement) {
                 $field                = new JFormFieldCustomFooter();
                 $field->fromInstaller = true;
                 $this->footer         = $field->getInputUsingCustomElement($footerElement[0]);
@@ -420,10 +446,7 @@ abstract class AbstractScript
             // If Pro extension, includes the license form view
             if ($license->isPro()) {
                 // Get the OSMyLicensesManager extension to handle the license key
-                $licensesManagerExtension         = new Extension\Generic('osmylicensesmanager', 'plugin', 'system');
-                $this->isLicensesManagerInstalled = false;
-
-                if (!empty($licensesManagerExtension)) {
+                if ($licensesManagerExtension = new Generic('osmylicensesmanager', 'plugin', 'system')) {
                     if (isset($licensesManagerExtension->params)) {
                         $this->licenseKey = $licensesManagerExtension->params->get('license-keys', '');
                     } else {
@@ -473,11 +496,6 @@ abstract class AbstractScript
 
             $this->showMessages();
 
-        } catch (\Exception $e) {
-            JFactory::getApplication()->enqueueMessage(
-                sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
-                'error'
-            );
         } catch (\Throwable $e) {
             $this->app->enqueueMessage(
                 sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
@@ -621,14 +639,14 @@ abstract class AbstractScript
                 if ($uninstall) {
                     if ($current = $this->findExtension($type, $element, $group)) {
                         $msg     = 'LIB_ALLEDIAINSTALLER_RELATED_UNINSTALL';
-                        $msgtype = 'message';
-                        if (!$installer->uninstall($current->type, $current->extension_id)) {
+                        $msgType = 'message';
+                        if (!$installer->uninstall($current->get('type'), $current->get('extension_id'))) {
                             $msg     .= '_FAIL';
-                            $msgtype = 'error';
+                            $msgType = 'error';
                         }
                         $this->setMessage(
                             Text::sprintf($msg, ucfirst($type), $element),
-                            $msgtype
+                            $msgType
                         );
                     }
                 } elseif ($this->app->get('debug', 0)) {
@@ -646,21 +664,21 @@ abstract class AbstractScript
     }
 
     /**
-     * @param string $type
-     * @param string $element
-     * @param string $group
+     * @param ?string $type
+     * @param ?string $element
+     * @param ?string $group
      *
-     * @return Extension
+     * @return ?Extension
      */
-    protected function findExtension($type, $element, $group = null)
+    protected function findExtension(?string $type, ?string $element, ?string $group = null): ?Extension
     {
         /** @var Extension $row */
         $row = Table::getInstance('extension');
 
-        $prefixes = array(
+        $prefixes = [
             'component' => 'com_',
             'module'    => 'mod_'
-        );
+        ];
 
         // Fix the element, if the prefix is not found
         if (array_key_exists($type, $prefixes)) {
@@ -674,10 +692,10 @@ abstract class AbstractScript
             $element = str_replace('tpl_', '', $element);
         }
 
-        $terms = array(
+        $terms = [
             'type'    => $type,
             'element' => $element
-        );
+        ];
 
         if ($type === 'plugin') {
             $terms['folder'] = $group;
@@ -706,29 +724,27 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function setPluginOrder(Extension $extension, $order)
+    protected function setPluginOrder(Extension $extension, string $order)
     {
-        if ($extension->type == 'plugin' && !empty($order)) {
+        if ($extension->get('type') == 'plugin' && !empty($order)) {
             $db    = $this->dbo;
             $query = $db->getQuery(true);
 
             $query->select('extension_id, element');
             $query->from('#__extensions');
-            $query->where(
-                array(
-                    $db->qn('folder') . ' = ' . $db->q($extension->folder),
-                    $db->qn('type') . ' = ' . $db->q($extension->type)
-                )
-            );
-            $query->order($db->qn('ordering'));
+            $query->where([
+                $db->quoteName('folder') . ' = ' . $db->quote($extension->get('folder')),
+                $db->quoteName('type') . ' = ' . $db->quote($extension->get('type'))
+            ]);
+            $query->order($db->quoteName('ordering'));
 
             $plugins = $db->setQuery($query)->loadObjectList('element');
 
             // Set the order only if plugin already successfully installed
-            if (array_key_exists($extension->element, $plugins)) {
-                $target = array(
-                    $extension->element => $plugins[$extension->element]
-                );
+            if (array_key_exists($extension->get('element'), $plugins)) {
+                $target = [
+                    $extension->get('element') => $plugins[$extension->get('element')]
+                ];
                 $others = array_diff_key($plugins, $target);
 
                 if ((is_numeric($order) && $order <= 1) || $order == 'first') {
@@ -743,7 +759,7 @@ abstract class AbstractScript
                     // place before or after named plugin
                     $place    = $match[1];
                     $element  = $match[2];
-                    $neworder = array();
+                    $neworder = [];
                     $previous = '';
 
                     foreach ($others as $plugin) {
@@ -760,7 +776,7 @@ abstract class AbstractScript
                     }
 
                 } else {
-                    $neworder = array();
+                    $neworder = [];
                 }
 
                 if (count($neworder) == count($plugins)) {
@@ -772,7 +788,7 @@ abstract class AbstractScript
                     /** @var \PluginsModelPlugin $model */
                     $model = BaseDatabaseModel::getInstance('Plugin', 'PluginsModel');
 
-                    $ids = array();
+                    $ids = [];
                     foreach ($neworder as $plugin) {
                         $ids[] = $plugin->extension_id;
                     }
@@ -795,7 +811,7 @@ abstract class AbstractScript
             $this->app->enqueueMessage($msg[0], $msg[1]);
         }
 
-        $this->messages = array();
+        $this->messages = [];
     }
 
     /**
@@ -803,19 +819,20 @@ abstract class AbstractScript
      *
      * @param string $msg
      * @param string $type
+     * @param bool   $prepend
      *
      * @return void
      */
-    protected function setMessage($msg, $type = 'message', $prepend = null)
+    protected function setMessage(string $msg, string $type = 'message', bool $prepend = false)
     {
         if ($prepend === null) {
-            $prepend = in_array($type, array('notice', 'error'));
+            $prepend = in_array($type, ['notice', 'error']);
         }
 
         if ($prepend) {
-            array_unshift($this->messages, array($msg, $type));
+            array_unshift($this->messages, [$msg, $type]);
         } else {
-            $this->messages[] = array($msg, $type);
+            $this->messages[] = [$msg, $type];
         }
     }
 
@@ -841,7 +858,7 @@ abstract class AbstractScript
                     if (!empty($current)) {
                         // Try to uninstall
                         $tmpInstaller = new Installer();
-                        $uninstalled  = $tmpInstaller->uninstall($type, $current->extension_id);
+                        $uninstalled  = $tmpInstaller->uninstall($type, $current->get('extension_id'));
 
                         $typeName = ucfirst(trim(($group ?: '') . ' ' . $type));
 
@@ -894,17 +911,15 @@ abstract class AbstractScript
     /**
      * Finds the extension row for the main extension
      *
-     * @return Extension
+     * @return ?Extension
      */
-    protected function findThisExtension()
+    protected function findThisExtension(): ?Extension
     {
-        $extension = $this->findExtension(
+        return $this->findExtension(
             $this->getXmlValue($this->manifest['type']),
             $this->getXmlValue($this->manifest->alledia->element),
             $this->getXmlValue($this->manifest['group'])
         );
-
-        return $extension;
     }
 
     /**
@@ -914,16 +929,17 @@ abstract class AbstractScript
     {
         $extension = $this->findThisExtension();
 
-        $db    = $this->dbo;
+        $db = $this->dbo;
+
         $query = $db->getQuery(true)
             ->select($db->quoteName('update_site_id'))
             ->from($db->quoteName('#__update_sites_extensions'))
-            ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
+            ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
 
         if ($list = $db->setQuery($query)->loadColumn()) {
             $query = $db->getQuery(true)
                 ->delete($db->quoteName('#__update_sites_extensions'))
-                ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
+                ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
             $db->setQuery($query)->execute();
 
             array_walk($list, 'intval');
@@ -937,15 +953,15 @@ abstract class AbstractScript
     /**
      * Get the full element, like com_myextension, lib_extension
      *
-     * @var string $type
-     * @var string $element
-     * @var string $group
+     * @param ?string $type
+     * @param ?string $element
+     * @param ?string $group
      *
      * @return string
      */
-    protected function getFullElement($type = null, $element = null, $group = null)
+    protected function getFullElement(?string $type = null, ?string $element = null, ?string $group = null): string
     {
-        $prefixes = array(
+        $prefixes = [
             'component' => 'com',
             'plugin'    => 'plg',
             'template'  => 'tpl',
@@ -953,7 +969,7 @@ abstract class AbstractScript
             'cli'       => 'cli',
             'module'    => 'mod',
             'file'      => 'file'
-        );
+        ];
 
         $type    = $type ?: $this->type;
         $element = $element ?: (string)$this->manifest->alledia->element;
@@ -965,18 +981,16 @@ abstract class AbstractScript
             $fullElement .= $group . '_';
         }
 
-        $fullElement .= $element;
-
-        return $fullElement;
+        return $fullElement . $element;
     }
 
     /**
      * @return Licensed
      */
-    protected function getLicense()
+    protected function getLicense(): Licensed
     {
         if ($this->license === null) {
-            $this->license = new Extension\Licensed(
+            $this->license = new Licensed(
                 (string)$this->manifest->alledia->namespace,
                 $this->type,
                 $this->group
@@ -987,15 +1001,15 @@ abstract class AbstractScript
     }
 
     /**
-     * Get extension information from manifest
+     * @param string $manifestPath
      *
      * @return Registry
      */
-    protected function getInfoFromManifest($manifestPath)
+    protected function getInfoFromManifest(string $manifestPath): Registry
     {
-        $info = new Registry;
+        $info = new Registry();
 
-        if (file_exists($manifestPath)) {
+        if (is_file($manifestPath)) {
             $xml = simplexml_load_file($manifestPath);
 
             $attributes = (array)$xml->attributes();
@@ -1022,15 +1036,15 @@ abstract class AbstractScript
     }
 
     /**
-     * Get the path for the extension
+     * @param string  $type
+     * @param string  $element
+     * @param ?string $group
      *
-     * @return string The path
+     * @return string
      */
-    protected function getExtensionPath($type, $element, $group = '')
+    protected function getExtensionPath(string $type, string $element, ?string $group = ''): string
     {
-        $basePath = '';
-
-        $folders = array(
+        $folders = [
             'component' => 'administrator/components/',
             'plugin'    => 'plugins/',
             'template'  => 'templates/',
@@ -1038,7 +1052,7 @@ abstract class AbstractScript
             'cli'       => 'cli/',
             'module'    => 'modules/',
             'file'      => 'administrator/manifests/files/'
-        );
+        ];
 
         $basePath = JPATH_SITE . '/' . $folders[$type];
 
@@ -1074,26 +1088,26 @@ abstract class AbstractScript
     }
 
     /**
-     * Get the id for an installed extension
+     * @param string  $type
+     * @param string  $element
+     * @param ?string $group
      *
-     * @return int The id
+     * @return int
      */
-    protected function getExtensionId($type, $element, $group = '')
+    protected function getExtensionId(string $type, string $element, ?string $group = ''): int
     {
         $db    = $this->dbo;
         $query = $db->getQuery(true)
             ->select('extension_id')
             ->from('#__extensions')
-            ->where(
-                array(
-                    $db->qn('element') . ' = ' . $db->q($element),
-                    $db->qn('folder') . ' = ' . $db->q($group),
-                    $db->qn('type') . ' = ' . $db->q($type)
-                )
-            );
+            ->where([
+                $db->quoteName('element') . ' = ' . $db->quote($element),
+                $db->quoteName('folder') . ' = ' . $db->quote($group),
+                $db->quoteName('type') . ' = ' . $db->quote($type)
+            ]);
         $db->setQuery($query);
 
-        return $db->loadResult();
+        return (int)$db->loadResult();
     }
 
     /**
@@ -1108,10 +1122,10 @@ abstract class AbstractScript
         switch ($type) {
             case 'library':
             case 'file':
-                $folders = array(
+                $folders = [
                     'library' => 'libraries',
                     'file'    => 'files'
-                );
+                ];
 
                 $manifestPath = JPATH_SITE . '/administrator/manifests/' . $folders[$type] . '/' . $element . '.xml';
 
@@ -1140,10 +1154,10 @@ abstract class AbstractScript
      */
     protected function publishThisPlugin()
     {
-        $attributes = (array)$this->manifest->alledia->element->attributes();
-        $attributes = (array)@$attributes['@attributes'];
+        $attributes = $this->manifest->alledia->element->attributes();
+        $publish    = (string)$attributes['publish'];
 
-        if (isset($attributes['publish']) && (bool)$attributes['publish']) {
+        if ($publish === 'true' || $publish === '1') {
             $extension = $this->findThisExtension();
             $extension->publish();
         }
@@ -1156,26 +1170,28 @@ abstract class AbstractScript
      */
     protected function reorderThisPlugin()
     {
-        $attributes = (array)$this->manifest->alledia->element->attributes();
-        $attributes = (array)@$attributes['@attributes'];
+        $attributes = $this->manifest->alledia->element->attributes();
+        $ordering   = (string)$attributes['ordering'];
 
-        if (isset($attributes['ordering'])) {
+        if ($ordering !== '') {
             $extension = $this->findThisExtension();
-            $this->setPluginOrder($extension, $attributes['ordering']);
+            $this->setPluginOrder($extension, $ordering);
         }
     }
 
     /**
      * Stores feedback data for related extensions to display after install
      *
-     * @param  string $element
-     * @param  string $key
-     * @param  string $value
+     * @param string $element
+     * @param string $key
+     * @param string $value
+     *
+     * @return void
      */
-    protected function storeFeedbackForRelatedExtension($element, $key, $value)
+    protected function storeFeedbackForRelatedExtension(string $element, string $key, string $value)
     {
-        if (!isset($this->relatedExtensionFeedback[$element])) {
-            $this->relatedExtensionFeedback[$element] = array();
+        if (empty($this->relatedExtensionFeedback[$element])) {
+            $this->relatedExtensionFeedback[$element] = [];
         }
 
         $this->relatedExtensionFeedback[$element][$key] = $value;
@@ -1189,32 +1205,31 @@ abstract class AbstractScript
      */
     protected function addAllediaAuthorshipToExtension()
     {
-        $extension = $this->findThisExtension();
+        if ($extension = $this->findThisExtension()) {
+            $db = $this->dbo;
 
-        $db = $this->dbo;
+            // Update the extension
+            $customData         = json_decode($extension->get('custom_data')) ?: (object)[];
+            $customData->author = 'Joomlashack';
 
-        // Update the extension
-        $customData         = json_decode($extension->custom_data) ?: new \stdClass();
-        $customData->author = 'Joomlashack';
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__extensions'))
+                ->set($db->quoteName('custom_data') . '=' . $db->quote(json_encode($customData)))
+                ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
+            $db->setQuery($query)->execute();
 
-        $query = $db->getQuery(true)
-            ->update($db->quoteName('#__extensions'))
-            ->set($db->quoteName('custom_data') . '=' . $db->quote(json_encode($customData)))
-            ->where($db->quoteName('extension_id') . '=' . (int)$extension->extension_id);
-        $db->setQuery($query)->execute();
-
-        // Update the Alledia framework
-        // @TODO: remove this after libraries be able to have a custom install script
-        $query = $db->getQuery(true)
-            ->update($db->quoteName('#__extensions'))
-            ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Joomlashack"}'))
-            ->where(
-                array(
+            // Update the Alledia framework
+            // @TODO: remove this after libraries be able to have a custom install script
+            $query = $db->getQuery(true)
+                ->update($db->quoteName('#__extensions'))
+                ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Joomlashack"}'))
+                ->where([
                     $db->quoteName('type') . '=' . $db->quote('library'),
                     $db->quoteName('element') . '=' . $db->quote('allediaframework')
-                )
-            );
-        $db->setQuery($query)->execute();
+                ]);
+            $db->setQuery($query)->execute();
+        }
+
     }
 
     /**
@@ -1226,7 +1241,7 @@ abstract class AbstractScript
     protected function addStyle($stylesheets)
     {
         if (is_string($stylesheets)) {
-            $stylesheets = array($stylesheets);
+            $stylesheets = [$stylesheets];
         }
 
         foreach ($stylesheets as $path) {
@@ -1250,26 +1265,24 @@ abstract class AbstractScript
             $db = $this->dbo;
 
             if ($extension = $this->findThisExtension()) {
-                $id     = $extension->extension_id;
-                $option = $extension->name;
+                $id     = $extension->get('extension_id');
+                $option = $extension->get('name');
 
                 $query = $db->getQuery(true)
                     ->update('#__menu')
                     ->set('component_id = ' . $db->quote($id))
-                    ->where(
-                        array(
-                            'type = ' . $db->quote('component'),
-                            'link LIKE ' . $db->quote("%option={$option}%")
-                        )
-                    );
+                    ->where([
+                        'type = ' . $db->quote('component'),
+                        'link LIKE ' . $db->quote("%option={$option}%")
+                    ]);
                 $db->setQuery($query)->execute();
 
                 // Check hidden admin menu option
                 // @TODO:  Remove after Joomla! incorporates this natively
                 $menuElement = $this->manifest->administration->menu;
-                if (in_array((string)$menuElement['hidden'], array('true', 'hidden'))) {
+                if (in_array((string)$menuElement['hidden'], ['true', 'hidden'])) {
                     $menu = Table::getInstance('Menu');
-                    $menu->load(array('component_id' => $id, 'client_id' => 1));
+                    $menu->load(['component_id' => $id, 'client_id' => 1]);
                     if ($menu->id) {
                         $menu->delete();
                     }
@@ -1281,18 +1294,18 @@ abstract class AbstractScript
     /**
      * Get and store a cache of columns of a table
      *
-     * @param  string $table The table name
+     * @param string $table The table name
      *
-     * @return array         A list of columns from a table
+     * @return string[]
      */
-    protected function getColumnsFromTable($table)
+    protected function getColumnsFromTable(string $table): array
     {
         if (!isset($this->columns[$table])) {
             $db = $this->dbo;
-            $db->setQuery("SHOW COLUMNS FROM " . $db->quoteName($table));
+            $db->setQuery('SHOW COLUMNS FROM ' . $db->quoteName($table));
             $rows = $db->loadObjectList();
 
-            $columns = array();
+            $columns = [];
             foreach ($rows as $row) {
                 $columns[] = $row->Field;
             }
@@ -1306,18 +1319,18 @@ abstract class AbstractScript
     /**
      * Get and store a cache of indexes of a table
      *
-     * @param  string $table The table name
+     * @param string $table The table name
      *
-     * @return array         A list of indexes from a table
+     * @return string[]
      */
-    protected function getIndexesFromTable($table)
+    protected function getIndexesFromTable(string $table): array
     {
         if (!isset($this->indexes[$table])) {
             $db = $this->dbo;
-            $db->setQuery("SHOW INDEX FROM " . $db->quoteName($table));
+            $db->setQuery('SHOW INDEX FROM ' . $db->quoteName($table));
             $rows = $db->loadObjectList();
 
-            $indexes = array();
+            $indexes = [];
             foreach ($rows as $row) {
                 $indexes[] = $row->Key_name;
             }
@@ -1331,10 +1344,12 @@ abstract class AbstractScript
     /**
      * Add columns to a table if they doesn't exists
      *
-     * @param string $table   The table name
-     * @param array  $columns The column's names that needed to be checked and added
+     * @param string   $table   The table name
+     * @param string[] $columns Assoc array of columnNames => definition
+     *
+     * @return void
      */
-    protected function addColumnsIfNotExists($table, $columns)
+    protected function addColumnsIfNotExists(string $table, array $columns)
     {
         $db = $this->dbo;
 
@@ -1359,9 +1374,11 @@ abstract class AbstractScript
      * Add indexes to a table if they doesn't exists
      *
      * @param string $table   The table name
-     * @param array  $indexes The names of the indexes that needed to be checked and added
+     * @param array  $indexes Assoc array of indexName => definition
+     *
+     * @return void
      */
-    protected function addIndexesIfNotExists($table, $indexes)
+    protected function addIndexesIfNotExists(string $table, array $indexes)
     {
         $db = $this->dbo;
 
@@ -1369,7 +1386,9 @@ abstract class AbstractScript
 
         foreach ($indexes as $index => $specification) {
             if (!in_array($index, $existentIndexes)) {
-                $db->setQuery(sprintf('CREATE INDEX %s ON %s', $specification, $index, $db->quoteName($table)))
+                $db->setQuery(
+                    sprintf('ALTER TABLE %s CREATE INDEX %s ON %s', $db->quoteName($table), $specification, $index)
+                )
                     ->execute();
             }
         }
@@ -1378,10 +1397,12 @@ abstract class AbstractScript
     /**
      * Drop columns from a table if they exists
      *
-     * @param string $table   The table name
-     * @param array  $columns The column's names that needed to be checked and added
+     * @param string   $table   The table name
+     * @param string[] $columns The column names that needed to be checked and added
+     *
+     * @return void
      */
-    protected function dropColumnsIfExists($table, $columns)
+    protected function dropColumnsIfExists(string $table, array $columns)
     {
         $db = $this->dbo;
 
@@ -1398,39 +1419,35 @@ abstract class AbstractScript
     /**
      * Check if a table exists
      *
-     * @param  string $name The table name
+     * @param string $name
      *
-     * @return bool         True if the table exists
+     * @return bool
      */
-    protected function tableExists($name)
+    protected function tableExists(string $name): bool
     {
         $tables = $this->getTables(true);
 
-        // Replace the table prefix
         $name = str_replace('#__', $this->app->get('dbprefix'), $name);
 
         return in_array($name, $tables);
     }
 
     /**
-     * Get a list of tables found in the db
+     * @param ?bool $force Force to get a fresh list of tables
      *
-     * @param  bool $force Force to get a fresh list of tables
-     *
-     * @return array List of tables
+     * @return string[] List of tables
      */
-    protected function getTables($force = false)
+    protected function getTables(?bool $force = false): array
     {
-        if (empty($this->tables) || $force) {
-            $normalizeTableArray = function ($item) {
-                return $item[0];
-            };
+        if ($force || $this->tables === null) {
+            $tables = $this->dbo->setQuery('SHOW TABLES')->loadRowList();
 
-            $db = $this->dbo;
-            $db->setQuery('SHOW TABLES');
-            $tables = $db->loadRowList();
-
-            $this->tables = array_map($normalizeTableArray, $tables);
+            $this->tables = array_map(
+                function ($item) {
+                    return $item[0];
+                },
+                $tables
+            );
         }
 
         return $this->tables;
@@ -1566,11 +1583,12 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getName()
+    protected function getName(): string
     {
         // Get the extension name. If no custom name is set, uses the namespace
         if (isset($this->manifest->alledia->name)) {
             $name = $this->manifest->alledia->name;
+
         } else {
             $name = $this->manifest->alledia->namespace;
         }
@@ -1604,22 +1622,20 @@ abstract class AbstractScript
             if (is_file($faviconTemp)) {
                 rename($faviconTemp, $favicon);
 
-            } else {
-                if (is_file($favicon)) {
-                    rename($favicon, $faviconTemp);
-                }
+            } elseif (is_file($favicon)) {
+                rename($favicon, $faviconTemp);
             }
         }
     }
 
     /**
      * @param SimpleXMLElement|string $element
-     * @param string                  $type
+     * @param ?string                  $type
      * @param mixed                   $default
      *
      * @return bool|string
      */
-    protected function getXmlValue($element, $type = 'string', $default = null)
+    protected function getXmlValue($element, ?string $type = 'string', $default = null)
     {
         $value = $element ? (string)$element : $default;
 
