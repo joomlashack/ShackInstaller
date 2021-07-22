@@ -763,7 +763,10 @@ abstract class AbstractScript
                     $previous = '';
 
                     foreach ($others as $plugin) {
-                        if ((($place == 'before') && ($plugin->element == $element)) || (($place == 'after') && ($previous == $element))) {
+                        if (
+                            (($place == 'before') && ($plugin->element == $element))
+                            || (($place == 'after') && ($previous == $element))
+                        ) {
                             $neworder = array_merge($neworder, $target);
                         }
                         $neworder[$plugin->element] = $plugin;
