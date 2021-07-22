@@ -1494,43 +1494,41 @@ abstract class AbstractScript
     /**
      * Get extension's info from element string, or extension name
      *
-     * @param  string $element The extension name, as element
+     * @param string $element The extension name, as element
      *
-     * @return array           An associative array with information about the extension
+     * @return string[] An associative array with information about the extension
      */
-    public static function getExtensionInfoFromElement($element)
+    protected function getExtensionInfoFromElement(string $element): array
     {
-        $result = array(
-            'type'      => null,
-            'name'      => null,
-            'group'     => null,
-            'prefix'    => null,
-            'namespace' => null
+        $result = array_fill_keys(
+            ['type', 'name', 'group', 'prefix', 'namespace'],
+            null
         );
 
-        $types = array(
+        $types = [
             'com' => 'component',
             'plg' => 'plugin',
             'mod' => 'module',
             'lib' => 'library',
             'tpl' => 'template',
             'cli' => 'cli'
-        );
+        ];
 
-        $element = explode('_', $element);
+        $element = explode('_', $element, 3);
 
-        $result['prefix'] = $element[0];
+        $prefix = $result['prefix'] = array_shift($element);
+        $name   = array_pop($element);
+        $group  = array_pop($element);
 
-        if (array_key_exists($result['prefix'], $types)) {
-            $result['type'] = $types[$result['prefix']];
-
-            if ($result['prefix'] === 'plg') {
-                $result['group'] = $element[1];
-                $result['name']  = $element[2];
-            } else {
-                $result['name']  = $element[1];
-                $result['group'] = null;
-            }
+        if (array_key_exists($prefix, $types)) {
+            $result = array_merge(
+                $result,
+                [
+                    'type'  => $types[$prefix],
+                    'group' => $group,
+                    'name'  => $name
+                ]
+            );
         }
 
         $result['namespace'] = preg_replace_callback(
@@ -1538,7 +1536,7 @@ abstract class AbstractScript
             function ($matches) {
                 return strtoupper($matches[1]) . $matches[2];
             },
-            $result['name']
+            $name
         );
 
         return $result;
