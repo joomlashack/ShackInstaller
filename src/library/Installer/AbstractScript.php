@@ -713,7 +713,7 @@ abstract class AbstractScript
         }
 
         // Fix the element for templates
-        if ('template' === $type) {
+        if ($type == 'template') {
             $element = str_replace('tpl_', '', $element);
         }
 
@@ -730,6 +730,7 @@ abstract class AbstractScript
 
         if ($eid) {
             $row->load($eid);
+
             return $row;
         }
 
@@ -923,8 +924,6 @@ abstract class AbstractScript
 
             // Folders
             if ($obsolete->folder) {
-                jimport('joomla.filesystem.folder');
-
                 foreach ($obsolete->folder as $folder) {
                     $path = JPATH_ROOT . '/' . trim((string)$folder, '/');
                     if (file_exists($path)) {
