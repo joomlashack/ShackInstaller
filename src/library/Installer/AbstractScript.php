@@ -391,6 +391,14 @@ abstract class AbstractScript
      */
     public function postFlight(string $type, InstallerAdapter $parent)
     {
+        /*
+         * Joomla 4 now calls postFlight on uninstalls. Which is kinda cool actually.
+         * But this code is problematic in that scenario
+         */
+        if ($type == 'uninstall') {
+            return;
+        }
+
         try {
             if ($this->cancelInstallation) {
                 $this->sendMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
