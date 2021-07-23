@@ -26,12 +26,13 @@ use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Registry\Registry;
 use SimpleXMLElement;
+use Throwable;
 
 require_once 'include.php';
 
 abstract class AbstractScript
 {
-    public const VERSION = '1.6.25b1';
+    public const VERSION = '2.0.0b1';
 
     /**
      * @var CMSApplication
