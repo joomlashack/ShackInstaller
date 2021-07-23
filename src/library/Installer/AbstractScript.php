@@ -290,84 +290,96 @@ abstract class AbstractScript
      */
     public function preFlight(string $type, InstallerAdapter $parent): bool
     {
-        $success = true;
-
-        if ($type === 'update') {
-            $this->clearUpdateServers();
+        if ($this->cancelInstallation) {
+            return false;
         }
 
-        if (in_array($type, ['install', 'update'])) {
-            // Check minimum target Joomla Platform
-            if (isset($this->manifest->alledia->targetplatform)) {
-                $targetPlatform = (string)$this->manifest->alledia->targetplatform;
+        try {
+            $success = true;
 
-                if (!$this->validateTargetVersion(JVERSION, $targetPlatform)) {
-                    // Platform version is invalid. Displays a warning and cancel the install
-                    $targetPlatform = str_replace('*', 'x', $targetPlatform);
-
-                    $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
-                    $this->app->enqueueMessage($msg, 'warning');
-                    $success = false;
-                }
+            if ($type === 'update') {
+                $this->clearUpdateServers();
             }
 
-            // Check for minimum mysql version
-            if ($targetMySQLVersion = $this->manifest->alledia->mysqlminimum) {
-                $targetMySQLVersion = (string)$targetMySQLVersion;
+            if (in_array($type, ['install', 'update'])) {
+                // Check minimum target Joomla Platform
+                if (isset($this->manifest->alledia->targetplatform)) {
+                    $targetPlatform = (string)$this->manifest->alledia->targetplatform;
 
-                if ($this->dbo->getServerType() == 'mysql') {
-                    $dbVersion = $this->dbo->getVersion();
-                    if (stripos($dbVersion, 'maria') !== false) {
-                        // For MariaDB this is a bit of a punt. We'll assume any version of Maria will do
-                        $dbVersion = $targetMySQLVersion;
+                    if (!$this->validateTargetVersion(JVERSION, $targetPlatform)) {
+                        // Platform version is invalid. Displays a warning and cancel the install
+                        $targetPlatform = str_replace('*', 'x', $targetPlatform);
+
+                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
+
+                        $this->sendMessage($msg, 'warning');
+                        $success = false;
                     }
+                }
 
-                    if (!$this->validateTargetVersion($dbVersion, $targetMySQLVersion)) {
-                        // mySQL version too low
-                        $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
+                // Check for minimum mysql version
+                if ($targetMySQLVersion = $this->manifest->alledia->mysqlminimum) {
+                    $targetMySQLVersion = (string)$targetMySQLVersion;
 
-                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
-                        $this->app->enqueueMessage($msg, 'warning');
+                    if ($this->dbo->getServerType() == 'mysql') {
+                        $dbVersion = $this->dbo->getVersion();
+                        if (stripos($dbVersion, 'maria') !== false) {
+                            // For MariaDB this is a bit of a punt. We'll assume any version of Maria will do
+                            $dbVersion = $targetMySQLVersion;
+                        }
+
+                        if (!$this->validateTargetVersion($dbVersion, $targetMySQLVersion)) {
+                            // mySQL version too low
+                            $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
+
+                            $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
+                            $this->sendMessage($msg, 'warning');
+                            $success = false;
+                        }
+                    }
+                }
+
+                // Check for minimum php version
+                if (isset($this->manifest->alledia->phpminimum)) {
+                    $targetPhpVersion = (string)$this->manifest->alledia->phpminimum;
+
+                    if (!$this->validateTargetVersion(phpversion(), $targetPhpVersion)) {
+                        // php version is too low
+                        $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
+
+                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
+                        $this->sendMessage($msg, 'warning');
+                        $success = false;
+                    }
+                }
+
+                // Check for minimum previous version
+                $targetVersion = (string)$this->manifest->alledia->previousminimum;
+                if ($type == 'update' && $targetVersion) {
+                    if (!$this->validatePreviousVersion($targetVersion)) {
+                        // Previous minimum is not installed
+                        $minimumVersion = str_replace('*', 'x', $targetVersion);
+
+                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
+                        $this->sendMessage($msg, 'warning');
                         $success = false;
                     }
                 }
             }
 
-            // Check for minimum php version
-            if (isset($this->manifest->alledia->phpminimum)) {
-                $targetPhpVersion = (string)$this->manifest->alledia->phpminimum;
+            $this->cancelInstallation = !$success;
 
-                if (!$this->validateTargetVersion(phpversion(), $targetPhpVersion)) {
-                    // php version is too low
-                    $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
-
-                    $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
-                    $this->app->enqueueMessage($msg, 'warning');
-                    $success = false;
-                }
+            if ($type === 'update' && $success) {
+                $this->preserveFavicon();
             }
 
-            // Check for minimum previous version
-            $targetVersion = (string)$this->manifest->alledia->previousminimum;
-            if ($type == 'update' && $targetVersion) {
-                if (!$this->validatePreviousVersion($targetVersion)) {
-                    // Previous minimum is not installed
-                    $minimumVersion = str_replace('*', 'x', $targetVersion);
+            return $success;
 
-                    $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
-                    $this->app->enqueueMessage($msg, 'warning');
-                    $success = false;
-                }
-            }
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
         }
 
-        $this->cancelInstallation = !$success;
-
-        if ($type === 'update' && $success) {
-            $this->preserveFavicon();
-        }
-
-        return $success;
+        return false;
     }
 
     /**
