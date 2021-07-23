@@ -35,6 +35,11 @@ abstract class AbstractScript
     public const VERSION = '2.0.0b1';
 
     /**
+     * @var bool
+     */
+    protected $outputAllowed = true;
+
+    /**
      * @var CMSApplication
      */
     protected $app = null;
@@ -96,6 +101,7 @@ abstract class AbstractScript
 
     /**
      * @var string[]
+     * @deprecated v2.0.0
      */
     protected $messages = [];
 
@@ -254,13 +260,9 @@ abstract class AbstractScript
     {
         try {
             $this->uninstallRelated();
-            $this->showMessages();
 
-        } catch (\Throwable $e) {
-            $this->app->enqueueMessage(
-                sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
-                'error'
-            );
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
         }
     }
 
@@ -374,7 +376,7 @@ abstract class AbstractScript
     {
         try {
             if ($this->cancelInstallation) {
-                $this->app->enqueueMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
+                $this->sendMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
 
                 return;
             }
@@ -495,13 +497,8 @@ abstract class AbstractScript
                 }
             }
 
-            $this->showMessages();
-
-        } catch (\Throwable $e) {
-            $this->app->enqueueMessage(
-                sprintf('%s:%s - %s', $e->getFile(), $e->getLine(), $e->getMessage()),
-                'error'
-            );
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
         }
     }
 
@@ -572,7 +569,7 @@ abstract class AbstractScript
 
                     $text = 'LIB_ALLEDIAINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
                     if ($tmpInstaller->install($path)) {
-                        $this->setMessage(Text::sprintf($text, $typeName, $element));
+                        $this->sendMessage(Text::sprintf($text, $typeName, $element));
                         if ($isNew) {
                             $current = $this->findExtension($type, $element, $group);
 
@@ -600,7 +597,7 @@ abstract class AbstractScript
                         );
 
                     } else {
-                        $this->setMessage(Text::sprintf($text . '_FAIL', $typeName, $element), 'error');
+                        $this->sendMessage(Text::sprintf($text . '_FAIL', $typeName, $element), 'error');
 
                         $this->storeFeedbackForRelatedExtension(
                             $element,
@@ -645,13 +642,13 @@ abstract class AbstractScript
                             $msg     .= '_FAIL';
                             $msgType = 'error';
                         }
-                        $this->setMessage(
+                        $this->sendMessage(
                             Text::sprintf($msg, ucfirst($type), $element),
                             $msgType
                         );
                     }
                 } elseif ($this->app->get('debug', 0)) {
-                    $this->setMessage(
+                    $this->sendMessage(
                         Text::sprintf(
                             'LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED',
                             ucfirst($type),
@@ -804,39 +801,38 @@ abstract class AbstractScript
     }
 
     /**
-     * Display messages from array
-     *
-     * @return void
-     * @throws \Exception
-     */
-    protected function showMessages()
-    {
-        foreach ($this->messages as $msg) {
-            $this->app->enqueueMessage($msg[0], $msg[1]);
-        }
-
-        $this->messages = [];
-    }
-
-    /**
      * Add a message to the message list
      *
      * @param string $msg
      * @param string $type
-     * @param bool   $prepend
      *
      * @return void
+     * @deprecated 2.0.0
      */
-    protected function setMessage(string $msg, string $type = 'message', bool $prepend = false)
+    protected function setMessage(string $msg, string $type = 'message')
     {
-        if ($prepend === null) {
-            $prepend = in_array($type, ['notice', 'error']);
-        }
+        $this->sendMessage($msg, $type);
+    }
 
-        if ($prepend) {
-            array_unshift($this->messages, [$msg, $type]);
-        } else {
-            $this->messages[] = [$msg, $type];
+    /**
+     * Display queued messages
+     *
+     * @return void
+     * @deprecated v2.0.0
+     */
+    protected function showMessages()
+    {
+        if ($this->messages) {
+            foreach ($this->messages as $msg) {
+                $text = $msg[0] ?? null;
+                $type = $msg[1] ?? null;
+
+                if ($text) {
+                    $this->sendMessage($text, $type);
+                }
+            }
+
+            $this->messages = [];
         }
     }
 
@@ -867,7 +863,7 @@ abstract class AbstractScript
                         $typeName = ucfirst(trim(($group ?: '') . ' ' . $type));
 
                         if ($uninstalled) {
-                            $this->setMessage(
+                            $this->sendMessage(
                                 Text::sprintf(
                                     'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_SUCCESS',
                                     strtolower($typeName),
@@ -875,7 +871,7 @@ abstract class AbstractScript
                                 )
                             );
                         } else {
-                            $this->setMessage(
+                            $this->sendMessage(
                                 Text::sprintf(
                                     'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_FAIL',
                                     strtolower($typeName),
@@ -1030,7 +1026,7 @@ abstract class AbstractScript
 
         } else {
             $relativePath = str_replace(JPATH_SITE . '/', '', $manifestPath);
-            $this->setMessage(
+            $this->sendMessage(
                 Text::sprintf('LIB_ALLEDIAINSTALLER_MANIFEST_NOT_FOUND', $relativePath),
                 'error'
             );
@@ -1662,4 +1658,53 @@ abstract class AbstractScript
         return $value;
     }
 
+    /**
+     * @param string $text
+     * @param string $type
+     *
+     * @return void
+     */
+    final protected function sendMessage(string $text, string $type = 'message')
+    {
+        if ($this->outputAllowed) {
+            $this->app->enqueueMessage($text, $type);
+        }
+    }
+
+    /**
+     * @param Throwable $error
+     * @param bool      $cancel
+     *
+     * @return void
+     */
+    final protected function sendErrorMessage(Throwable $error, bool $cancel = true)
+    {
+        if ($cancel) {
+            $this->cancelInstallation = true;
+        }
+
+        if ($this->outputAllowed) {
+            $trace = $error->getTrace();
+            $trace = array_shift($trace);
+
+            if (empty($trace['class'])) {
+                $caller = basename($trace['file']);
+
+            } else {
+                $className = explode('\\', $trace['class']);
+                $caller    = array_pop($className);
+            }
+            $line     = $trace['line'];
+            $function = $trace['function'] ?? null;
+            $file     = $trace['file'];
+
+            if ($function) {
+                $message = sprintf('%s: %s<br>%s::%s() - %s', $line, $file, $caller, $function, $error->getMessage());
+            } else {
+                $message = sprintf('%s:%s (%s) - %s', $line, $caller, $file, $error->getMessage());
+            }
+
+            $this->app->enqueueMessage($message, 'error');
+        }
+    }
 }
