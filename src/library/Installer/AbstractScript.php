@@ -174,59 +174,64 @@ abstract class AbstractScript
      */
     public function initProperties(InstallerAdapter $parent)
     {
-        $this->app       = Factory::getApplication();
-        $this->dbo       = Factory::getDbo();
-        $this->installer = $parent->getParent();
-        $this->manifest  = $this->installer->getManifest();
-        $this->messages  = [];
+        $this->app = Factory::getApplication();
 
-        if ($media = $this->manifest->media) {
-            $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
-        }
+        $this->outputAllowed = JPATH_BASE == JPATH_ADMINISTRATOR;
 
-        $attributes = (array)$this->manifest->attributes();
-        $attributes = $attributes['@attributes'];
-        $this->type = $attributes['type'];
+        try {
+            $this->dbo       = Factory::getDbo();
+            $this->installer = $parent->getParent();
+            $this->manifest  = $this->installer->getManifest();
 
-        if ($this->type === 'plugin') {
-            $this->group = $attributes['group'];
-        }
-
-        // Get the previous manifest for use in upgrades
-        // @TODO: Is there a better way? This should work for components, modules and plugins.
-        $targetPath   = $this->installer->getPath('extension_administrator')
-            ?: $this->installer->getPath('extension_root');
-        $manifestPath = $targetPath . '/' . basename($this->installer->getPath('manifest'));
-        if (is_file($manifestPath)) {
-            $this->previousManifest = simplexml_load_file($manifestPath);
-        }
-
-        // Determine basepath for localized files
-        $language = Factory::getLanguage();
-        $basePath = $this->installer->getPath('source');
-        if (is_dir($basePath)) {
-            if ($this->type == 'component' && $basePath != $targetPath) {
-                // For components sourced by manifest, need to find the admin folder
-                if ($files = $this->manifest->administration->files) {
-                    if ($files = (string)$files['folder']) {
-                        $basePath .= '/' . $files;
-                    }
-                }
+            if ($media = $this->manifest->media) {
+                $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
             }
 
-        } else {
-            $basePath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element, $this->group);
-        }
+            $attributes  = $this->manifest->attributes();
+            $this->type  = (string)$attributes['type'];
+            $this->group = (string)$attributes['group'];
 
-        // All the files we want to load
-        $languageFiles = [
-            'lib_allediainstaller.sys',
-            $this->getFullElement()
-        ];
+            // Get the previous manifest for use in upgrades
+            $targetPath   = $this->installer->getPath('extension_administrator')
+                ?: $this->installer->getPath('extension_root');
+            $manifestPath = $targetPath . '/' . basename($this->installer->getPath('manifest'));
 
-        // Load from localized or core language folder
-        foreach ($languageFiles as $languageFile) {
-            $language->load($languageFile, $basePath) || $language->load($languageFile, JPATH_ADMINISTRATOR);
+            if (is_file($manifestPath)) {
+                $this->previousManifest = simplexml_load_file($manifestPath);
+            }
+
+            // Determine basepath for localized files
+            $language = Factory::getLanguage();
+            $basePath = $this->installer->getPath('source');
+            if (is_dir($basePath)) {
+                if ($this->type == 'component' && $basePath != $targetPath) {
+                    // For components sourced by manifest, need to find the admin folder
+                    if ($files = $this->manifest->administration->files) {
+                        if ($files = (string)$files['folder']) {
+                            $basePath .= '/' . $files;
+                        }
+                    }
+                }
+
+            } else {
+                $basePath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element,
+                    $this->group);
+            }
+
+            // All the files we want to load
+            $languageFiles = [
+                'lib_allediainstaller.sys',
+                $this->getFullElement()
+            ];
+
+            // Load from localized or core language folder
+            foreach ($languageFiles as $languageFile) {
+                $language->load($languageFile, $basePath) || $language->load($languageFile, JPATH_ADMINISTRATOR);
+            }
+
+        } catch (Throwable $error) {
+            $this->cancelInstallation = true;
+            $this->sendErrorMessage($error);
         }
     }
 
