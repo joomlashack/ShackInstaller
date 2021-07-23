@@ -6,17 +6,18 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+use Joomla\CMS\HTML\HTMLHelper;
+
 defined('_JEXEC') or die();
 
 /**
  * @var \Alledia\Installer\Extension\Licensed $license
  */
 
-JHtml::_('jquery.framework');
+HTMLHelper::_('jquery.framework');
 
 ?>
 <div class="joomlashack-wrapper">
-
     <div class="joomlashack-content">
         <h2><?php echo $this->welcomeMessage; ?></h2>
 

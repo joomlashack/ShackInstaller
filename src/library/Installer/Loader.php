@@ -12,10 +12,9 @@ namespace Alledia\Installer;
 
 use Alledia\Framework\Factory;
 use JLog;
+use Joomla\CMS\Log\Log;
 
 defined('_JEXEC') or die();
-
-jimport('joomla.log.log');
 
 class Loader
 {
@@ -32,13 +31,13 @@ class Loader
      * @return  bool    True, if the file exists and was loaded well.
      * @throws \Exception
      */
-    public static function includeFile($path)
+    public static function includeFile(string $path): bool
     {
         if (!static::$logRegistered) {
-            JLog::addLogger(
-                array('text_file' => 'allediaframework.loader.errors.php'),
-                JLog::ALL,
-                array('allediaframework')
+            Log::addLogger(
+                ['text_file' => 'allediaframework.loader.errors.php'],
+                Log::ALL,
+                ['allediaframework']
             );
 
             static::$logRegistered = true;
@@ -83,7 +82,7 @@ class Loader
             return false;
         }
 
-        include_once($path);
+        include_once $path;
 
         return true;
     }

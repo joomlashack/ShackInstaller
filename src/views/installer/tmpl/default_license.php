@@ -6,7 +6,12 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
+
 defined('_JEXEC') or die();
+
+$licenseUpdate = Uri::root() . '/administrator/index.php?plugin=system_osmylicensesmanager&task=license.save';
 
 if ($this->isLicensesManagerInstalled) :
     ?>
@@ -15,44 +20,41 @@ if ($this->isLicensesManagerInstalled) :
         if (!empty($this->licenseKey)) :
             ?>
             <a href="javascript:void(0);" class="joomlashack-installer-change-license-button joomlashack-button">
-                <?php echo JText::_('LIB_ALLEDIAINSTALLER_CHANGE_LICENSE_KEY'); ?>
+                <?php echo Text::_('LIB_ALLEDIAINSTALLER_CHANGE_LICENSE_KEY'); ?>
             </a>
-        <?php
-        endif;
-        ?>
+        <?php endif; ?>
 
         <div id="joomlashack-installer-license-panel"
              style="display: <?php echo empty($this->licenseKey) ? '' : 'none'; ?>;">
-            <input
-                type="text"
-                name="joomlashack-license-keys"
-                id="joomlashack-license-keys"
-                value="<?php echo $this->licenseKey; ?>"
-                placeholder="<?php echo JText::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_PLACEHOLDER'); ?>"/>
+            <input type="text"
+                   name="joomlashack-license-keys"
+                   id="joomlashack-license-keys"
+                   value="<?php echo $this->licenseKey; ?>"
+                   placeholder="<?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_PLACEHOLDER'); ?>"/>
 
             <p class="joomlashack-empty-key-msg">
-                <?php echo JText::_('LIB_ALLEDIAINSTALLER_MSG_LICENSE_KEYS_EMPTY'); ?>&nbsp;
+                <?php echo Text::_('LIB_ALLEDIAINSTALLER_MSG_LICENSE_KEYS_EMPTY'); ?>&nbsp;
                 <a href="https://www.joomlashack.com/account/key/" target="_blank">
-                    <?php echo JText::_('LIB_ALLEDIAINSTALLER_I_DONT_REMEMBER_MY_KEY'); ?>
+                    <?php echo Text::_('LIB_ALLEDIAINSTALLER_I_DONT_REMEMBER_MY_KEY'); ?>
                 </a>
             </p>
 
             <a id="joomlashack-license-save-button"
                class="joomlashack-button"
                href="javascript:void(0);">
-                <?php echo JText::_('LIB_ALLEDIAINSTALLER_SAVE_LICENSE_KEY'); ?>
+                <?php echo Text::_('LIB_ALLEDIAINSTALLER_SAVE_LICENSE_KEY'); ?>
             </a>
         </div>
 
         <div id="joomlashack-installer-license-success" style="display: none">
             <p>
-                <?php echo JText::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_SUCCESS'); ?>
+                <?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_SUCCESS'); ?>
             </p>
         </div>
 
         <div id="joomlashack-installer-license-error" style="display: none">
             <p>
-                <?php echo JText::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_ERROR'); ?>
+                <?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_ERROR'); ?>
             </p>
         </div>
     </div>
@@ -66,14 +68,13 @@ if ($this->isLicensesManagerInstalled) :
                 });
 
                 $('#joomlashack-license-save-button').on('click', function() {
-
-                    $.post('<?php echo JURI::root(); ?>/administrator/index.php?plugin=system_osmylicensesmanager&task=license.save',
+                    $.post('<?php echo $licenseUpdate; ?>',
                         {
                             'license-keys': $('#joomlashack-license-keys').val()
                         },
                         function(data) {
                             try {
-                                var result = JSON.parse(data);
+                                let result = JSON.parse(data);
 
                                 $('#joomlashack-installer-license-panel').hide();
 
@@ -99,11 +100,8 @@ if ($this->isLicensesManagerInstalled) :
         })(jQuery);
     </script>
 
-<?php
-else :
-    ?>
+<?php else : ?>
     <div class="error">
-        <?php echo JText::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_MANAGER_REQUIRED'); ?>
+        <?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_MANAGER_REQUIRED'); ?>
     </div>
-<?php
-endif;
+<?php endif;
