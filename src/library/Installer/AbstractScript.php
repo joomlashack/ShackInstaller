@@ -428,10 +428,12 @@ abstract class AbstractScript
                     Folder::delete($proLibraryPath);
                 }
             }
-            \JLoader::register(
-                '\\JFormFieldCustomFooter',
-                $license->getExtensionPath() . '/form/fields/customfooter.php'
-            );
+
+            // Custom footer field is not automatically loaded
+            $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
+            if (is_file($customFooterPath)) {
+                include_once $customFooterPath;
+            }
 
             // Check if we are on the backend before display anything. This fixes an issue
             // on the updates triggered by Watchful, which is always triggered on the frontend
@@ -456,7 +458,7 @@ abstract class AbstractScript
                 $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
             }
 
-            if (class_exists('\\JFormFieldCustomFooter') && $footerElement) {
+            if ($footerElement && class_exists('\\JFormFieldCustomFooter')) {
                 $field                = new JFormFieldCustomFooter();
                 $field->fromInstaller = true;
                 $this->footer         = $field->getInputUsingCustomElement($footerElement[0]);
