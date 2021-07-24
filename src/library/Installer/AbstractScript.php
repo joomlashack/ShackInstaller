@@ -1384,12 +1384,7 @@ abstract class AbstractScript
         foreach ($columns as $column => $specification) {
             if (!in_array($column, $existentColumns)) {
                 $db->setQuery(
-                    sprintf(
-                        'ALTER TABLE %s ADD COLUMN %s %s',
-                        $db->quoteName($table),
-                        $db->quoteName($column),
-                        $specification
-                    )
+                    "ALTER TABLE {$db->quoteName($table)} ADD COLUMN {$db->quoteName($column)} {$specification}"
                 );
                 $db->execute();
             }
@@ -1413,7 +1408,7 @@ abstract class AbstractScript
         foreach ($indexes as $index => $specification) {
             if (!in_array($index, $existentIndexes)) {
                 $db->setQuery(
-                    sprintf('ALTER TABLE %s CREATE INDEX %s ON %s', $db->quoteName($table), $specification, $index)
+                    "ALTER TABLE {$db->quoteName($table)} CREATE INDEX {$specification} ON {$index}"
                 )
                     ->execute();
             }
