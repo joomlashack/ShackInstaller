@@ -1574,8 +1574,8 @@ abstract class AbstractScript
         string $targetVersion,
         ?string $compare = null
     ): bool {
-        // If is universal, any version is valid
         if ($targetVersion === '.*') {
+            // Any version is valid
             return true;
         }
 
@@ -1653,7 +1653,7 @@ abstract class AbstractScript
 
     /**
      * @param SimpleXMLElement|string $element
-     * @param ?string                  $type
+     * @param ?string                 $type
      * @param mixed                   $default
      *
      * @return bool|string

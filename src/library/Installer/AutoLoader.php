@@ -20,7 +20,7 @@ class AutoLoader
      *
      * @var array
      */
-    protected static $prefixes = array();
+    protected static $prefixes = [];
 
     /**
      * Associative array of prefixes for loading specialized camelCase classes
@@ -28,35 +28,38 @@ class AutoLoader
      *
      * @var array
      */
-    protected static $camelPrefixes = array();
+    protected static $camelPrefixes = [];
 
     /**
      * @var AutoLoader
      */
     protected static $instance = null;
 
+    /**
+     * @param string $method
+     */
     protected static function registerLoader($method)
     {
         if (static::$instance === null) {
             static::$instance = new static();
         }
 
-        spl_autoload_register(array(static::$instance, $method));
+        spl_autoload_register([static::$instance, $method]);
     }
 
     /**
      * Register a psr4 namespace
      *
-     * @param string $prefix   The namespace prefix.
-     * @param string $baseDir  A base directory for class files in the
+     * @param ?string $prefix  The namespace prefix.
+     * @param ?string $baseDir A base directory for class files in the
      *                         namespace.
-     * @param bool   $prepend  If true, prepend the base directory to the stack
+     * @param ?bool   $prepend If true, prepend the base directory to the stack
      *                         instead of appending it; this causes it to be searched first rather
      *                         than last.
      *
      * @return void
      */
-    public static function register($prefix = null, $baseDir = null, $prepend = false)
+    public static function register(?string $prefix = null, ?string $baseDir = null, ?bool $prepend = false)
     {
         if ($prefix === null || $baseDir === null) {
             // Recognize old-style instantiations for backward compatibility
@@ -64,7 +67,6 @@ class AutoLoader
         }
 
         if (count(self::$prefixes) == 0) {
-            // Register function on first call
             static::registerLoader('loadClass');
         }
 
@@ -76,7 +78,7 @@ class AutoLoader
 
         // initialise the namespace prefix array
         if (empty(self::$prefixes[$prefix])) {
-            self::$prefixes[$prefix] = array();
+            self::$prefixes[$prefix] = [];
         }
 
         // retain the base directory for the namespace prefix
@@ -92,9 +94,9 @@ class AutoLoader
      *
      * @param string $class The fully-qualified class name.
      *
-     * @return null|string The mapped file name on success, or boolean false on failure.
+     * @return ?string The mapped file name on success
      */
-    protected function loadClass($class)
+    protected function loadClass(string $class): ?string
     {
         $prefixes  = explode('\\', $class);
         $className = '';
@@ -105,11 +107,11 @@ class AutoLoader
             if ($filePath = $this->loadMappedFile($prefix, $className)) {
                 return $filePath;
             }
+
             $className = '\\' . $className;
         }
 
-        // never found a mapped file
-        return false;
+        return null;
     }
 
     /**
@@ -118,13 +120,13 @@ class AutoLoader
      * @param string $prefix    The namespace prefix.
      * @param string $className The relative class name.
      *
-     * @return bool|string false if no mapped file can be loaded | path that was loaded
+     * @return ?string path that was loaded
      */
-    protected function loadMappedFile($prefix, $className)
+    protected function loadMappedFile(string $prefix, string $className): ?string
     {
         // are there any base directories for this namespace prefix?
         if (isset(self::$prefixes[$prefix]) === false) {
-            return false;
+            return null;
         }
 
         // look through base directories for this namespace prefix
@@ -133,12 +135,12 @@ class AutoLoader
 
             if (is_file($path)) {
                 require_once $path;
+
                 return $path;
             }
         }
 
-        // never found it
-        return false;
+        return null;
     }
 
     /**
@@ -164,7 +166,7 @@ class AutoLoader
      * @return void
      * @throws \Exception
      */
-    public static function registerCamelBase($prefix, $baseDir)
+    public static function registerCamelBase(string $prefix, string $baseDir)
     {
         if (!is_dir($baseDir)) {
             throw new \Exception("Cannot register '{$prefix}'. The requested base directory does not exist!'");
@@ -185,9 +187,9 @@ class AutoLoader
      *
      * @param string $class
      *
-     * @return bool|string
+     * @return string
      */
-    protected function loadCamelClass($class)
+    protected function loadCamelClass(string $class): ?string
     {
         if (!class_exists($class)) {
             foreach (self::$camelPrefixes as $prefix => $baseDir) {
@@ -199,13 +201,13 @@ class AutoLoader
 
                     if (is_file($filePath)) {
                         require_once $filePath;
+
                         return $filePath;
                     }
                 }
             }
         }
 
-        // No file found
-        return false;
+        return null;
     }
 }

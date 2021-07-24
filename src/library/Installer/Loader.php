@@ -11,22 +11,21 @@
 namespace Alledia\Installer;
 
 use Alledia\Framework\Factory;
-use JLog;
 use Joomla\CMS\Log\Log;
 
 defined('_JEXEC') or die();
 
-class Loader
+abstract class Loader
 {
     protected static $logRegistered = false;
 
     /**
-     * Safelly include a PHP file, making sure it exists before import.
+     * Safely include a PHP file, making sure it exists before import.
      *
      * This method will register a log message and display a warning for admins
      * in case the file is missed.
      *
-     * @param   string $path The file path you want to include
+     * @param string $path The file path you want to include
      *
      * @return  bool    True, if the file exists and was loaded well.
      * @throws \Exception
@@ -63,7 +62,7 @@ class Loader
             }
 
             // Register the log
-            JLog::add($logMsg, JLog::ERROR, 'allediaframework');
+            Log::add($logMsg, Log::ERROR, 'allediaframework');
 
             // Warn admin users
             $app = Factory::getApplication();

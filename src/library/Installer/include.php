@@ -15,4 +15,4 @@ if (!class_exists('\\Alledia\\Installer\\AutoLoader')) {
     require_once __DIR__ . '/AutoLoader.php';
 }
 
-Autoloader::register('Alledia\\Installer', __DIR__);
+AutoLoader::register('Alledia\\Installer', __DIR__);
