@@ -698,7 +698,7 @@ abstract class AbstractScript
     protected function findExtension(?string $type, ?string $element, ?string $group = null): ?Extension
     {
         /** @var Extension $row */
-        $row = Table::getInstance('extension');
+        $row = \JTable::getInstance('extension');
 
         $prefixes = [
             'component' => 'com_',
