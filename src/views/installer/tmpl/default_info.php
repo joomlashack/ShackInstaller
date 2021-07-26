@@ -6,9 +6,26 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+use Alledia\Installer\AbstractScript;
+use Alledia\Installer\Extension\Generic;
+use Alledia\Installer\Extension\Licensed;
 use Joomla\CMS\Language\Text;
 
 defined('_JEXEC') or die();
+
+/**
+ * @var AbstractScript $this
+ * @var string         $type
+ * @var Licensed       $license
+ * @var string         $name
+ * @var string         $configPath
+ * @var string         $customFooterPath
+ * @var string         $extensionPath
+ * @var Generic        $licensesManagerExtension
+ * @var string         $string
+ * @var string         $path
+ */
+
 ?>
 <div class="joomlashack-details-container">
     <a href="javascript:void(0);" id="joomlashack-installer-footer-toggler">
@@ -76,7 +93,7 @@ defined('_JEXEC') or die();
                 event.preventDefault();
 
                 footer.style.display = 'block';
-                this.style.display = 'none';
+                this.style.display   = 'none';
             });
         }
     })();

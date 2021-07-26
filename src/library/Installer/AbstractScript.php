@@ -1657,7 +1657,7 @@ abstract class AbstractScript
         $name    = $this->getName() . ($license->isPro() ? ' Pro' : '');
 
         // Get the footer content
-        $this->footer  = '';
+        $this->footer = '';
 
         // Check if we have a dedicated config.xml file
         $configPath = $license->getExtensionPath() . '/config.xml';

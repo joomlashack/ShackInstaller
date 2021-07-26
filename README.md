@@ -75,7 +75,7 @@ Atributes available under
 |element|RO|extension element name (without prefix, e.g. 'com_'|
 |downgrade|R|true &#124; false -- okay to downgrade on a reinstall|
 |publish|R|true &#124; false -- used for plugins only
-|ordering|R|# &#124; first &#124; last &#124; before:pluginelement &#124; after:pluginelement<br/>Applies only for new installations
+|ordering|R|# &#124; first &#124; last &#124; before:pluginelement &#124; after:pluginelement<br>Applies only for new installations
 |uninstall|R|true &#124; false -- uninstall during uninstall of the current extension|
 
 ## Requirements
