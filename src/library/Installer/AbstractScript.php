@@ -429,100 +429,14 @@ abstract class AbstractScript
                 }
             }
 
-            // Custom footer field is not automatically loaded
-            $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
-            if (is_file($customFooterPath)) {
-                include_once $customFooterPath;
-            }
-
-            // Check if we are on the backend before display anything. This fixes an issue
-            // on the updates triggered by Watchful, which is always triggered on the frontend
-            if (JPATH_BASE === JPATH_ROOT) {
-                // Frontend
-                return;
-            }
-
-            // Get the footer content
-            $this->footer  = '';
-            $footerElement = null;
-
-            // Check if we have a dedicated config.xml file
-            $configPath = $license->getExtensionPath() . '/config.xml';
-            if (is_file($configPath)) {
-                $config = $license->getConfig();
-
-                if (!empty($config)) {
-                    $footerElement = $config->xpath('//field[@type="customfooter"]');
-                }
-            } else {
-                $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
-            }
-
-            if ($footerElement && class_exists('\\JFormFieldCustomFooter')) {
-                $field                = new JFormFieldCustomFooter();
-                $field->fromInstaller = true;
-                $this->footer         = $field->getInputUsingCustomElement($footerElement[0]);
-
-                unset($field, $footerElement);
-            }
-
-            // Show additional installation messages
-            $extensionPath = $this->getExtensionPath(
-                $this->type,
-                (string)$this->manifest->alledia->element,
-                $this->group
-            );
-
-            // If Pro extension, includes the license form view
-            if ($license->isPro()) {
-                // Get the OSMyLicensesManager extension to handle the license key
-                if ($licensesManagerExtension = new Generic('osmylicensesmanager', 'plugin', 'system')) {
-                    if (isset($licensesManagerExtension->params)) {
-                        $this->licenseKey = $licensesManagerExtension->params->get('license-keys', '');
-                    } else {
-                        $this->licenseKey = '';
-                    }
-
-                    $this->isLicensesManagerInstalled = true;
-                }
-            }
-
-            $name = $this->getName() . ($license->isPro() ? ' Pro' : '');
-
             if ($type === 'update') {
                 $this->preserveFavicon();
             }
 
-            // Welcome message
-            if ($type === 'install') {
-                $string = 'LIB_ALLEDIAINSTALLER_THANKS_INSTALL';
-            } else {
-                $string = 'LIB_ALLEDIAINSTALLER_THANKS_UPDATE';
+            if ($this->outputAllowed) {
+                $this->displayWelcome($type);
             }
 
-            // Variables for the included template
-            $this->welcomeMessage = Text::sprintf($string, $name);
-            $this->mediaURL       = Uri::root() . 'media/' . $license->getFullElement();
-
-            $this->addStyle($this->mediaFolder . '/css/installer.css');
-
-            /*
-             * Include the template
-             * Try to find the template in an alternative folder, since some extensions
-             * which uses FOF will display the "Installers" view on admin, errouniously.
-             * FOF look for views automatically reading the views folder. So on that
-             * case we move the installer view to another folder.
-            */
-            $path = $extensionPath . '/views/installer/tmpl/default.php';
-
-            if (is_file($path)) {
-                include $path;
-            } else {
-                $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
-                if (is_file($path)) {
-                    include $path;
-                }
-            }
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
@@ -1727,6 +1641,99 @@ abstract class AbstractScript
             }
 
             $this->app->enqueueMessage($message, 'error');
+        }
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return void
+     */
+    final protected function displayWelcome(string $type)
+    {
+        $license = $this->getLicense();
+        $name    = $this->getName() . ($license->isPro() ? ' Pro' : '');
+
+        // Custom footer field is not automatically loaded
+        $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
+        if (is_file($customFooterPath)) {
+            include_once $customFooterPath;
+        }
+
+        // Get the footer content
+        $this->footer  = '';
+        $footerElement = null;
+
+        // Check if we have a dedicated config.xml file
+        $configPath = $license->getExtensionPath() . '/config.xml';
+        if (is_file($configPath)) {
+            $config = $license->getConfig();
+
+            if (!empty($config)) {
+                $footerElement = $config->xpath('//field[@type="customfooter"]');
+            }
+        } else {
+            $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
+        }
+
+        if ($footerElement && class_exists('\\JFormFieldCustomFooter')) {
+            $field                = new JFormFieldCustomFooter();
+            $field->fromInstaller = true;
+            $this->footer         = $field->getInputUsingCustomElement($footerElement[0]);
+
+            unset($field, $footerElement);
+        }
+
+        // Show additional installation messages
+        $extensionPath = $this->getExtensionPath(
+            $this->type,
+            (string)$this->manifest->alledia->element,
+            $this->group
+        );
+
+        // If Pro extension, includes the license form view
+        if ($license->isPro()) {
+            // Get the OSMyLicensesManager extension to handle the license key
+            if ($licensesManagerExtension = new Generic('osmylicensesmanager', 'plugin', 'system')) {
+                if (isset($licensesManagerExtension->params)) {
+                    $this->licenseKey = $licensesManagerExtension->params->get('license-keys', '');
+                } else {
+                    $this->licenseKey = '';
+                }
+
+                $this->isLicensesManagerInstalled = true;
+            }
+        }
+
+        // Welcome message
+        if ($type === 'install') {
+            $string = 'LIB_ALLEDIAINSTALLER_THANKS_INSTALL';
+        } else {
+            $string = 'LIB_ALLEDIAINSTALLER_THANKS_UPDATE';
+        }
+
+        // Variables for the included template
+        $this->welcomeMessage = Text::sprintf($string, $name);
+        $this->mediaURL       = Uri::root() . 'media/' . $license->getFullElement();
+
+        $this->addStyle($this->mediaFolder . '/css/installer.css');
+
+        /*
+         * Include the template
+         * Try to find the template in an alternative folder, since some extensions
+         * which uses FOF will display the "Installers" view on admin, errouniously.
+         * FOF look for views automatically reading the views folder. So on that
+         * case we move the installer view to another folder.
+        */
+        $path = $extensionPath . '/views/installer/tmpl/default.php';
+
+        if (is_file($path)) {
+            include $path;
+        } else {
+            $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
+            if (is_file($path)) {
+                include $path;
+            }
         }
     }
 }
