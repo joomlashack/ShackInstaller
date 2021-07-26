@@ -437,7 +437,6 @@ abstract class AbstractScript
                 $this->displayWelcome($type);
             }
 
-
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
         }
@@ -1656,6 +1655,7 @@ abstract class AbstractScript
 
         // Custom footer field is not automatically loaded
         $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
+
         if (is_file($customFooterPath)) {
             include_once $customFooterPath;
         }
@@ -1729,6 +1729,7 @@ abstract class AbstractScript
 
         if (is_file($path)) {
             include $path;
+
         } else {
             $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
             if (is_file($path)) {
