@@ -67,14 +67,17 @@ defined('_JEXEC') or die();
 </div>
 
 <script>
-    (function($) {
-        $(function() {
-            // More info button
-            $('#joomlashack-installer-footer-toggler').on('click', function(event) {
-                $('#joomlashack-installer-footer').show();
-                $(this).hide();
-            });
-        });
+    (function() {
+        let footer = document.getElementById('joomlashack-installer-footer'),
+            toggle = document.getElementById('joomlashack-installer-footer-toggler');
 
-    })(jQuery);
+        if (footer && toggle) {
+            toggle.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                footer.style.display = 'block';
+                this.style.display = 'none';
+            });
+        }
+    })();
 </script>

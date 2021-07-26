@@ -6,15 +6,14 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+use Alledia\Installer\Extension\Licensed;
 use Joomla\CMS\HTML\HTMLHelper;
 
 defined('_JEXEC') or die();
 
 /**
- * @var \Alledia\Installer\Extension\Licensed $license
+ * @var Licensed $license
  */
-
-HTMLHelper::_('jquery.framework');
 
 ?>
 <div class="joomlashack-wrapper">
