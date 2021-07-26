@@ -1656,16 +1656,8 @@ abstract class AbstractScript
         $license = $this->getLicense();
         $name    = $this->getName() . ($license->isPro() ? ' Pro' : '');
 
-        // Custom footer field is not automatically loaded
-        $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
-
-        if (is_file($customFooterPath)) {
-            include_once $customFooterPath;
-        }
-
         // Get the footer content
         $this->footer  = '';
-        $footerElement = null;
 
         // Check if we have a dedicated config.xml file
         $configPath = $license->getExtensionPath() . '/config.xml';
@@ -1679,12 +1671,23 @@ abstract class AbstractScript
             $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
         }
 
-        if ($footerElement && class_exists('\\JFormFieldCustomFooter')) {
-            $field                = new JFormFieldCustomFooter();
-            $field->fromInstaller = true;
-            $this->footer         = $field->getInputUsingCustomElement($footerElement[0]);
+        if (!empty($footerElement)) {
+            if (!class_exists('\\JFormFieldCustomFooter')) {
+                // Custom footer field is not (and should not be) automatically loaded
+                $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
 
-            unset($field, $footerElement);
+                if (is_file($customFooterPath)) {
+                    include_once $customFooterPath;
+                }
+            }
+
+            if (class_exists('\\JFormFieldCustomFooter')) {
+                $field                = new JFormFieldCustomFooter();
+                $field->fromInstaller = true;
+                $this->footer         = $field->getInputUsingCustomElement($footerElement[0]);
+
+                unset($field, $footerElement);
+            }
         }
 
         // Show additional installation messages
