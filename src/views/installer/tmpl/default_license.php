@@ -35,17 +35,17 @@ if ($this->isLicensesManagerInstalled) :
         <?php
         if (!empty($this->licenseKey)) :
             ?>
-            <a href="javascript:void(0);" class="joomlashack-installer-change-license-button joomlashack-button">
+            <a href="" class="joomlashack-installer-change-license-button btn btn-success">
                 <?php echo Text::_('LIB_ALLEDIAINSTALLER_CHANGE_LICENSE_KEY'); ?>
             </a>
         <?php endif; ?>
 
-        <div id="joomlashack-installer-license-panel"
-             style="display: <?php echo empty($this->licenseKey) ? '' : 'none'; ?>;">
+        <div id="joomlashack-installer-license-panel">
             <input type="text"
                    name="joomlashack-license-keys"
                    id="joomlashack-license-keys"
                    value="<?php echo $this->licenseKey; ?>"
+                   class="form-control"
                    placeholder="<?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_PLACEHOLDER'); ?>"/>
 
             <p class="joomlashack-empty-key-msg">
@@ -56,22 +56,18 @@ if ($this->isLicensesManagerInstalled) :
             </p>
 
             <a id="joomlashack-license-save-button"
-               class="joomlashack-button"
-               href="javascript:void(0);">
+               class="btn btn-success"
+               href="#">
                 <?php echo Text::_('LIB_ALLEDIAINSTALLER_SAVE_LICENSE_KEY'); ?>
             </a>
         </div>
 
         <div id="joomlashack-installer-license-success" style="display: none">
-            <p>
-                <?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_SUCCESS'); ?>
-            </p>
+            <p><?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_SUCCESS'); ?></p>
         </div>
 
         <div id="joomlashack-installer-license-error" style="display: none">
-            <p>
-                <?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_ERROR'); ?>
-            </p>
+            <p><?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_ERROR'); ?></p>
         </div>
     </div>
 

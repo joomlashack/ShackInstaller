@@ -13,27 +13,6 @@
     font-weight: normal;
 }
 
-.joomlashack-wrapper input#joomlashack-license-keys {
-    font-family: monospace;
-    font-size: 20px !important;
-    width: 410px !important;
-    text-align: center;
-    vertical-align: middle;
-    height: 22px;
-    min-height: 22px !important;
-    line-height: 22px;
-    border-radius: 0;
-    -moz-border-radius: 0;
-    -webkit-border-radius: 0;
-    -o-border-radius: 0;
-    color: rgba(103, 128, 208, 0.65);
-    padding: 8px 10px;
-    font-weight: 300;
-    background-color: #fff !important;
-    margin-top: 15px;
-    margin-bottom: 5px;
-}
-
 .joomlashack-wrapper .joomlashack-button {
     color: #ffffff;
     display: inline-block;
