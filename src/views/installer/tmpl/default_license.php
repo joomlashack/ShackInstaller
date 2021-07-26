@@ -72,44 +72,68 @@ if ($this->isLicensesManagerInstalled) :
     </div>
 
     <script>
-        (function($) {
-            $(function() {
-                $('.joomlashack-installer-change-license-button').on('click', function() {
-                    $('#joomlashack-installer-license-panel').show();
-                    $(this).hide();
-                });
+        (function() {
+            let panel         = document.getElementById('joomlashack-installer-license-panel'),
+                updateButtons = document.getElementsByClassName('joomlashack-installer-change-license-button'),
+                saveButton    = document.getElementById('joomlashack-license-save-button');
 
-                $('#joomlashack-license-save-button').on('click', function() {
-                    $.post('<?php echo $licenseUpdate; ?>',
-                        {
-                            'license-keys': $('#joomlashack-license-keys').val()
-                        },
-                        function(data) {
-                            try {
-                                let result = JSON.parse(data);
+            if (panel) {
+                if (updateButtons.length > 0) {
+                    panel.style.display = 'none';
 
-                                $('#joomlashack-installer-license-panel').hide();
+                    Array.from(updateButtons).forEach(function(button) {
+                        button.addEventListener('click', function(event) {
+                            event.preventDefault();
 
-                                if (result.success) {
-                                    $('#joomlashack-installer-license-success').show();
-                                } else {
-                                    $('#joomlashack-installer-license-error').show();
-                                }
-                            } catch (e) {
-                                $('#joomlashack-installer-license-panel').hide();
-                                $('#joomlashack-installer-license-error').show();
-                            }
-                        },
-                        'text'
-                    ).fail(function() {
-                        $('#joomlashack-installer-license-panel').hide();
-                        $('#joomlashack-installer-license-error').show();
+                            panel.style.display = 'block';
+                            this.style.display  = 'none';
+                        })
                     });
+                }
 
-                });
-            });
+                if (saveButton) {
+                    saveButton.addEventListener('click', function(event) {
+                        event.preventDefault();
 
-        })(jQuery);
+                        let request  = new XMLHttpRequest(),
+                            data     = new FormData(),
+                            keyField = document.getElementById('joomlashack-license-keys')
+
+                        data.append('license-keys', keyField.value)
+                        request.onreadystatechange = function(data) {
+                            if (this.readyState === XMLHttpRequest.DONE) {
+                                try {
+                                    if (this.status === 200) {
+                                        let result  = JSON.parse(this.response),
+                                            success = document.getElementById('joomlashack-installer-license-success'),
+                                            error   = document.getElementById('joomlashack-installer-license-error');
+
+                                        panel.style.display = 'none';
+
+                                        if (result.success) {
+                                            success.style.display = 'block';
+
+                                        } else {
+                                            error.style.display = 'block';
+                                        }
+
+                                    } else {
+                                        error.style.display = 'block';
+                                    }
+
+                                } catch (e) {
+                                    panel.style.display = 'none';
+                                    error.style.display = 'block';
+                                }
+                            }
+                        };
+
+                        request.open('POST', '<?php echo $licenseUpdate; ?>');
+                        request.send(data);
+                    });
+                }
+            }
+        })();
     </script>
 
 <?php else : ?>
