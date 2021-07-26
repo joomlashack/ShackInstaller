@@ -420,7 +420,7 @@ abstract class AbstractScript
                 $this->reorderThisPlugin();
             }
 
-            // If Free, remove any missed Pro library
+            // If Free, remove any Pro library
             $license = $this->getLicense();
             if (!$license->isPro()) {
                 $proLibraryPath = $license->getProLibraryPath();
@@ -697,6 +697,7 @@ abstract class AbstractScript
      */
     protected function findExtension(?string $type, ?string $element, ?string $group = null): ?Extension
     {
+        // @TODO: Why do we need to use JTable?
         /** @var Extension $row */
         $row = \JTable::getInstance('extension');
 
