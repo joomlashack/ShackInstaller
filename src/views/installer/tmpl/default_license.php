@@ -6,10 +6,26 @@
  * @license   http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
 
+use Alledia\Installer\AbstractScript;
+use Alledia\Installer\Extension\Generic;
+use Alledia\Installer\Extension\Licensed;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 
 defined('_JEXEC') or die();
+
+/**
+ * @var AbstractScript $this
+ * @var string         $type
+ * @var Licensed       $license
+ * @var string         $name
+ * @var string         $configPath
+ * @var string         $customFooterPath
+ * @var string         $extensionPath
+ * @var Generic        $licensesManagerExtension
+ * @var string         $string
+ * @var string         $path
+ */
 
 $licenseUpdate = Uri::root() . '/administrator/index.php?plugin=system_osmylicensesmanager&task=license.save';
 
