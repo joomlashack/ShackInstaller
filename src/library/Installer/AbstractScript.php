@@ -407,10 +407,8 @@ abstract class AbstractScript
             }
 
             $this->clearObsolete();
-            $this->installRelated();
+            $this->installRelated($parent);
             $this->addAllediaAuthorshipToExtension();
-
-            // @TODO: Stop the script here if this is a related extension (but still remove pro folder, if needed)
 
             $this->element = (string)$this->manifest->alledia->element;
 
@@ -433,9 +431,7 @@ abstract class AbstractScript
                 $this->preserveFavicon();
             }
 
-            if ($this->outputAllowed) {
-                $this->displayWelcome($type);
-            }
+            $this->displayWelcome($type);
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
@@ -443,11 +439,11 @@ abstract class AbstractScript
     }
 
     /**
-     * Install related extensions
+     * @param InstallerAdapter $parent
      *
      * @return void
      */
-    protected function installRelated()
+    protected function installRelated(InstallerAdapter $parent)
     {
         if ($this->manifest->alledia->relatedExtensions) {
             // Directly unused var, but this resets the Installer instance
@@ -477,6 +473,8 @@ abstract class AbstractScript
                     // Get data from the manifest
                     $tmpInstaller = new Installer();
                     $tmpInstaller->setPath('source', $path);
+                    $tmpInstaller->setPath('parent', $this->installer->getPath('source'));
+
                     $newManifest = $tmpInstaller->getManifest();
                     $newVersion  = (string)$newManifest->version;
 
@@ -1650,6 +1648,11 @@ abstract class AbstractScript
      */
     final protected function displayWelcome(string $type)
     {
+        if ($this->installer->getPath('parent') || !$this->outputAllowed) {
+            // Either a related extension or installing from frontend
+            return;
+        }
+
         $license = $this->getLicense();
         $name    = $this->getName() . ($license->isPro() ? ' Pro' : '');
 
