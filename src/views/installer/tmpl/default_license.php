@@ -36,7 +36,7 @@ if ($this->isLicensesManagerInstalled) :
         if (!empty($this->licenseKey)) :
             ?>
             <a href="" class="joomlashack-installer-change-license-button btn btn-success">
-                <?php echo Text::_('LIB_ALLEDIAINSTALLER_CHANGE_LICENSE_KEY'); ?>
+                <?php echo Text::_('LIB_SHACKINSTALLER_CHANGE_LICENSE_KEY'); ?>
             </a>
         <?php endif; ?>
 
@@ -46,28 +46,28 @@ if ($this->isLicensesManagerInstalled) :
                    id="joomlashack-license-keys"
                    value="<?php echo $this->licenseKey; ?>"
                    class="form-control"
-                   placeholder="<?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_PLACEHOLDER'); ?>"/>
+                   placeholder="<?php echo Text::_('LIB_SHACKINSTALLER_LICENSE_KEYS_PLACEHOLDER'); ?>"/>
 
             <p class="joomlashack-empty-key-msg">
-                <?php echo Text::_('LIB_ALLEDIAINSTALLER_MSG_LICENSE_KEYS_EMPTY'); ?>&nbsp;
+                <?php echo Text::_('LIB_SHACKINSTALLER_MSG_LICENSE_KEYS_EMPTY'); ?>&nbsp;
                 <a href="https://www.joomlashack.com/account/key/" target="_blank">
-                    <?php echo Text::_('LIB_ALLEDIAINSTALLER_I_DONT_REMEMBER_MY_KEY'); ?>
+                    <?php echo Text::_('LIB_SHACKINSTALLER_I_DONT_REMEMBER_MY_KEY'); ?>
                 </a>
             </p>
 
             <a id="joomlashack-license-save-button"
                class="btn btn-success"
                href="#">
-                <?php echo Text::_('LIB_ALLEDIAINSTALLER_SAVE_LICENSE_KEY'); ?>
+                <?php echo Text::_('LIB_SHACKINSTALLER_SAVE_LICENSE_KEY'); ?>
             </a>
         </div>
 
         <div id="joomlashack-installer-license-success" style="display: none">
-            <p><?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_SUCCESS'); ?></p>
+            <p><?php echo Text::_('LIB_SHACKINSTALLER_LICENSE_KEY_SUCCESS'); ?></p>
         </div>
 
         <div id="joomlashack-installer-license-error" style="display: none">
-            <p><?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEY_ERROR'); ?></p>
+            <p><?php echo Text::_('LIB_SHACKINSTALLER_LICENSE_KEY_ERROR'); ?></p>
         </div>
     </div>
 
@@ -138,6 +138,6 @@ if ($this->isLicensesManagerInstalled) :
 
 <?php else : ?>
     <div class="error">
-        <?php echo Text::_('LIB_ALLEDIAINSTALLER_LICENSE_KEYS_MANAGER_REQUIRED'); ?>
+        <?php echo Text::_('LIB_SHACKINSTALLER_LICENSE_KEYS_MANAGER_REQUIRED'); ?>
     </div>
 <?php endif;

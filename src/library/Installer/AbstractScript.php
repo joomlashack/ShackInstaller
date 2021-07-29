@@ -10,7 +10,6 @@ namespace Alledia\Installer;
 
 defined('_JEXEC') or die();
 
-use Alledia\Installer\Extension\Generic;
 use Alledia\Installer\Extension\Licensed;
 use JFormFieldCustomFooter;
 use Joomla\CMS\Application\CMSApplication;
@@ -220,7 +219,7 @@ abstract class AbstractScript
 
             // All the files we want to load
             $languageFiles = [
-                'lib_allediainstaller.sys',
+                'lib_shackinstaller.sys',
                 $this->getFullElement()
             ];
 
@@ -310,7 +309,7 @@ abstract class AbstractScript
                         // Platform version is invalid. Displays a warning and cancel the install
                         $targetPlatform = str_replace('*', 'x', $targetPlatform);
 
-                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
+                        $msg = Text::sprintf('LIB_SHACKINSTALLER_WRONG_PLATFORM', $this->getName(), $targetPlatform);
 
                         $this->sendMessage($msg, 'warning');
                         $success = false;
@@ -332,7 +331,7 @@ abstract class AbstractScript
                             // mySQL version too low
                             $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
 
-                            $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
+                            $msg = Text::sprintf('LIB_SHACKINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
                             $this->sendMessage($msg, 'warning');
                             $success = false;
                         }
@@ -347,7 +346,7 @@ abstract class AbstractScript
                         // php version is too low
                         $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
 
-                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
+                        $msg = Text::sprintf('LIB_SHACKINSTALLER_WRONG_PHP', $this->getName(), $minimumPhp);
                         $this->sendMessage($msg, 'warning');
                         $success = false;
                     }
@@ -360,7 +359,7 @@ abstract class AbstractScript
                         // Previous minimum is not installed
                         $minimumVersion = str_replace('*', 'x', $targetVersion);
 
-                        $msg = Text::sprintf('LIB_ALLEDIAINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
+                        $msg = Text::sprintf('LIB_SHACKINSTALLER_WRONG_PREVIOUS', $this->getName(), $minimumVersion);
                         $this->sendMessage($msg, 'warning');
                         $success = false;
                     }
@@ -401,7 +400,7 @@ abstract class AbstractScript
 
         try {
             if ($this->cancelInstallation) {
-                $this->sendMessage('LIB_ALLEDIAINSTALLER_INSTALL_CANCELLED', 'warning');
+                $this->sendMessage('LIB_SHACKINSTALLER_INSTALL_CANCELLED', 'warning');
 
                 return;
             }
@@ -494,7 +493,7 @@ abstract class AbstractScript
                                 $element,
                                 'message',
                                 Text::sprintf(
-                                    'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_SKIPED',
+                                    'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_SKIPED',
                                     $newVersion,
                                     $currentVersion
                                 )
@@ -505,7 +504,7 @@ abstract class AbstractScript
                         }
                     }
 
-                    $text = 'LIB_ALLEDIAINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
+                    $text = 'LIB_SHACKINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
                     if ($tmpInstaller->install($path)) {
                         $this->sendMessage(Text::sprintf($text, $typeName, $element));
                         if ($isNew) {
@@ -531,7 +530,7 @@ abstract class AbstractScript
                         $this->storeFeedbackForRelatedExtension(
                             $element,
                             'message',
-                            Text::sprintf('LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
+                            Text::sprintf('LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
                         );
 
                     } else {
@@ -541,7 +540,7 @@ abstract class AbstractScript
                             $element,
                             'message',
                             Text::sprintf(
-                                'LIB_ALLEDIAINSTALLER_RELATED_UPDATE_STATE_FAILED',
+                                'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_FAILED',
                                 $newVersion
                             )
                         );
@@ -574,7 +573,7 @@ abstract class AbstractScript
                 $uninstall = $this->getXmlValue($extension['uninstall'], 'bool', $defaultUninstall);
                 if ($uninstall) {
                     if ($current = $this->findExtension($type, $element, $group)) {
-                        $msg     = 'LIB_ALLEDIAINSTALLER_RELATED_UNINSTALL';
+                        $msg     = 'LIB_SHACKINSTALLER_RELATED_UNINSTALL';
                         $msgType = 'message';
                         if (!$installer->uninstall($current->get('type'), $current->get('extension_id'))) {
                             $msg     .= '_FAIL';
@@ -588,7 +587,7 @@ abstract class AbstractScript
                 } elseif ($this->app->get('debug', 0)) {
                     $this->sendMessage(
                         Text::sprintf(
-                            'LIB_ALLEDIAINSTALLER_RELATED_NOT_UNINSTALLED',
+                            'LIB_SHACKINSTALLER_RELATED_NOT_UNINSTALLED',
                             ucfirst($type),
                             $element
                         ),
@@ -805,7 +804,7 @@ abstract class AbstractScript
                         if ($uninstalled) {
                             $this->sendMessage(
                                 Text::sprintf(
-                                    'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_SUCCESS',
+                                    'LIB_SHACKINSTALLER_OBSOLETE_UNINSTALLED_SUCCESS',
                                     strtolower($typeName),
                                     $element
                                 )
@@ -813,7 +812,7 @@ abstract class AbstractScript
                         } else {
                             $this->sendMessage(
                                 Text::sprintf(
-                                    'LIB_ALLEDIAINSTALLER_OBSOLETE_UNINSTALLED_FAIL',
+                                    'LIB_SHACKINSTALLER_OBSOLETE_UNINSTALLED_FAIL',
                                     strtolower($typeName),
                                     $element
                                 ),
@@ -965,7 +964,7 @@ abstract class AbstractScript
         } else {
             $relativePath = str_replace(JPATH_SITE . '/', '', $manifestPath);
             $this->sendMessage(
-                Text::sprintf('LIB_ALLEDIAINSTALLER_MANIFEST_NOT_FOUND', $relativePath),
+                Text::sprintf('LIB_SHACKINSTALLER_MANIFEST_NOT_FOUND', $relativePath),
                 'error'
             );
         }
@@ -1713,9 +1712,9 @@ abstract class AbstractScript
 
         // Welcome message
         if ($type === 'install') {
-            $string = 'LIB_ALLEDIAINSTALLER_THANKS_INSTALL';
+            $string = 'LIB_SHACKINSTALLER_THANKS_INSTALL';
         } else {
-            $string = 'LIB_ALLEDIAINSTALLER_THANKS_UPDATE';
+            $string = 'LIB_SHACKINSTALLER_THANKS_UPDATE';
         }
 
         // Variables for the included template
