@@ -34,7 +34,7 @@ abstract class Loader
     {
         if (!static::$logRegistered) {
             Log::addLogger(
-                ['text_file' => 'allediaframework.loader.errors.php'],
+                ['text_file' => 'shackframework.loader.errors.php'],
                 Log::ALL,
                 ['allediaframework']
             );
@@ -68,14 +68,14 @@ abstract class Loader
             $app = Factory::getApplication();
             if ($app->getName() == 'administrator') {
                 $app->enqueueMessage(
-                    'Alledia Framework Loader detected that a required file was not found! Please, check the logs.',
+                    'ShackInstaller Loader detected that a required file was not found! Please, check the logs.',
                     'error'
                 );
             }
 
             // Stand up a flag to warn a required file is missed
-            if (!defined('ALLEDIA_INSTALLER_MISSED_FILE')) {
-                define('ALLEDIA_INSTALLER_MISSED_FILE', true);
+            if (!defined('SHACK_INSTALLER_MISSED_FILE')) {
+                define('SHACK_INSTALLER_MISSED_FILE', true);
             }
 
             return false;
