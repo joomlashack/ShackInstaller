@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="ShackBuilder Client" default="build">
+<project name="ShackBuilder Client" default="copy">
     <property name="builder.version.client" value="4.0.2"/>
     <echo message="${phing.project.name} Version ${builder.version.client}"/>
 
