@@ -1702,7 +1702,7 @@ abstract class AbstractScript
         // If Pro extension, includes the license form view
         if ($license->isPro()) {
             // Get the OSMyLicensesManager extension to handle the license key
-            if ($licensesManagerExtension = new Generic('osmylicensesmanager', 'plugin', 'system')) {
+            if ($licensesManagerExtension = new Licensed('osmylicensesmanager', 'plugin', 'system')) {
                 if (isset($licensesManagerExtension->params)) {
                     $this->licenseKey = $licensesManagerExtension->params->get('license-keys', '');
                 } else {
