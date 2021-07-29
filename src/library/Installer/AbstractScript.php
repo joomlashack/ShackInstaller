@@ -213,8 +213,11 @@ abstract class AbstractScript
                 }
 
             } else {
-                $basePath = $this->getExtensionPath($this->type, (string)$this->manifest->alledia->element,
-                    $this->group);
+                $basePath = $this->getExtensionPath(
+                    $this->type,
+                    (string)$this->manifest->alledia->element,
+                    $this->group
+                );
             }
 
             // All the files we want to load
