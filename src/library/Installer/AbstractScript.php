@@ -23,6 +23,7 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Table\Extension;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Component\Plugins\Administrator\Model\PluginModel;
 use Joomla\Registry\Registry;
 use SimpleXMLElement;
 use Throwable;
@@ -728,7 +729,9 @@ abstract class AbstractScript
                         JPATH_ADMINISTRATOR . '/components/com_plugins/models',
                         'PluginsModels'
                     );
-                    /** @var \PluginsModelPlugin $model */
+
+                    // @TODO: Model class is (\PluginsModelPlugin) in J3 but this works either way
+                    /** @var PluginModel $model */
                     $model = BaseDatabaseModel::getInstance('Plugin', 'PluginsModel');
 
                     $ids = [];
