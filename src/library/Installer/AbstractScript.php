@@ -176,7 +176,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function __construct(InstallerAdapter $parent)
+    public function __construct($parent)
     {
         $this->initProperties($parent);
     }
@@ -187,7 +187,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function initProperties(InstallerAdapter $parent)
+    public function initProperties($parent)
     {
         $this->app = Factory::getApplication();
 
@@ -258,7 +258,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function install(InstallerAdapter $parent): bool
+    public function install($parent)
     {
         return true;
     }
@@ -268,7 +268,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function discover_install(InstallerAdapter $parent): bool
+    public function discover_install($parent)
     {
         return $this->install($parent);
     }
@@ -279,7 +279,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function uninstall(InstallerAdapter $parent)
+    public function uninstall($parent)
     {
         try {
             $this->uninstallRelated();
@@ -294,7 +294,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function update(InstallerAdapter $parent): bool
+    public function update($parent)
     {
         return true;
     }
@@ -306,7 +306,7 @@ abstract class AbstractScript
      * @return bool
      * @throws \Exception
      */
-    public function preFlight(string $type, InstallerAdapter $parent): bool
+    public function preFlight($type, $parent)
     {
         if ($this->cancelInstallation) {
             return false;
@@ -407,7 +407,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function postFlight(string $type, InstallerAdapter $parent)
+    public function postFlight($type, $parent)
     {
         /*
          * Joomla 4 now calls postFlight on uninstalls. Which is kinda cool actually.
@@ -461,7 +461,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function installRelated(InstallerAdapter $parent)
+    protected function installRelated($parent)
     {
         if ($this->manifest->alledia->relatedExtensions) {
             // Directly unused var, but this resets the Installer instance
@@ -624,7 +624,7 @@ abstract class AbstractScript
      *
      * @return ?Extension
      */
-    protected function findExtension(?string $type, ?string $element, ?string $group = null): ?Extension
+    protected function findExtension($type, $element, $group = null)
     {
         // @TODO: Why do we need to use JTable?
         /** @var Extension $row */
@@ -680,7 +680,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function setPluginOrder(Extension $extension, string $order)
+    protected function setPluginOrder($extension, $order)
     {
         if ($extension->get('type') == 'plugin' && !empty($order)) {
             $db    = $this->dbo;
@@ -769,7 +769,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.0.0
      */
-    protected function setMessage(string $msg, string $type = 'message')
+    protected function setMessage($msg, $type = 'message')
     {
         $this->sendMessage($msg, $type);
     }
@@ -871,7 +871,7 @@ abstract class AbstractScript
      *
      * @return ?Extension
      */
-    protected function findThisExtension(): ?Extension
+    protected function findThisExtension()
     {
         return $this->findExtension(
             $this->getXmlValue($this->manifest['type']),
@@ -917,7 +917,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getFullElement(?string $type = null, ?string $element = null, ?string $group = null): string
+    protected function getFullElement($type = null, $element = null, $group = null)
     {
         $prefixes = [
             'component' => 'com',
@@ -945,7 +945,7 @@ abstract class AbstractScript
     /**
      * @return Licensed
      */
-    protected function getLicense(): Licensed
+    protected function getLicense()
     {
         if ($this->license === null) {
             $this->license = new Licensed(
@@ -963,7 +963,7 @@ abstract class AbstractScript
      *
      * @return Registry
      */
-    protected function getInfoFromManifest(string $manifestPath): Registry
+    protected function getInfoFromManifest($manifestPath)
     {
         $info = new Registry();
 
@@ -1000,7 +1000,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getExtensionPath(string $type, string $element, ?string $group = ''): string
+    protected function getExtensionPath($type, $element, $group = '')
     {
         $folders = [
             'component' => 'administrator/components/',
@@ -1052,7 +1052,7 @@ abstract class AbstractScript
      *
      * @return int
      */
-    protected function getExtensionId(string $type, string $element, ?string $group = ''): int
+    protected function getExtensionId($type, $element, $group = '')
     {
         $db    = $this->dbo;
         $query = $db->getQuery(true)
@@ -1146,7 +1146,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function storeFeedbackForRelatedExtension(string $element, string $key, string $value)
+    protected function storeFeedbackForRelatedExtension($element, $key, $value)
     {
         if (empty($this->relatedExtensionFeedback[$element])) {
             $this->relatedExtensionFeedback[$element] = [];
@@ -1256,7 +1256,7 @@ abstract class AbstractScript
      *
      * @return string[]
      */
-    protected function getColumnsFromTable(string $table): array
+    protected function getColumnsFromTable($table)
     {
         if (!isset($this->columns[$table])) {
             $db = $this->dbo;
@@ -1281,7 +1281,7 @@ abstract class AbstractScript
      *
      * @return string[]
      */
-    protected function getIndexesFromTable(string $table): array
+    protected function getIndexesFromTable($table)
     {
         if (!isset($this->indexes[$table])) {
             $db = $this->dbo;
@@ -1307,7 +1307,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function addColumnsIfNotExists(string $table, array $columns)
+    protected function addColumnsIfNotExists($table, $columns)
     {
         $db = $this->dbo;
 
@@ -1331,7 +1331,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function addIndexesIfNotExists(string $table, array $indexes)
+    protected function addIndexesIfNotExists($table, $indexes)
     {
         $db = $this->dbo;
 
@@ -1355,7 +1355,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function dropColumnsIfExists(string $table, array $columns)
+    protected function dropColumnsIfExists($table, $columns)
     {
         $db = $this->dbo;
 
@@ -1376,7 +1376,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    protected function tableExists(string $name): bool
+    protected function tableExists(string $name)
     {
         $tables = $this->getTables(true);
 
@@ -1390,7 +1390,7 @@ abstract class AbstractScript
      *
      * @return string[] List of tables
      */
-    protected function getTables(?bool $force = false): array
+    protected function getTables(?bool $force = false)
     {
         if ($force || $this->tables === null) {
             $tables = $this->dbo->setQuery('SHOW TABLES')->loadRowList();
@@ -1414,7 +1414,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    protected function parseConditionalExpression(string $expression): bool
+    protected function parseConditionalExpression($expression)
     {
         $expression = strtolower($expression);
         $terms      = explode('=', $expression);
@@ -1448,7 +1448,7 @@ abstract class AbstractScript
      *
      * @return string[] An associative array with information about the extension
      */
-    protected function getExtensionInfoFromElement(string $element): array
+    protected function getExtensionInfoFromElement($element)
     {
         $result = array_fill_keys(
             ['type', 'name', 'group', 'prefix', 'namespace'],
@@ -1501,11 +1501,8 @@ abstract class AbstractScript
      *
      * @return bool True, if the target version is greater than or equal to actual version
      */
-    protected function validateTargetVersion(
-        string $actualVersion,
-        string $targetVersion,
-        ?string $compare = null
-    ): bool {
+    protected function validateTargetVersion($actualVersion, $targetVersion, $compare = null)
+    {
         if ($targetVersion === '.*') {
             // Any version is valid
             return true;
@@ -1522,7 +1519,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    protected function validatePreviousVersion(string $targetVersion, ?string $compare = null): bool
+    protected function validatePreviousVersion($targetVersion, $compare = null)
     {
         if ($this->previousManifest) {
             $lastVersion = (string)$this->previousManifest->version;
@@ -1538,7 +1535,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getName(): string
+    protected function getName()
     {
         // Get the extension name. If no custom name is set, uses the namespace
         if (isset($this->manifest->alledia->name)) {
@@ -1590,7 +1587,7 @@ abstract class AbstractScript
      *
      * @return bool|string
      */
-    protected function getXmlValue($element, ?string $type = 'string', $default = null)
+    protected function getXmlValue($element, $type = 'string', $default = null)
     {
         $value = $element ? (string)$element : $default;
 
