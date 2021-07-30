@@ -47,7 +47,7 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
-    public const VERSION = '2.0.0';
+    public const VERSION = '2.0.1';
 
     /**
      * @var bool
@@ -767,7 +767,7 @@ abstract class AbstractScript
      * @param string $type
      *
      * @return void
-     * @deprecated 2.0.0
+     * @deprecated v2.0.0
      */
     protected function setMessage(string $msg, string $type = 'message')
     {
