@@ -1,7 +1,7 @@
 [![Joomlashack](https://www.joomlashack.com/images/logo_circle_small.png)](https://www.joomlashack.com)
 
 Joomlashack Installer
-============
+=====================
 
 Common libraries for our extension installer scripts
 
@@ -10,7 +10,7 @@ Common libraries for our extension installer scripts
 ### Custom Tags
 A special `<alledia>` tag is recognized in the manifest for control of various aspects
 of installation. Note that boolean attribute values can be specified using true/false or 1/0.
-
+```xml
     <alledia>
         <element publish="bool">elementname</element>
         <namespace>ExtensionName</namespace>
@@ -45,6 +45,7 @@ of installation. Note that boolean attribute values can be specified using true/
             <file>/administrator/components/com_mycomponent/oldfile.php</file>
         </obsolete>
     </alledia>
+```
 
 #### Element tag
 
@@ -80,8 +81,8 @@ Atributes available under
 
 ## Requirements
 
-Joomla 3.7+
-php 5.6+
+Joomla 3.9+
+php 7.2+
 
 ## License
 
