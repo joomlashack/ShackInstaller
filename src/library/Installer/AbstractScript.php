@@ -848,7 +848,7 @@ abstract class AbstractScript
             if ($obsolete->file) {
                 foreach ($obsolete->file as $file) {
                     $path = JPATH_ROOT . '/' . trim((string)$file, '/');
-                    if (file_exists($path)) {
+                    if (is_file($path)) {
                         File::delete($path);
                     }
                 }
@@ -858,7 +858,7 @@ abstract class AbstractScript
             if ($obsolete->folder) {
                 foreach ($obsolete->folder as $folder) {
                     $path = JPATH_ROOT . '/' . trim((string)$folder, '/');
-                    if (file_exists($path)) {
+                    if (is_dir($path)) {
                         Folder::delete($path);
                     }
                 }
