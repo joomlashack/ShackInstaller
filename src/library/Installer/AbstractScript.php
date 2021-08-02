@@ -864,6 +864,11 @@ abstract class AbstractScript
                 }
             }
         }
+
+        $oldLanguageFiles = Folder::files(JPATH_ADMINISTRATOR . '/language', '\.lib_allediainstaller\.', true, true);
+        foreach ($oldLanguageFiles as $oldLanguageFile) {
+            File::delete($oldLanguageFile);
+        }
     }
 
     /**
