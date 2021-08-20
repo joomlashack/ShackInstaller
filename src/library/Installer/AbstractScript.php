@@ -1619,7 +1619,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function sendMessage(string $text, string $type = 'message')
+    protected function sendMessage(string $text, string $type = 'message')
     {
         if ($this->outputAllowed) {
             $this->app->enqueueMessage($text, $type);
@@ -1632,7 +1632,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function sendErrorMessage(Throwable $error, bool $cancel = true)
+    protected function sendErrorMessage(Throwable $error, bool $cancel = true)
     {
         if ($cancel) {
             $this->cancelInstallation = true;
