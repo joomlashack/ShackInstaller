@@ -40,7 +40,7 @@ abstract class Loader
      *
      * @param string $path The file path you want to include
      *
-     * @return  bool    True, if the file exists and was loaded well.
+     * @return  bool
      * @throws \Exception
      */
     public static function includeFile(string $path): bool

@@ -22,32 +22,12 @@
  */
 
 use Alledia\Installer\AutoLoader;
-use Joomla\CMS\Factory;
-use Joomla\CMS\Language\Text;
 
 defined('_JEXEC') or die();
 
-$autoLoaderClass = '\\Alledia\\Installer\\AutoLoader';
-if (class_exists($autoLoaderClass)) {
-    // If the installer autoloader is already loaded, this is a problem
-
-    Factory::getLanguage()->load('lib_shackinstaller.sys', realpath(__DIR__ . '/../..'));
-
-    // Extract the most relevant parts of the the source path
-    $autoloader = new \ReflectionClass($autoLoaderClass);
-
-    $path = str_replace(JPATH_ROOT . '/', '', $autoloader->getFileName());
-
-    $pathParts = explode('/library/', $path);
-    $source    = array_shift($pathParts);
-
-    Factory::getApplication()->enqueueMessage(Text::sprintf('LIB_SHACKINSTALLER_ABORT_INTERFERENCE', $source), 'error');
-
-    return false;
+if (!defined('SHACKINSTALLER_BASE')) {
+    define('SHACKINSTALLER_BASE', __DIR__);
 }
 
-require_once __DIR__ . '/AutoLoader.php';
-
-AutoLoader::register('Alledia\\Installer', __DIR__);
-
-return true;
+require_once SHACKINSTALLER_BASE . '/AutoLoader.php';
+AutoLoader::register('Alledia\\Installer', SHACKINSTALLER_BASE, true);
