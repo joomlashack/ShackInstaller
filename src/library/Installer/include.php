@@ -36,4 +36,5 @@ AutoLoader::register('Alledia\\Installer', SHACK_INSTALLER_BASE, true);
 
 if (!defined('SHACK_INSTALLER_VERSION')) {
     define('SHACK_INSTALLER_VERSION', '2.0.3');
+    define('SHACK_INSTALLER_COMPATIBLE', '2.0.3');
 }

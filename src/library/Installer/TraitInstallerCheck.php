@@ -57,7 +57,7 @@ trait TraitInstallerCheck
         $sourcePath = $this->cleanPath($sourcePath);
         $targetPath = $this->cleanPath(SHACK_INSTALLER_BASE);
 
-        if ($sourcePath != $targetPath && version_compare($sourceVersion, SHACK_INSTALLER_VERSION, 'lt')) {
+        if ($sourcePath != $targetPath && version_compare($sourceVersion, SHACK_INSTALLER_COMPATIBLE , 'lt')) {
             $source = join('/', array_slice(explode('/', $sourcePath), 0, $sourceBase));
 
             $errorMessage = 'LIB_SHACKINSTALLER_ABORT_'
