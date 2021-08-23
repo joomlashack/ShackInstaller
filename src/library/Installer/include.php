@@ -25,9 +25,15 @@ use Alledia\Installer\AutoLoader;
 
 defined('_JEXEC') or die();
 
-if (!defined('SHACKINSTALLER_BASE')) {
-    define('SHACKINSTALLER_BASE', __DIR__);
+if (!defined('SHACK_INSTALLER_BASE')) {
+    define('SHACK_INSTALLER_BASE', __DIR__);
 }
 
-require_once SHACKINSTALLER_BASE . '/AutoLoader.php';
-AutoLoader::register('Alledia\\Installer', SHACKINSTALLER_BASE, true);
+if (class_exists('\\Alledia\\Installer\\AutoLoader') === false) {
+    require_once SHACK_INSTALLER_BASE . '/AutoLoader.php';
+}
+AutoLoader::register('Alledia\\Installer', SHACK_INSTALLER_BASE, true);
+
+if (!defined('SHACK_INSTALLER_VERSION')) {
+    define('SHACK_INSTALLER_VERSION', '2.0.3');
+}

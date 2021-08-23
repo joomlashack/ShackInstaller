@@ -50,13 +50,14 @@ trait TraitInstallerCheck
         $scriptClassName = array_pop($parentClasses);
         $scriptClass     = new \ReflectionClass($scriptClassName);
 
-        $sourcePath = dirname($scriptClass->getFileName());
-        $sourceBase = strpos($sourcePath, JPATH_PLUGINS) === 0 ? 3 : 2;
+        $sourcePath    = dirname($scriptClass->getFileName());
+        $sourceBase    = strpos($sourcePath, JPATH_PLUGINS) === 0 ? 3 : 2;
+        $sourceVersion = AbstractScript::VERSION ?? '0.0.0';
 
         $sourcePath = $this->cleanPath($sourcePath);
-        $targetPath = $this->cleanPath(SHACKINSTALLER_BASE);
+        $targetPath = $this->cleanPath(SHACK_INSTALLER_BASE);
 
-        if ($sourcePath != $targetPath) {
+        if ($sourcePath != $targetPath && version_compare($sourceVersion, SHACK_INSTALLER_VERSION, 'lt')) {
             $source = join('/', array_slice(explode('/', $sourcePath), 0, $sourceBase));
 
             $errorMessage = 'LIB_SHACKINSTALLER_ABORT_'
