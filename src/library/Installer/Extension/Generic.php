@@ -25,8 +25,8 @@ namespace Alledia\Installer\Extension;
 
 defined('_JEXEC') or die();
 
-use JFactory;
-use JRegistry;
+use Joomla\CMS\Factory;
+use Joomla\Registry\Registry;
 
 /**
  * Generic extension class
@@ -38,79 +38,87 @@ class Generic
      *
      * @var string
      */
-    protected $namespace;
+    protected $namespace = null;
 
     /**
      * The extension type
      *
      * @var string
      */
-    protected $type;
+    protected $type = null;
 
     /**
      * The extension id
      *
      * @var int
      */
-    protected $id;
+    protected $id = null;
 
     /**
      * The extension name
      *
      * @var string
      */
-    protected $name;
+    protected $name = null;
 
     /**
      * The extension params
      *
-     * @var JRegistry
+     * @var Registry
      */
-    public $params;
+    public $params = null;
 
     /**
      * The extension enable state
      *
      * @var bool
      */
-    protected $enabled;
+    protected $enabled = null;
 
     /**
      * The element of the extension
      *
      * @var string
      */
-    protected $element;
+    protected $element = null;
+
+    /**
+     * @var string
+     */
+    protected $folder = null;
 
     /**
      * Base path
      *
      * @var string
      */
-    protected $basePath;
+    protected $basePath = null;
 
     /**
      * The manifest information
      *
-     * @var \SimpleXMLElement
+     * @var object
      */
-    public $manifest;
+    public $manifest = null;
 
     /**
      * The config.xml information
      *
      * @var \SimpleXMLElement
      */
-    public $config;
+    public $config = null;
 
     /**
      * Class constructor, set the extension type.
      *
-     * @param string $namespace The element of the extension
-     * @param string $type      The type of extension
-     * @param string $folder    The folder for plugins (only)
+     * @param string  $namespace The element of the extension
+     * @param string  $type      The type of extension
+     * @param ?string $folder    The folder for plugins (only)
+     * @param string  $basePath
+     *
+     * @return void
      */
-    public function __construct($namespace, $type, $folder = '', $basePath = JPATH_SITE)
+    public function __construct(string $namespace, string $type, ?string $folder = '', string $basePath = JPATH_SITE)
     {
         $this->type      = $type;
         $this->element   = strtolower($namespace);
@@ -131,20 +139,20 @@ class Generic
         $element = $this->getElementToDb();
 
         // Load the extension info from database
-        $db    = JFactory::getDbo();
+        $db    = Factory::getDbo();
         $query = $db->getQuery(true)
-            ->select(array(
-                $db->qn('extension_id'),
-                $db->qn('name'),
-                $db->qn('enabled'),
-                $db->qn('params')
-            ))
+            ->select([
+                $db->quoteName('extension_id'),
+                $db->quoteName('name'),
+                $db->quoteName('enabled'),
+                $db->quoteName('params')
+            ])
             ->from('#__extensions')
-            ->where($db->qn('type') . ' = ' . $db->q($this->type))
-            ->where($db->qn('element') . ' = ' . $db->q($element));
+            ->where($db->quoteName('type') . ' = ' . $db->quote($this->type))
+            ->where($db->quoteName('element') . ' = ' . $db->quote($element));
 
         if ($this->type === 'plugin') {
-            $query->where($db->qn('folder') . ' = ' . $db->q($this->folder));
+            $query->where($db->quoteName('folder') . ' = ' . $db->quote($this->folder));
         }
 
         $db->setQuery($query);
@@ -154,22 +162,23 @@ class Generic
             $this->id      = $row->extension_id;
             $this->name    = $row->name;
             $this->enabled = (bool)$row->enabled;
-            $this->params  = new JRegistry($row->params);
+            $this->params  = new Registry($row->params);
 
         } else {
             $this->id      = null;
             $this->name    = null;
             $this->enabled = false;
-            $this->params  = new JRegistry;
+            $this->params  = new Registry();
+
         }
     }
 
     /**
      * Check if the extension is enabled
      *
-     * @return boolean True for enabled
+     * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return (bool)$this->enabled;
     }
@@ -179,18 +188,16 @@ class Generic
      *
      * @return string The path
      */
-    public function getExtensionPath()
+    public function getExtensionPath(): string
     {
-        $basePath = '';
-
-        $folders = array(
+        $folders = [
             'component' => 'administrator/components/',
             'plugin'    => 'plugins/',
             'template'  => 'templates/',
             'library'   => 'libraries/',
             'cli'       => 'cli/',
             'module'    => 'modules/'
-        );
+        ];
 
         $basePath = $this->basePath . '/' . $folders[$this->type];
 
@@ -220,18 +227,18 @@ class Generic
     /**
      * Get the full element
      *
-     * @return string The full element
+     * @return string
      */
-    public function getFullElement()
+    public function getFullElement(): string
     {
-        $prefixes = array(
+        $prefixes = [
             'component' => 'com',
             'plugin'    => 'plg',
             'template'  => 'tpl',
             'library'   => 'lib',
             'cli'       => 'cli',
             'module'    => 'mod'
-        );
+        ];
 
         $fullElement = $prefixes[$this->type];
 
@@ -250,12 +257,12 @@ class Generic
      *
      * @return string The element
      */
-    public function getElementToDb()
+    public function getElementToDb(): string
     {
-        $prefixes = array(
+        $prefixes = [
             'component' => 'com_',
             'module'    => 'mod_'
-        );
+        ];
 
         $fullElement = '';
         if (array_key_exists($this->type, $prefixes)) {
@@ -274,29 +281,29 @@ class Generic
      *
      * @return string
      */
-    public function getManifestPath()
+    public function getManifestPath(): string
     {
         $extensionPath = $this->getExtensionPath();
 
         // Templates or extension?
-        if ($this->type === 'template') {
-            $fileName = 'templateDetails.xml';
-        } else {
-            $fileName = $this->element . '.xml';
-
-            if ($this->type === 'template') {
+        switch ($this->type) {
+            case 'template':
                 $fileName = 'templateDetails.xml';
-            }
+                break;
+
+            case 'library':
+                $fileName = $this->element . '.xml';
+                if (!is_file($extensionPath . '/' . $fileName)) {
+                    $extensionPath = JPATH_MANIFESTS . '/libraries';
+                }
+                break;
+
+            default:
+                $fileName = $this->getElementToDb() . '.xml';
+                break;
         }
 
-        $path = $extensionPath . "/{$fileName}";
-
-        if (!file_exists($path)) {
-            $path = $extensionPath . "/{$this->getElementToDb()}.xml";
-        }
-
-
-        return $path;
+        return $extensionPath . '/' . $fileName;
     }
 
     /**
@@ -304,9 +311,9 @@ class Generic
      *
      * @param bool $force If true, force to load the manifest, ignoring the cached one
      *
-     * @return \SimpleXMLElement
+     * @return object
      */
-    public function getManifest($force = false)
+    public function getManifest(bool $force = false): object
     {
         if (!isset($this->manifest) || $force) {
             $path = $this->getManifestPath();
@@ -324,16 +331,14 @@ class Generic
      *
      * @param bool $force Force to reload the config file
      *
-     * @return JRegistry
+     * @return \SimpleXMLElement
      */
-    public function getConfig($force = false)
+    public function getConfig(bool $force = false)
     {
-        if (!isset($this->config) || $force) {
+        if ($this->config === null || $force) {
             $path = $this->getExtensionPath() . '/config.xml';
 
-            if (file_exists($path)) {
-                $this->config = simplexml_load_file($path);
-            }
+            $this->config = is_file($path) ? simplexml_load_file($path) : false;
         }
 
         return $this->config;
@@ -344,18 +349,16 @@ class Generic
      *
      * @return string
      */
-    public function getUpdateURL()
+    public function getUpdateURL(): string
     {
-        $db    = JFactory::getDbo();
+        $db    = Factory::getDbo();
         $query = $db->getQuery(true)
             ->select('sites.location')
             ->from('#__update_sites AS sites')
             ->leftJoin('#__update_sites_extensions AS extensions ON (sites.update_site_id = extensions.update_site_id)')
             ->where('extensions.extension_id = ' . $this->id);
-        $db->setQuery($query);
-        $row = $db->loadResult();
 
-        return $row;
+        return $db->setQuery($query)->loadResult();
     }
 
     /**
@@ -363,16 +366,16 @@ class Generic
      *
      * @param string $url
      */
-    public function setUpdateURL($url)
+    public function setUpdateURL(string $url)
     {
-        $db = JFactory::getDbo();
+        $db = Factory::getDbo();
 
         // Get the update site id
-        $join  = $db->qn('#__update_sites_extensions') . ' AS extensions '
+        $join  = $db->quoteName('#__update_sites_extensions') . ' AS extensions '
             . 'ON (sites.update_site_id = extensions.update_site_id)';
         $query = $db->getQuery(true)
             ->select('sites.update_site_id')
-            ->from($db->qn('#__update_sites') . ' AS sites')
+            ->from($db->quoteName('#__update_sites') . ' AS sites')
             ->leftJoin($join)
             ->where('extensions.extension_id = ' . $this->id);
         $db->setQuery($query);
@@ -380,9 +383,9 @@ class Generic
 
         if (!empty($siteId)) {
             $query = $db->getQuery(true)
-                ->update($db->qn('#__update_sites'))
-                ->set($db->qn('location') . ' = ' . $db->q($url))
-                ->where($db->qn('update_site_id') . ' = ' . $siteId);
+                ->update($db->quoteName('#__update_sites'))
+                ->set($db->quoteName('location') . ' = ' . $db->quote($url))
+                ->where($db->quoteName('update_site_id') . ' = ' . $siteId);
             $db->setQuery($query);
             $db->execute();
         }
@@ -395,9 +398,9 @@ class Generic
      */
     public function storeParams()
     {
-        $db     = JFactory::getDbo();
-        $params = $db->q($this->params->toString());
-        $id     = $db->q($this->id);
+        $db     = Factory::getDbo();
+        $params = $db->quote($this->params->toString());
+        $id     = $db->quote($this->id);
 
         $query = "UPDATE `#__extensions` SET params = {$params} WHERE extension_id = {$id}";
         $db->setQuery($query);
@@ -409,7 +412,7 @@ class Generic
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }

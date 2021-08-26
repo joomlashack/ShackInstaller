@@ -1192,7 +1192,6 @@ abstract class AbstractScript
                 ]);
             $db->setQuery($query)->execute();
         }
-
     }
 
     /**
@@ -1542,14 +1541,7 @@ abstract class AbstractScript
      */
     protected function getName()
     {
-        // Get the extension name. If no custom name is set, uses the namespace
-        if (isset($this->manifest->alledia->name)) {
-            $name = $this->manifest->alledia->name;
-
-        } else {
-            $name = $this->manifest->alledia->namespace;
-        }
-        return (string)$name;
+        return (string)($this->manifest->alledia->name ?? $this->manifest->alledia->namespace);
     }
 
     /**

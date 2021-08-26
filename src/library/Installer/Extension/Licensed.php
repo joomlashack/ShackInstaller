@@ -37,30 +37,26 @@ class Licensed extends Generic
      *
      * @var string
      */
-    protected $license;
+    protected $license = null;
 
     /**
      * The path for the pro library
      *
      * @var string
      */
-    protected $proLibraryPath;
+    protected $proLibraryPath = null;
 
     /**
      * The path for the free library
      *
      * @var string
      */
-    protected $libraryPath;
+    protected $libraryPath = null;
 
     /**
-     * Class constructor, set the extension type.
-     *
-     * @param string $namespace The element of the extension
-     * @param string $type      The type of extension
-     * @param string $folder    The folder for plugins (only)
+     * @inheritDoc
      */
-    public function __construct($namespace, $type, $folder = '', $basePath = JPATH_SITE)
+    public function __construct(string $namespace, string $type, ?string $folder = '', string $basePath = JPATH_SITE)
     {
         parent::__construct($namespace, $type, $folder, $basePath);
 
@@ -73,9 +69,9 @@ class Licensed extends Generic
     /**
      * Check if the license is pro
      *
-     * @return boolean True for pro license
+     * @return bool True for pro license
      */
-    public function isPro()
+    public function isPro(): bool
     {
         return $this->license === 'pro';
     }
@@ -83,19 +79,19 @@ class Licensed extends Generic
     /**
      * Check if the license is free
      *
-     * @return boolean True for free license
+     * @return bool
      */
-    public function isFree()
+    public function isFree(): bool
     {
         return !$this->isPro();
     }
 
     /**
-     * Get the include path for the include on the free library, based on the extension type
+     * Get the path for the free library, based on the extension type
      *
      * @return string The path for pro
      */
-    public function getLibraryPath()
+    public function getLibraryPath(): string
     {
         if (empty($this->libraryPath)) {
             $basePath = $this->getExtensionPath();
@@ -107,13 +103,13 @@ class Licensed extends Generic
     }
 
     /**
-     * Get the include path for the include on the pro library, based on the extension type
+     * Get path for the pro library, based on the extension type
      *
      * @return string The path for pro
      */
-    public function getProLibraryPath()
+    public function getProLibraryPath(): string
     {
-        if (empty($this->proLibraryPath)) {
+        if ($this->proLibraryPath === null) {
             $basePath = $this->getLibraryPath();
 
             $this->proLibraryPath = $basePath . '/Pro';
@@ -128,19 +124,19 @@ class Licensed extends Generic
      * @return bool
      * @throws \Exception
      */
-    public function loadLibrary()
+    public function loadLibrary(): bool
     {
         $libraryPath = $this->getLibraryPath();
 
         // If we have a library path, lets load it
-        if (file_exists($libraryPath)) {
+        if (is_dir($libraryPath)) {
             if ($this->isPro()) {
                 // Check if the pro library exists
-                if (!file_exists($this->getProLibraryPath())) {
-                    throw new \Exception("Pro library not found: {$this->extension->type}, {$this->extension->element}");
+                if (!is_dir($this->getProLibraryPath())) {
+                    throw new \Exception("Pro library not found: {$this->type}, {$this->element}");
                 }
             }
-            // Setup autoloaded libraries
+
             AutoLoader::register('Alledia\\' . $this->namespace, $libraryPath);
 
             return true;
