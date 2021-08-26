@@ -890,26 +890,26 @@ abstract class AbstractScript
      */
     protected function clearUpdateServers()
     {
-        $extension = $this->findThisExtension();
+        if ($extension = $this->findThisExtension()) {
+            $db = $this->dbo;
 
-        $db = $this->dbo;
-
-        $query = $db->getQuery(true)
-            ->select($db->quoteName('update_site_id'))
-            ->from($db->quoteName('#__update_sites_extensions'))
-            ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
-
-        if ($list = $db->setQuery($query)->loadColumn()) {
             $query = $db->getQuery(true)
-                ->delete($db->quoteName('#__update_sites_extensions'))
+                ->select($db->quoteName('update_site_id'))
+                ->from($db->quoteName('#__update_sites_extensions'))
                 ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
-            $db->setQuery($query)->execute();
 
-            array_walk($list, 'intval');
-            $query = $db->getQuery(true)
-                ->delete($db->quoteName('#__update_sites'))
-                ->where($db->quoteName('update_site_id') . ' IN (' . join(',', $list) . ')');
-            $db->setQuery($query)->execute();
+            if ($list = $db->setQuery($query)->loadColumn()) {
+                $query = $db->getQuery(true)
+                    ->delete($db->quoteName('#__update_sites_extensions'))
+                    ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
+                $db->setQuery($query)->execute();
+
+                array_walk($list, 'intval');
+                $query = $db->getQuery(true)
+                    ->delete($db->quoteName('#__update_sites'))
+                    ->where($db->quoteName('update_site_id') . ' IN (' . join(',', $list) . ')');
+                $db->setQuery($query)->execute();
+            }
         }
     }
 
