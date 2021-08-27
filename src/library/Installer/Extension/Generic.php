@@ -97,7 +97,7 @@ class Generic
     /**
      * The manifest information
      *
-     * @var object
+     * @var \SimpleXMLElement
      */
     public $manifest = null;
 
@@ -133,6 +133,8 @@ class Generic
 
     /**
      * Get information about this extension from the database
+     * NOTE: This is duplicated code from the corresponding class in
+     * \Alledia\Framework\Joomla\Extension\Generic
      */
     protected function getDataFromDatabase()
     {
@@ -311,19 +313,20 @@ class Generic
      *
      * @param bool $force If true, force to load the manifest, ignoring the cached one
      *
-     * @return object
+     * @return ?\SimpleXMLElement
      */
-    public function getManifest(bool $force = false): object
+    public function getManifest(bool $force = false): ?\SimpleXMLElement
     {
-        if (!isset($this->manifest) || $force) {
+        if ($this->manifest === null || $force) {
+            $this->manifest = false;
+
             $path = $this->getManifestPath();
-
-            $xml = simplexml_load_file($path);
-
-            $this->manifest = (object)json_decode(json_encode($xml));
+            if (is_file($path)) {
+                $this->manifest = simplexml_load_file($path);
+            }
         }
 
-        return $this->manifest;
+        return $this->manifest ?: null;
     }
 
     /**
