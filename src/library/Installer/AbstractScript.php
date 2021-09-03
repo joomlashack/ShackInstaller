@@ -440,7 +440,7 @@ abstract class AbstractScript
             $license = $this->getLicense();
             if (!$license->isPro()) {
                 $proLibraryPath = $license->getProLibraryPath();
-                if (file_exists($proLibraryPath)) {
+                if (is_dir($proLibraryPath)) {
                     Folder::delete($proLibraryPath);
                 }
             }
