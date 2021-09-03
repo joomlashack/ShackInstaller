@@ -287,7 +287,6 @@ class Generic
     {
         $extensionPath = $this->getExtensionPath();
 
-        // Templates or extension?
         switch ($this->type) {
             case 'template':
                 $fileName = 'templateDetails.xml';
@@ -300,8 +299,22 @@ class Generic
                 }
                 break;
 
+            case 'module':
+                $fileName = 'mod_' . $this->element . '.xml';
+                break;
+
+            case 'pkg':
+                $extensionPath = JPATH_MANIFESTS . '/packages';
+                $fileName      = 'pkg_' . $this->element . '.xml';
+                break;
+
+            case 'file':
+                $extensionPath = JPATH_MANIFESTS . '/files';
+                $fileName = 'file_' . $this->element . '.xml';
+                break;
+
             default:
-                $fileName = $this->getElementToDb() . '.xml';
+                $fileName = $this->element . '.xml';
                 break;
         }
 
