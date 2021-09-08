@@ -183,6 +183,7 @@ abstract class AbstractScript
      */
     public function __construct($parent)
     {
+        $this->sendDebugMessage('ShackInstaller v' . static::VERSION);
         $this->sendDebugMessage(__METHOD__);
 
         $this->initProperties($parent);
