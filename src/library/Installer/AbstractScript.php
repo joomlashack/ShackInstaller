@@ -1637,7 +1637,13 @@ abstract class AbstractScript
     protected function sendMessage(string $text, string $type = 'message')
     {
         if ($this->outputAllowed) {
-            $this->app->enqueueMessage($text, $type);
+            try {
+                $this->app = $this->app ?: Factory::getApplication();
+                $this->app->enqueueMessage($text, $type);
+
+            } catch (Throwable $error) {
+                // Give up trying to send a message normally
+            }
         }
     }
 
@@ -1674,7 +1680,7 @@ abstract class AbstractScript
                 $message = sprintf('%s:%s (%s) - %s', $line, $caller, $file, $error->getMessage());
             }
 
-            $this->app->enqueueMessage($message, 'error');
+            $this->sendMessage($message, 'error');
         }
     }
 
