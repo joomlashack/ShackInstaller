@@ -479,12 +479,9 @@ abstract class AbstractScript
      */
     protected function installRelated($parent)
     {
-        if ($this->manifest->alledia->relatedExtensions) {
-            // Directly unused var, but this resets the Installer instance
-            $installer = new Installer();
-            unset($installer);
         $this->sendDebugMessage(__METHOD__);
 
+        if ($this->manifest->alledia->relatedExtensions) {
             $source         = $this->installer->getPath('source');
             $extensionsPath = $source . '/extensions';
 
