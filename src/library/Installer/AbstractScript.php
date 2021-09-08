@@ -171,6 +171,11 @@ abstract class AbstractScript
     protected $welcomeMessage = null;
 
     /**
+     * @var bool
+     */
+    protected $debug = false;
+
+    /**
      * @param InstallerAdapter $parent
      *
      * @return void
@@ -178,6 +183,8 @@ abstract class AbstractScript
      */
     public function __construct($parent)
     {
+        $this->sendDebugMessage(__METHOD__);
+
         $this->initProperties($parent);
     }
 
@@ -189,6 +196,8 @@ abstract class AbstractScript
      */
     public function initProperties($parent)
     {
+        $this->sendDebugMessage(__METHOD__);
+
         $this->app = Factory::getApplication();
 
         $this->outputAllowed = JPATH_BASE == JPATH_ADMINISTRATOR;
@@ -281,6 +290,8 @@ abstract class AbstractScript
      */
     public function uninstall($parent)
     {
+        $this->sendDebugMessage(__METHOD__);
+
         try {
             $this->uninstallRelated();
 
@@ -309,10 +320,13 @@ abstract class AbstractScript
     public function preFlight($type, $parent)
     {
         if ($this->cancelInstallation) {
+            $this->sendDebugMessage('CANCEL: ' . __METHOD__);
+
             return false;
         }
 
         try {
+            $this->sendDebugMessage(__METHOD__);
             $success = true;
 
             if ($type === 'update') {
@@ -409,6 +423,8 @@ abstract class AbstractScript
      */
     public function postFlight($type, $parent)
     {
+        $this->sendDebugMessage(__METHOD__);
+
         /*
          * Joomla 4 now calls postFlight on uninstalls. Which is kinda cool actually.
          * But this code is problematic in that scenario
@@ -467,6 +483,7 @@ abstract class AbstractScript
             // Directly unused var, but this resets the Installer instance
             $installer = new Installer();
             unset($installer);
+        $this->sendDebugMessage(__METHOD__);
 
             $source         = $this->installer->getPath('source');
             $extensionsPath = $source . '/extensions';
@@ -1154,6 +1171,14 @@ abstract class AbstractScript
      */
     protected function storeFeedbackForRelatedExtension(string $key, string $property, string $value)
     {
+        $this->sendDebugMessage(sprintf(
+            '%s<br>**** %s-%s-%s<br><br>',
+            __METHOD__,
+            $key,
+            $property,
+            $value
+        ));
+
         if (empty($this->relatedExtensionFeedback[$key])) {
             $this->relatedExtensionFeedback[$key] = [];
         }
@@ -1653,6 +1678,18 @@ abstract class AbstractScript
             }
 
             $this->app->enqueueMessage($message, 'error');
+        }
+    }
+
+    /**
+     * @param string $text
+     *
+     * @return void
+     */
+    protected function sendDebugMessage(string $text)
+    {
+        if ($this->debug) {
+            $this->sendMessage($text, 'Debug-' . get_class($this));
         }
     }
 
