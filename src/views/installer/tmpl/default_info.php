@@ -60,7 +60,7 @@ defined('_JEXEC') or die();
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($this->relatedExtensionFeedback as $element => $data) : ?>
+                <?php foreach ($this->relatedExtensionFeedback as $data) : ?>
                     <tr>
                         <td><?php echo Text::_($data['name']); ?></td>
                         <td>

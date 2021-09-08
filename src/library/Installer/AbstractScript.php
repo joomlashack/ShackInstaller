@@ -482,6 +482,7 @@ abstract class AbstractScript
                     $type    = $this->getXmlValue($extension['type']);
                     $element = $this->getXmlValue($extension['element']);
                     $group   = $this->getXmlValue($extension['group']);
+                    $key     = md5(join(':', [$type, $element, $group]));
 
                     $current = $this->findExtension($type, $element, $group);
                     $isNew   = empty($current);
@@ -496,7 +497,7 @@ abstract class AbstractScript
                     $newManifest = $tmpInstaller->getManifest();
                     $newVersion  = (string)$newManifest->version;
 
-                    $this->storeFeedbackForRelatedExtension($element, 'name', (string)$newManifest->name);
+                    $this->storeFeedbackForRelatedExtension($key, 'name', (string)$newManifest->name);
 
                     $downgrade = $this->getXmlValue($extension['downgrade'], 'bool', $defaultDowngrade);
                     if (!$isNew && !$downgrade) {
@@ -509,7 +510,7 @@ abstract class AbstractScript
                         if (version_compare($currentVersion, $newVersion, '>')) {
                             // Store the state of the install/update
                             $this->storeFeedbackForRelatedExtension(
-                                $element,
+                                $key,
                                 'message',
                                 Text::sprintf(
                                     'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_SKIPED',
@@ -534,20 +535,20 @@ abstract class AbstractScript
                                     if ($this->getXmlValue($extension['publish'], 'bool', $defaultPublish)) {
                                         $current->publish();
 
-                                        $this->storeFeedbackForRelatedExtension($element, 'publish', true);
+                                        $this->storeFeedbackForRelatedExtension($key, 'publish', true);
                                     }
 
                                     if ($ordering = $this->getXmlValue($extension['ordering'])) {
                                         $this->setPluginOrder($current, $ordering);
 
-                                        $this->storeFeedbackForRelatedExtension($element, 'ordering', $ordering);
+                                        $this->storeFeedbackForRelatedExtension($key, 'ordering', $ordering);
                                     }
                                 }
                             }
                         }
 
                         $this->storeFeedbackForRelatedExtension(
-                            $element,
+                            $key,
                             'message',
                             Text::sprintf('LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
                         );
@@ -556,7 +557,7 @@ abstract class AbstractScript
                         $this->sendMessage(Text::sprintf($text . '_FAIL', $typeName, $element), 'error');
 
                         $this->storeFeedbackForRelatedExtension(
-                            $element,
+                            $key,
                             'message',
                             Text::sprintf(
                                 'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_FAILED',
@@ -1145,19 +1146,19 @@ abstract class AbstractScript
     /**
      * Stores feedback data for related extensions to display after install
      *
-     * @param string $element
      * @param string $key
+     * @param string $property
      * @param string $value
      *
      * @return void
      */
-    protected function storeFeedbackForRelatedExtension($element, $key, $value)
+    protected function storeFeedbackForRelatedExtension(string $key, string $property, string $value)
     {
-        if (empty($this->relatedExtensionFeedback[$element])) {
-            $this->relatedExtensionFeedback[$element] = [];
+        if (empty($this->relatedExtensionFeedback[$key])) {
+            $this->relatedExtensionFeedback[$key] = [];
         }
 
-        $this->relatedExtensionFeedback[$element][$key] = $value;
+        $this->relatedExtensionFeedback[$key][$property] = $value;
     }
 
     /**
