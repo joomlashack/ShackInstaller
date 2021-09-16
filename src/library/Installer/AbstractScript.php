@@ -26,6 +26,8 @@ namespace Alledia\Installer;
 defined('_JEXEC') or die();
 
 use Alledia\Installer\Extension\Licensed;
+use JDatabaseDriver;
+use JEventDispatcher;
 use JFormFieldCustomFooter;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
@@ -38,7 +40,9 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Table\Extension;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Version;
 use Joomla\Component\Plugins\Administrator\Model\PluginModel;
+use Joomla\Event\DispatcherInterface;
 use Joomla\Registry\Registry;
 use SimpleXMLElement;
 use Throwable;
@@ -60,9 +64,14 @@ abstract class AbstractScript
     protected $app = null;
 
     /**
-     * @var \JDatabaseDriver
+     * @var JDatabaseDriver
      */
     protected $dbo = null;
+
+    /**
+     * @var JEventDispatcher|DispatcherInterface
+     */
+    protected $dispatcher = null;
 
     /**
      * @var Installer
@@ -195,7 +204,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function initProperties($parent)
+    protected function initProperties($parent)
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -261,6 +270,23 @@ abstract class AbstractScript
             $this->cancelInstallation = true;
             $this->sendErrorMessage($error);
         }
+    }
+
+    /**
+     * @return JEventDispatcher|DispatcherInterface
+     */
+    protected function getDispatcher()
+    {
+        if ($this->dispatcher === null) {
+            if (Version::MAJOR_VERSION < 4) {
+                $this->dispatcher = JEventDispatcher::getInstance();
+
+            } else {
+                $this->dispatcher = $this->app->getDispatcher();
+            }
+        }
+
+        return $this->dispatcher;
     }
 
     /**
