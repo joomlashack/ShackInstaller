@@ -849,7 +849,6 @@ abstract class AbstractScript
     {
         $obsolete = $this->manifest->alledia->obsolete;
         if ($obsolete) {
-            // Extensions
             if ($obsolete->extension) {
                 foreach ($obsolete->extension as $extension) {
                     $type    = $this->getXmlValue($extension['type']);
@@ -886,7 +885,6 @@ abstract class AbstractScript
                 }
             }
 
-            // Files
             if ($obsolete->file) {
                 foreach ($obsolete->file as $file) {
                     $path = JPATH_ROOT . '/' . trim((string)$file, '/');
@@ -896,7 +894,6 @@ abstract class AbstractScript
                 }
             }
 
-            // Folders
             if ($obsolete->folder) {
                 foreach ($obsolete->folder as $folder) {
                     $path = JPATH_ROOT . '/' . trim((string)$folder, '/');
