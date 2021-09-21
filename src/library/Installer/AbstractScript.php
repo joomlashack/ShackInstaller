@@ -51,7 +51,7 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
-    public const VERSION = '2.0.9';
+    public const VERSION = '2.0.10b1';
 
     /**
      * @var bool
