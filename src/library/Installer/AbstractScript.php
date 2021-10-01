@@ -312,24 +312,6 @@ abstract class AbstractScript
     /**
      * @param InstallerAdapter $parent
      *
-     * @return void
-     * @throws \Exception
-     */
-    public function uninstall($parent)
-    {
-        $this->sendDebugMessage(__METHOD__);
-
-        try {
-            $this->uninstallRelated();
-
-        } catch (Throwable $error) {
-            $this->sendErrorMessage($error);
-        }
-    }
-
-    /**
-     * @param InstallerAdapter $parent
-     *
      * @return bool
      */
     public function update($parent)
@@ -493,6 +475,24 @@ abstract class AbstractScript
             }
 
             $this->displayWelcome($type);
+
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
+        }
+    }
+
+    /**
+     * @param InstallerAdapter $parent
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function uninstall($parent)
+    {
+        $this->sendDebugMessage(__METHOD__);
+
+        try {
+            $this->uninstallRelated();
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
