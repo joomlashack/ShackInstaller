@@ -51,7 +51,7 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
-    public const VERSION = '2.0.9';
+    public const VERSION = '2.0.10';
 
     /**
      * @var bool
@@ -312,24 +312,6 @@ abstract class AbstractScript
     /**
      * @param InstallerAdapter $parent
      *
-     * @return void
-     * @throws \Exception
-     */
-    public function uninstall($parent)
-    {
-        $this->sendDebugMessage(__METHOD__);
-
-        try {
-            $this->uninstallRelated();
-
-        } catch (Throwable $error) {
-            $this->sendErrorMessage($error);
-        }
-    }
-
-    /**
-     * @param InstallerAdapter $parent
-     *
      * @return bool
      */
     public function update($parent)
@@ -343,6 +325,8 @@ abstract class AbstractScript
      *
      * @return bool
      * @throws \Exception
+     *
+     * @deprecated v2.0.10 Use customPreFlight() in subclasses
      */
     public function preFlight($type, $parent)
     {
@@ -426,11 +410,19 @@ abstract class AbstractScript
                 }
             }
 
-            $this->cancelInstallation = !$success;
-
-            if ($type === 'update' && $success) {
-                $this->preserveFavicon();
+            if ($success) {
+                $success = $this->customPreFlight($type, $parent);
             }
+
+            if ($success) {
+                if ($type === 'update') {
+                    $this->preserveFavicon();
+                }
+
+                $this->clearObsolete($this->manifest->alledia->obsolete->preflight);
+            }
+
+            $this->cancelInstallation = !$success;
 
             return $success;
 
@@ -447,6 +439,8 @@ abstract class AbstractScript
      *
      * @return void
      * @throws \Exception
+     *
+     * @deprecated v2.0.10 Use customPostFlight() in subclasses
      */
     public function postFlight($type, $parent)
     {
@@ -492,11 +486,69 @@ abstract class AbstractScript
                 $this->preserveFavicon();
             }
 
+            $this->customPostFlight($type, $parent);
+
             $this->displayWelcome($type);
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
         }
+    }
+
+    /**
+     * @param InstallerAdapter $parent
+     *
+     * @return void
+     * @throws \Exception
+     *
+     * @deprecated v2.0.10 Use customUninstall() in subclasses
+     */
+    public function uninstall($parent)
+    {
+        $this->sendDebugMessage(__METHOD__);
+
+        try {
+            $this->uninstallRelated();
+            $this->customUninstall($parent);
+            $this->clearObsolete($this->manifest->alledia->obsolete->uninstall);
+
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
+        }
+    }
+
+    /**
+     * For use in subclasses
+     *
+     * @param string           $type
+     * @param InstallerAdapter $parent
+     *
+     * @return bool
+     */
+    protected function customPreFlight(string $type, InstallerAdapter $parent): bool
+    {
+        return true;
+    }
+
+    /**
+     * @param string           $type
+     * @param InstallerAdapter $parent
+     *
+     * @return void
+     */
+    protected function customPostFlight(string $type, InstallerAdapter $parent)
+    {
+    }
+
+    /**
+     * For use in subclasses
+     *
+     * @param InstallerAdapter $parent
+     *
+     * @return void
+     */
+    protected function customUninstall(InstallerAdapter $parent)
+    {
     }
 
     /**
@@ -841,13 +893,16 @@ abstract class AbstractScript
     /**
      * Delete obsolete files, folders and extensions.
      * Files and folders are identified from the site
-     * root path and should starts with a slash.
+     * root path.
      *
      * @return void
      */
-    protected function clearObsolete()
+    protected function clearObsolete(SimpleXMLElement $obsolete = null)
     {
-        $obsolete = $this->manifest->alledia->obsolete;
+        $obsolete = $obsolete ?: $this->manifest->alledia->obsolete;
+
+        $this->sendDebugMessage(__METHOD__ . '<pre>' . print_r($obsolete, 1) . '</pre>');
+
         if ($obsolete) {
             if ($obsolete->extension) {
                 foreach ($obsolete->extension as $extension) {
