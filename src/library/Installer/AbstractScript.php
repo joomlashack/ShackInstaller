@@ -150,12 +150,26 @@ abstract class AbstractScript
      * List of tables and respective indexes
      *
      * @var array
+     * @deprecated v5.0.0
      */
     protected $indexes = null;
 
     /**
-     * List of tables
-     *
+     * @var object[]
+     */
+    protected $tableColumns = [];
+
+    /**
+     * @var object[]
+     */
+    protected $tableIndexes = [];
+
+    /**
+     * @var object[]
+     */
+    protected $tableConstraints = [];
+
+    /**
      * @var array
      */
     protected $tables = null;
@@ -1361,6 +1375,7 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
+     * @deprecated v5.0.0: Use findColumn()
      */
     protected function getColumnsFromTable($table)
     {
@@ -1386,6 +1401,7 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
+     * @deprecated v5.0.0 use findIndex()
      */
     protected function getIndexesFromTable($table)
     {
@@ -1412,21 +1428,19 @@ abstract class AbstractScript
      * @param string[] $columns Assoc array of columnNames => definition
      *
      * @return void
+     * @deprecated v5.0.0: Use addColumns()
      */
-    protected function addColumnsIfNotExists($table, $columns)
+    protected function addColumnsIfNotExists(string $table, array $columns)
     {
         $db = $this->dbo;
 
-        $existentColumns = $this->getColumnsFromTable($table);
-
-        foreach ($columns as $column => $specification) {
-            if (!in_array($column, $existentColumns)) {
-                $db->setQuery(
-                    "ALTER TABLE {$db->quoteName($table)} ADD COLUMN {$db->quoteName($column)} {$specification}"
-                );
-                $db->execute();
-            }
+        $columnSpecs = [];
+        foreach ($columns as $columnName => $columnData) {
+            $columnId               = $table . '.' . $columnName;
+            $columnSpecs[$columnId] = $columnData;
         }
+
+        $this->addColumns($columnSpecs);
     }
 
     /**
@@ -1436,6 +1450,7 @@ abstract class AbstractScript
      * @param array  $indexes Assoc array of indexName => definition
      *
      * @return void
+     * @deprecated v5.0.0 use addIndexes()
      */
     protected function addIndexesIfNotExists($table, $indexes)
     {
@@ -1460,19 +1475,16 @@ abstract class AbstractScript
      * @param string[] $columns The column names that needed to be checked and added
      *
      * @return void
+     * @deprecated v5.0.0: Use dropColumns()
      */
     protected function dropColumnsIfExists($table, $columns)
     {
-        $db = $this->dbo;
-
-        $existentColumns = $this->getColumnsFromTable($table);
-
+        $columnIds = [];
         foreach ($columns as $column) {
-            if (in_array($column, $existentColumns)) {
-                $db->setQuery(sprintf('ALTER TABLE %s DROP COLUMN %s', $db->quoteName($table), $column))
-                    ->execute();
-            }
+            $columnIds[] = $table . '.' . $column;
         }
+
+        $this->dropColumns($columnIds);
     }
 
     /**
@@ -1481,35 +1493,11 @@ abstract class AbstractScript
      * @param string $name
      *
      * @return bool
+     * @deprecated v5.0.0: Use findTable()
      */
     protected function tableExists(string $name)
     {
-        $tables = $this->getTables(true);
-
-        $name = str_replace('#__', $this->app->get('dbprefix'), $name);
-
-        return in_array($name, $tables);
-    }
-
-    /**
-     * @param ?bool $force Force to get a fresh list of tables
-     *
-     * @return string[] List of tables
-     */
-    protected function getTables(?bool $force = false)
-    {
-        if ($force || $this->tables === null) {
-            $tables = $this->dbo->setQuery('SHOW TABLES')->loadRowList();
-
-            $this->tables = array_map(
-                function ($item) {
-                    return $item[0];
-                },
-                $tables
-            );
-        }
-
-        return $this->tables;
+        return $this->findTable($name);
     }
 
     /**
@@ -1677,6 +1665,273 @@ abstract class AbstractScript
                 rename($favicon, $faviconTemp);
             }
         }
+    }
+
+    /**
+     * @param ?bool $force Force to get a fresh list of tables
+     *
+     * @return string[] List of tables
+     */
+    protected function getTables(?bool $force = false): array
+    {
+        if ($force || $this->tables === null) {
+            $this->tables = $this->dbo->setQuery('SHOW TABLES')->loadColumn();
+        }
+
+        return $this->tables;
+    }
+
+    /**
+     * @param string $table
+     *
+     * @return bool
+     */
+    protected function findTable(string $table): bool
+    {
+        return in_array($this->dbo->replacePrefix($table), $this->getTables());
+    }
+
+    /**
+     * @param string[] $columnSpecs
+     *
+     * @return void
+     * @TODO: allow use of specification array
+     */
+    protected function addColumns(array $columnSpecs)
+    {
+        $db = $this->dbo;
+
+        foreach ($columnSpecs as $columnId => $specification) {
+            if (strpos($columnId, '.') !== false && empty($this->findColumn($columnId))) {
+                list($table, $columnName) = explode('.', $columnId);
+
+                $db->setQuery(
+                    sprintf(
+                        'ALTER TABLE %s ADD COLUMN %s %s',
+                        $db->quoteName($table),
+                        $db->quoteName($columnName),
+                        $specification
+                    )
+                )
+                    ->execute();
+            }
+        }
+    }
+
+    /**
+     * @param string[] $columnIds
+     *
+     * @return void
+     */
+    protected function dropColumns(array $columnIds)
+    {
+        $db = $this->dbo;
+        foreach ($columnIds as $columnId) {
+            if (strpos($columnId, '.') !== false) {
+                list($table, $column) = explode('.', $columnId);
+
+                $db->setQuery(
+                    sprintf(
+                        'ALTER TABLE %s DROP COLUMN %s',
+                        $db->quoteName($table),
+                        $column
+                    )
+                )
+                    ->execute();
+            }
+        }
+    }
+
+    /**
+     * @param string $columnId
+     *
+     * @return ?object
+     */
+    protected function findColumn(string $columnId): ?object
+    {
+        if (strpos($columnId, '.') !== false) {
+            $db = $this->dbo;
+
+            list($table, $field) = explode('.', $columnId, 2);
+
+            if (isset($this->tableColumns[$table]) == false) {
+                $this->tableColumns[$table] = $db->setQuery('SHOW COLUMNS FROM ' . $db->quoteName($table))
+                    ->loadObjectList();
+            }
+
+            foreach ($this->tableColumns[$table] as $column) {
+                if ($column->Field == $field) {
+                    return $column;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array $indexes
+     *
+     * @return void
+     */
+    protected function addIndexes(array $indexes)
+    {
+        $db = $this->dbo;
+
+        foreach ($indexes as $indexId => $ordering) {
+            if (strpos($indexId, '.') !== false) {
+                $index      = explode('.', $indexId);
+                $indexTable = array_shift($index) ?: '';
+                $indexName  = array_shift($index) ?: '';
+                $indexType  = array_shift($index) ?: '';
+
+                if ($this->findIndex($indexTable . '.' . $indexName) == false) {
+                    $db->setQuery(
+                        sprintf(
+                            'ALTER TABLE %s ADD %s INDEX %s(%s)',
+                            $db->quoteName($indexTable),
+                            $indexType,
+                            $db->quoteName($indexName),
+                            join(',', $ordering)
+                        )
+                    )
+                        ->execute();
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string[] $indexIds
+     *
+     * @return void
+     */
+    protected function dropIndexes(array $indexIds)
+    {
+        $db = $this->dbo;
+
+        foreach ($indexIds as $indexId) {
+            if (strpos($indexId, '.') !== false) {
+                if ($this->findIndex($indexId)) {
+                    list($table, $indexName) = explode('.', $indexId);
+
+                    $db->setQuery(
+                        sprintf(
+                            'ALTER TABLE %s DROP INDEX %s',
+                            $db->quoteName($table),
+                            $db->quoteName($indexName)
+                        )
+                    )
+                        ->execute();
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $indexId
+     *
+     * @return object[]
+     */
+    protected function findIndex(string $indexId): array
+    {
+        if (strpos($indexId, '.') !== false) {
+            $db = $this->dbo;
+
+            list($table, $indexName) = explode('.', $indexId);
+
+            if (isset($this->tableIndexes[$table]) == false) {
+                $this->tableIndexes[$table] = $db->setQuery('SHOW INDEX FROM ' . $db->quoteName($table))
+                    ->loadObjectList();
+            }
+
+            $indexes = [];
+            foreach ($this->tableIndexes[$table] as $index) {
+                if ($index->Key_name == $indexName) {
+                    $indexes[] = $index;
+                }
+            }
+
+            return $indexes;
+        }
+
+        return [];
+    }
+
+    /**
+     * @param string[] $constraintIds
+     *
+     * @return void
+     */
+    protected function dropConstraints(array $constraintIds)
+    {
+        $db = $this->dbo;
+
+        foreach ($constraintIds as $constraintId) {
+            if (strpos($constraintId, '.') !== false && $this->findConstraint($constraintId)) {
+                list($table, $constraintName) = explode('.', $constraintId);
+
+                $db->setQuery(
+                    sprintf(
+                        'ALTER TABLE %s DROP FOREIGN KEY %s',
+                        $db->quoteName($table),
+                        $db->quoteName($constraintName)
+                    )
+                )
+                    ->execute();
+            }
+        }
+    }
+
+    /**
+     * @param string $constraintId
+     *
+     * @return object[]
+     */
+    protected function findConstraint(string $constraintId): array
+    {
+        if (strpos($constraintId, '.') !== false) {
+            $db = $this->dbo;
+
+            list($table, $constraint) = explode('.', $constraintId);
+
+            if (isset($this->tableConstraints[$table]) == false) {
+                $query = $db->getQuery(true)
+                    ->select('*')
+                    ->from('information_schema.KEY_COLUMN_USAGE')
+                    ->where('TABLE_NAME = ' . $db->quote($db->replacePrefix($table)));
+
+                $this->tableConstraints[$table] = $db->setQuery($query)->loadObjectList();
+            }
+
+            $items = [];
+            foreach ($this->tableConstraints[$table] as $item) {
+                if ($item->CONSTRAINT_NAME == $constraint) {
+                    $items[] = $item;
+                }
+            }
+
+            return $items ?: [];
+        }
+
+        return [];
+    }
+
+    /**
+     * @return ?string
+     */
+    protected function getSchemaVersion(): ?string
+    {
+        if ($extension = $this->findThisExtension()) {
+            $query = $this->dbo->getQuery(true)
+                ->select('version_id')
+                ->from('#__schemas')
+                ->where('extension_id = ' . $extension->getId());
+
+            return $this->dbo->setQuery($query)->loadResult();
+        }
+
+        return null;
     }
 
     /**
