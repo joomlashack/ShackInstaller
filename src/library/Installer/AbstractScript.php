@@ -1926,7 +1926,7 @@ abstract class AbstractScript
             $query = $this->dbo->getQuery(true)
                 ->select('version_id')
                 ->from('#__schemas')
-                ->where('extension_id = ' . $extension->getId());
+                ->where('extension_id = ' . $extension->get('extension_id'));
 
             return $this->dbo->setQuery($query)->loadResult();
         }
