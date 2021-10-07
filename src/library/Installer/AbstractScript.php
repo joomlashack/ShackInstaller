@@ -318,7 +318,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function discover_install($parent)
+    final public function discover_install($parent)
     {
         return $this->install($parent);
     }
