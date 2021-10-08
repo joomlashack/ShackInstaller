@@ -150,7 +150,7 @@ abstract class AbstractScript
      * List of tables and respective indexes
      *
      * @var array
-     * @deprecated v5.0.0
+     * @deprecated v2.0.11
      */
     protected $indexes = null;
 
@@ -339,8 +339,6 @@ abstract class AbstractScript
      *
      * @return bool
      * @throws \Exception
-     *
-     * @deprecated v2.0.10 Use customPreFlight() in subclasses
      */
     public function preFlight($type, $parent)
     {
@@ -453,8 +451,6 @@ abstract class AbstractScript
      *
      * @return void
      * @throws \Exception
-     *
-     * @deprecated v2.0.10 Use customPostFlight() in subclasses
      */
     public function postFlight($type, $parent)
     {
@@ -514,8 +510,6 @@ abstract class AbstractScript
      *
      * @return void
      * @throws \Exception
-     *
-     * @deprecated v2.0.10 Use customUninstall() in subclasses
      */
     public function uninstall($parent)
     {
@@ -875,7 +869,7 @@ abstract class AbstractScript
      * @param string $type
      *
      * @return void
-     * @deprecated v2.0.0
+     * @deprecated v2.0.0: use $this->sendMessage()
      */
     protected function setMessage($msg, $type = 'message')
     {
@@ -886,7 +880,7 @@ abstract class AbstractScript
      * Display queued messages
      *
      * @return void
-     * @deprecated v2.0.0
+     * @deprecated v2.0.0: use $this->sendMessage()
      */
     protected function showMessages()
     {
@@ -1375,7 +1369,7 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
-     * @deprecated v5.0.0: Use findColumn()
+     * @deprecated v2.0.11: Use $this->findColumn()
      */
     protected function getColumnsFromTable($table)
     {
@@ -1401,7 +1395,7 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
-     * @deprecated v5.0.0 use findIndex()
+     * @deprecated v2.0.11: use $this->findIndex()
      */
     protected function getIndexesFromTable($table)
     {
@@ -1428,7 +1422,7 @@ abstract class AbstractScript
      * @param string[] $columns Assoc array of columnNames => definition
      *
      * @return void
-     * @deprecated v5.0.0: Use addColumns()
+     * @deprecated v2.0.11: Use $this->addColumns()
      */
     protected function addColumnsIfNotExists(string $table, array $columns)
     {
@@ -1475,7 +1469,7 @@ abstract class AbstractScript
      * @param string[] $columns The column names that needed to be checked and added
      *
      * @return void
-     * @deprecated v5.0.0: Use dropColumns()
+     * @deprecated v2.0.11: Use $this->dropColumns()
      */
     protected function dropColumnsIfExists($table, $columns)
     {
@@ -1493,7 +1487,7 @@ abstract class AbstractScript
      * @param string $name
      *
      * @return bool
-     * @deprecated v5.0.0: Use findTable()
+     * @deprecated v2.0.11: Use $this->findTable()
      */
     protected function tableExists(string $name)
     {
