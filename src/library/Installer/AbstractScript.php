@@ -310,7 +310,14 @@ abstract class AbstractScript
      */
     public function install($parent)
     {
-        return true;
+        try {
+            return $this->customInstall($parent);
+
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
+        }
+
+        return false;
     }
 
     /**
@@ -318,9 +325,18 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    final public function discover_install($parent)
+    public function discover_install($parent)
     {
-        return $this->install($parent);
+        try {
+            if ($this->install($parent)) {
+                return $this->customDiscoverInstall($parent);
+            }
+
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
+        }
+
+        return false;
     }
 
     /**
@@ -330,7 +346,14 @@ abstract class AbstractScript
      */
     public function update($parent)
     {
-        return true;
+        try {
+            return $this->customUpdate($parent);
+
+        } catch (Throwable $error) {
+            $this->sendErrorMessage($error);
+        }
+
+        return false;
     }
 
     /**
@@ -539,6 +562,44 @@ abstract class AbstractScript
     }
 
     /**
+     * For use in subclasses
+     *
+     * @param InstallerAdapter $parent
+     *
+     * @return bool
+     */
+    protected function customInstall(InstallerAdapter $parent): bool
+    {
+        return true;
+    }
+
+    /**
+     * For use in subclasses
+     *
+     * @param InstallerAdapter $parent
+     *
+     * @return bool
+     */
+    protected function customDiscoverInstall(InstallerAdapter $parent): bool
+    {
+        return true;
+    }
+
+    /**
+     * For use in subclasses
+     *
+     * @param InstallerAdapter $parent
+     *
+     * @return bool
+     */
+    protected function customUpdate(InstallerAdapter $parent): bool
+    {
+        return true;
+    }
+
+    /**
+     * For use in subclassses
+     *
      * @param string           $type
      * @param InstallerAdapter $parent
      *
