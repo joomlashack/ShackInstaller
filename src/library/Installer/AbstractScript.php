@@ -564,7 +564,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function installRelated($parent)
+    final protected function installRelated($parent)
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -678,7 +678,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    protected function uninstallRelated()
+    final protected function uninstallRelated()
     {
         if ($this->manifest->alledia->relatedExtensions) {
             $installer = new Installer();
@@ -726,7 +726,7 @@ abstract class AbstractScript
      *
      * @return ?Extension
      */
-    protected function findExtension($type, $element, $group = null)
+    final protected function findExtension($type, $element, $group = null)
     {
         // @TODO: Why do we need to use JTable?
         /** @var Extension $row */
@@ -782,7 +782,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function setPluginOrder($extension, $order)
+    final protected function setPluginOrder($extension, $order)
     {
         if ($extension->get('type') == 'plugin' && !empty($order)) {
             $db    = $this->dbo;
@@ -871,7 +871,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.0.0: use $this->sendMessage()
      */
-    protected function setMessage($msg, $type = 'message')
+    final protected function setMessage($msg, $type = 'message')
     {
         $this->sendMessage($msg, $type);
     }
@@ -882,7 +882,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.0.0: use $this->sendMessage()
      */
-    protected function showMessages()
+    final protected function showMessages()
     {
         if ($this->messages) {
             foreach ($this->messages as $msg) {
@@ -905,7 +905,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function clearObsolete(SimpleXMLElement $obsolete = null)
+    final protected function clearObsolete(SimpleXMLElement $obsolete = null)
     {
         $obsolete = $obsolete ?: $this->manifest->alledia->obsolete;
 
@@ -978,7 +978,7 @@ abstract class AbstractScript
      *
      * @return ?Extension
      */
-    protected function findThisExtension()
+    final protected function findThisExtension()
     {
         return $this->findExtension(
             $this->getXmlValue($this->manifest['type']),
@@ -990,7 +990,7 @@ abstract class AbstractScript
     /**
      * Use this in preflight to clear out obsolete update servers when the url has changed.
      */
-    protected function clearUpdateServers()
+    final protected function clearUpdateServers()
     {
         if ($extension = $this->findThisExtension()) {
             $db = $this->dbo;
@@ -1024,7 +1024,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getFullElement($type = null, $element = null, $group = null)
+    final protected function getFullElement($type = null, $element = null, $group = null)
     {
         $prefixes = [
             'component' => 'com',
@@ -1052,7 +1052,7 @@ abstract class AbstractScript
     /**
      * @return Licensed
      */
-    protected function getLicense()
+    final protected function getLicense()
     {
         if ($this->license === null) {
             $this->license = new Licensed(
@@ -1070,7 +1070,7 @@ abstract class AbstractScript
      *
      * @return Registry
      */
-    protected function getInfoFromManifest($manifestPath)
+    final protected function getInfoFromManifest($manifestPath)
     {
         $info = new Registry();
 
@@ -1107,7 +1107,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getExtensionPath($type, $element, $group = '')
+    final protected function getExtensionPath($type, $element, $group = '')
     {
         $folders = [
             'component' => 'administrator/components/',
@@ -1159,7 +1159,7 @@ abstract class AbstractScript
      *
      * @return int
      */
-    protected function getExtensionId($type, $element, $group = '')
+    final protected function getExtensionId($type, $element, $group = '')
     {
         $db    = $this->dbo;
         $query = $db->getQuery(true)
@@ -1180,7 +1180,7 @@ abstract class AbstractScript
      *
      * @return string The path
      */
-    protected function getManifestPath($type, $element, $group = '')
+    final protected function getManifestPath($type, $element, $group = '')
     {
         $installer = new Installer();
 
@@ -1217,7 +1217,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function publishThisPlugin()
+    final protected function publishThisPlugin()
     {
         $attributes = $this->manifest->alledia->element->attributes();
         $publish    = (string)$attributes['publish'];
@@ -1233,7 +1233,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function reorderThisPlugin()
+    final protected function reorderThisPlugin()
     {
         $attributes = $this->manifest->alledia->element->attributes();
         $ordering   = (string)$attributes['ordering'];
@@ -1253,7 +1253,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function storeFeedbackForRelatedExtension(string $key, string $property, string $value)
+    final protected function storeFeedbackForRelatedExtension(string $key, string $property, string $value)
     {
         $this->sendDebugMessage(sprintf(
             '%s<br>**** %s-%s-%s<br><br>',
@@ -1276,7 +1276,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function addAllediaAuthorshipToExtension()
+    final protected function addAllediaAuthorshipToExtension()
     {
         if ($extension = $this->findThisExtension()) {
             $db = $this->dbo;
@@ -1310,7 +1310,7 @@ abstract class AbstractScript
      *
      * @param mixed $stylesheets
      */
-    protected function addStyle($stylesheets)
+    final protected function addStyle($stylesheets)
     {
         if (is_string($stylesheets)) {
             $stylesheets = [$stylesheets];
@@ -1331,7 +1331,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function fixMenus()
+    final protected function fixMenus()
     {
         if ($this->type == 'component') {
             $db = $this->dbo;
@@ -1371,7 +1371,7 @@ abstract class AbstractScript
      * @return string[]
      * @deprecated v2.0.11: Use $this->findColumn()
      */
-    protected function getColumnsFromTable($table)
+    final protected function getColumnsFromTable($table)
     {
         if (!isset($this->columns[$table])) {
             $db = $this->dbo;
@@ -1397,7 +1397,7 @@ abstract class AbstractScript
      * @return string[]
      * @deprecated v2.0.11: use $this->findIndex()
      */
-    protected function getIndexesFromTable($table)
+    final protected function getIndexesFromTable($table)
     {
         if (!isset($this->indexes[$table])) {
             $db = $this->dbo;
@@ -1424,7 +1424,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.0.11: Use $this->addColumns()
      */
-    protected function addColumnsIfNotExists(string $table, array $columns)
+    final protected function addColumnsIfNotExists(string $table, array $columns)
     {
         $db = $this->dbo;
 
@@ -1444,9 +1444,9 @@ abstract class AbstractScript
      * @param array  $indexes Assoc array of indexName => definition
      *
      * @return void
-     * @deprecated v5.0.0 use addIndexes()
+     * @deprecated v2.0.11: use $this->addIndexes()
      */
-    protected function addIndexesIfNotExists($table, $indexes)
+    final protected function addIndexesIfNotExists($table, $indexes)
     {
         $db = $this->dbo;
 
@@ -1471,7 +1471,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.0.11: Use $this->dropColumns()
      */
-    protected function dropColumnsIfExists($table, $columns)
+    final protected function dropColumnsIfExists($table, $columns)
     {
         $columnIds = [];
         foreach ($columns as $column) {
@@ -1489,7 +1489,7 @@ abstract class AbstractScript
      * @return bool
      * @deprecated v2.0.11: Use $this->findTable()
      */
-    protected function tableExists(string $name)
+    final protected function tableExists(string $name)
     {
         return $this->findTable($name);
     }
@@ -1502,7 +1502,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    protected function parseConditionalExpression($expression)
+    final protected function parseConditionalExpression($expression)
     {
         $expression = strtolower($expression);
         $terms      = explode('=', $expression);
@@ -1536,7 +1536,7 @@ abstract class AbstractScript
      *
      * @return string[] An associative array with information about the extension
      */
-    protected function getExtensionInfoFromElement($element)
+    final protected function getExtensionInfoFromElement($element)
     {
         $result = array_fill_keys(
             ['type', 'name', 'group', 'prefix', 'namespace'],
@@ -1589,7 +1589,7 @@ abstract class AbstractScript
      *
      * @return bool True, if the target version is greater than or equal to actual version
      */
-    protected function validateTargetVersion($actualVersion, $targetVersion, $compare = null)
+    final protected function validateTargetVersion($actualVersion, $targetVersion, $compare = null)
     {
         if ($targetVersion === '.*') {
             // Any version is valid
@@ -1607,7 +1607,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    protected function validatePreviousVersion($targetVersion, $compare = null)
+    final protected function validatePreviousVersion($targetVersion, $compare = null)
     {
         if ($this->previousManifest) {
             $lastVersion = (string)$this->previousManifest->version;
@@ -1623,7 +1623,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    protected function getName()
+    final protected function getName()
     {
         return (string)($this->manifest->alledia->name ?? $this->manifest->alledia->namespace);
     }
@@ -1632,7 +1632,7 @@ abstract class AbstractScript
      * If a template, preserve the favicon during an update.
      * Rename favicon during preFlight(). Rename back during postFlight()
      */
-    protected function preserveFavicon()
+    final protected function preserveFavicon()
     {
         $nameOfExtension = (string)$this->manifest->alledia->element;
 
@@ -1666,7 +1666,7 @@ abstract class AbstractScript
      *
      * @return string[] List of tables
      */
-    protected function getTables(?bool $force = false): array
+    final protected function getTables(?bool $force = false): array
     {
         if ($force || $this->tables === null) {
             $this->tables = $this->dbo->setQuery('SHOW TABLES')->loadColumn();
@@ -1680,7 +1680,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    protected function findTable(string $table): bool
+    final protected function findTable(string $table): bool
     {
         return in_array($this->dbo->replacePrefix($table), $this->getTables());
     }
@@ -1691,7 +1691,7 @@ abstract class AbstractScript
      * @return void
      * @TODO: allow use of specification array
      */
-    protected function addColumns(array $columnSpecs)
+    final protected function addColumns(array $columnSpecs)
     {
         $db = $this->dbo;
 
@@ -1717,7 +1717,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function dropColumns(array $columnIds)
+    final protected function dropColumns(array $columnIds)
     {
         $db = $this->dbo;
         foreach ($columnIds as $columnId) {
@@ -1741,7 +1741,7 @@ abstract class AbstractScript
      *
      * @return ?object
      */
-    protected function findColumn(string $columnId): ?object
+    final protected function findColumn(string $columnId): ?object
     {
         if (strpos($columnId, '.') !== false) {
             $db = $this->dbo;
@@ -1768,7 +1768,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function addIndexes(array $indexes)
+    final protected function addIndexes(array $indexes)
     {
         $db = $this->dbo;
 
@@ -1800,7 +1800,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function dropIndexes(array $indexIds)
+    final protected function dropIndexes(array $indexIds)
     {
         $db = $this->dbo;
 
@@ -1827,7 +1827,7 @@ abstract class AbstractScript
      *
      * @return object[]
      */
-    protected function findIndex(string $indexId): array
+    final protected function findIndex(string $indexId): array
     {
         if (strpos($indexId, '.') !== false) {
             $db = $this->dbo;
@@ -1857,7 +1857,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function dropConstraints(array $constraintIds)
+    final protected function dropConstraints(array $constraintIds)
     {
         $db = $this->dbo;
 
@@ -1882,7 +1882,7 @@ abstract class AbstractScript
      *
      * @return object[]
      */
-    protected function findConstraint(string $constraintId): array
+    final protected function findConstraint(string $constraintId): array
     {
         if (strpos($constraintId, '.') !== false) {
             $db = $this->dbo;
@@ -1914,7 +1914,7 @@ abstract class AbstractScript
     /**
      * @return ?string
      */
-    protected function getSchemaVersion(): ?string
+    final protected function getSchemaVersion(): ?string
     {
         if ($extension = $this->findThisExtension()) {
             $query = $this->dbo->getQuery(true)
@@ -1935,7 +1935,7 @@ abstract class AbstractScript
      *
      * @return bool|string
      */
-    protected function getXmlValue($element, $type = 'string', $default = null)
+    final protected function getXmlValue($element, $type = 'string', $default = null)
     {
         $value = $element ? (string)$element : $default;
 
@@ -1962,7 +1962,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function sendMessage(string $text, string $type = 'message')
+    final protected function sendMessage(string $text, string $type = 'message')
     {
         if ($this->outputAllowed) {
             try {
@@ -1981,7 +1981,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function sendErrorMessage(Throwable $error, bool $cancel = true)
+    final protected function sendErrorMessage(Throwable $error, bool $cancel = true)
     {
         if ($cancel) {
             $this->cancelInstallation = true;
@@ -2017,7 +2017,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    protected function sendDebugMessage(string $text)
+    final protected function sendDebugMessage(string $text)
     {
         if ($this->debug) {
             $this->sendMessage($text, 'Debug-' . get_class($this));
