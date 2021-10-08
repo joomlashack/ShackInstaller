@@ -51,7 +51,7 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
-    public const VERSION = '2.0.10';
+    public const VERSION = '2.1.0';
 
     /**
      * @var bool
@@ -150,7 +150,7 @@ abstract class AbstractScript
      * List of tables and respective indexes
      *
      * @var array
-     * @deprecated v2.0.11
+     * @deprecated v2.1.0
      */
     protected $indexes = null;
 
@@ -1430,7 +1430,7 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
-     * @deprecated v2.0.11: Use $this->findColumn()
+     * @deprecated v2.1.0: Use $this->findColumn()
      */
     final protected function getColumnsFromTable($table)
     {
@@ -1456,7 +1456,7 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
-     * @deprecated v2.0.11: use $this->findIndex()
+     * @deprecated v2.1.0: use $this->findIndex()
      */
     final protected function getIndexesFromTable($table)
     {
@@ -1483,7 +1483,7 @@ abstract class AbstractScript
      * @param string[] $columns Assoc array of columnNames => definition
      *
      * @return void
-     * @deprecated v2.0.11: Use $this->addColumns()
+     * @deprecated v2.1.0: Use $this->addColumns()
      */
     final protected function addColumnsIfNotExists(string $table, array $columns)
     {
@@ -1505,7 +1505,7 @@ abstract class AbstractScript
      * @param array  $indexes Assoc array of indexName => definition
      *
      * @return void
-     * @deprecated v2.0.11: use $this->addIndexes()
+     * @deprecated v2.1.0: use $this->addIndexes()
      */
     final protected function addIndexesIfNotExists($table, $indexes)
     {
@@ -1530,7 +1530,7 @@ abstract class AbstractScript
      * @param string[] $columns The column names that needed to be checked and added
      *
      * @return void
-     * @deprecated v2.0.11: Use $this->dropColumns()
+     * @deprecated v2.1.0: Use $this->dropColumns()
      */
     final protected function dropColumnsIfExists($table, $columns)
     {
@@ -1548,7 +1548,7 @@ abstract class AbstractScript
      * @param string $name
      *
      * @return bool
-     * @deprecated v2.0.11: Use $this->findTable()
+     * @deprecated v2.1.0: Use $this->findTable()
      */
     final protected function tableExists(string $name)
     {
