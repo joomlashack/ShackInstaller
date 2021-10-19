@@ -454,7 +454,9 @@ abstract class AbstractScript
                     $this->preserveFavicon();
                 }
 
-                $this->clearObsolete($this->manifest->alledia->obsolete->preflight);
+                if ($type !== 'uninstall') {
+                    $this->clearObsolete($this->manifest->alledia->obsolete->preflight);
+                }
             }
 
             $this->cancelInstallation = !$success;
