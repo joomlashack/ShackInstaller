@@ -384,7 +384,7 @@ abstract class AbstractScript
                 if (isset($this->manifest->alledia->targetplatform)) {
                     $targetPlatform = (string)$this->manifest->alledia->targetplatform;
 
-                    if (!$this->validateTargetVersion(JVERSION, $targetPlatform)) {
+                    if ($this->validateTargetVersion(JVERSION, $targetPlatform) == false) {
                         // Platform version is invalid. Displays a warning and cancel the install
                         $targetPlatform = str_replace('*', 'x', $targetPlatform);
 
@@ -406,7 +406,7 @@ abstract class AbstractScript
                             $dbVersion = $targetMySQLVersion;
                         }
 
-                        if (!$this->validateTargetVersion($dbVersion, $targetMySQLVersion)) {
+                        if ($this->validateTargetVersion($dbVersion, $targetMySQLVersion) == false) {
                             // mySQL version too low
                             $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
 
@@ -421,7 +421,7 @@ abstract class AbstractScript
                 if (isset($this->manifest->alledia->phpminimum)) {
                     $targetPhpVersion = (string)$this->manifest->alledia->phpminimum;
 
-                    if (!$this->validateTargetVersion(phpversion(), $targetPhpVersion)) {
+                    if ($this->validateTargetVersion(phpversion(), $targetPhpVersion) == false) {
                         // php version is too low
                         $minimumPhp = str_replace('*', 'x', $targetPhpVersion);
 
@@ -1652,8 +1652,11 @@ abstract class AbstractScript
      *
      * @return bool True, if the target version is greater than or equal to actual version
      */
-    final protected function validateTargetVersion($actualVersion, $targetVersion, $compare = null)
-    {
+    final protected function validateTargetVersion(
+        string $actualVersion,
+        string $targetVersion,
+        ?string $compare = null
+    ): bool {
         if ($targetVersion === '.*') {
             // Any version is valid
             return true;
@@ -1670,7 +1673,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    final protected function validatePreviousVersion($targetVersion, $compare = null)
+    final protected function validatePreviousVersion(string $targetVersion, ?string $compare = null): bool
     {
         if ($this->previousManifest) {
             $lastVersion = (string)$this->previousManifest->version;
@@ -2099,6 +2102,8 @@ abstract class AbstractScript
             return;
         }
 
+        $this->sendDebugMessage(__METHOD__);
+
         $license = $this->getLicense();
         $name    = $this->getName() . ($license->isPro() ? ' Pro' : '');
 
@@ -2117,8 +2122,8 @@ abstract class AbstractScript
             $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
         }
 
-        if (!empty($footerElement)) {
-            if (!class_exists('\\JFormFieldCustomFooter')) {
+        if (empty($footerElement) != false) {
+            if (class_exists('\\JFormFieldCustomFooter') == false) {
                 // Custom footer field is not (and should not be) automatically loaded
                 $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
 
