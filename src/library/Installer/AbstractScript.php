@@ -847,7 +847,7 @@ abstract class AbstractScript
      */
     final protected function setPluginOrder($extension, $order)
     {
-        if ($extension->get('type') == 'plugin' && !empty($order)) {
+        if ($extension->get('type') == 'plugin' && empty($order) == false) {
             $db    = $this->dbo;
             $query = $db->getQuery(true);
 
@@ -982,7 +982,7 @@ abstract class AbstractScript
                     $group   = $this->getXmlValue($extension['group']);
 
                     $current = $this->findExtension($type, $element, $group);
-                    if (!empty($current)) {
+                    if (empty($current) == false) {
                         // Try to uninstall
                         $tmpInstaller = new Installer();
                         $uninstalled  = $tmpInstaller->uninstall($type, $current->get('extension_id'));
@@ -1584,7 +1584,7 @@ abstract class AbstractScript
             // @TODO: compare the version, if specified, or different than *
             // @TODO: Check if the extension is enabled, not just installed
 
-            if (!empty($extension)) {
+            if (empty($extension) == false) {
                 return true;
             }
         }
@@ -2115,7 +2115,7 @@ abstract class AbstractScript
         if (is_file($configPath)) {
             $config = $license->getConfig();
 
-            if (!empty($config)) {
+            if (empty($config) == false) {
                 $footerElement = $config->xpath('//field[@type="customfooter"]');
             }
         } else {
