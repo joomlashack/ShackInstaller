@@ -2122,7 +2122,7 @@ abstract class AbstractScript
             $footerElement = $this->manifest->xpath('//field[@type="customfooter"]');
         }
 
-        if (empty($footerElement) != false) {
+        if (empty($footerElement) == false) {
             if (class_exists('\\JFormFieldCustomFooter') == false) {
                 // Custom footer field is not (and should not be) automatically loaded
                 $customFooterPath = $license->getExtensionPath() . '/form/fields/customfooter.php';
