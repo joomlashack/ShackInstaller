@@ -223,6 +223,53 @@ abstract class AbstractScript
     /**
      * @param InstallerAdapter $parent
      *
+     * @return bool
+     * @throws \Exception
+     */
+    protected function checkInheritance(InstallerAdapter $parent): bool
+    {
+        Factory::getLanguage()->load('lib_shackinstaller.sys', realpath(__DIR__ . '/../..'));
+
+        $parentClasses   = class_parents($this);
+        $scriptClassName = array_pop($parentClasses);
+        $scriptClass     = new \ReflectionClass($scriptClassName);
+
+        $sourcePath    = dirname($scriptClass->getFileName());
+        $sourceBase    = strpos($sourcePath, JPATH_PLUGINS) === 0 ? 3 : 2;
+        $sourceVersion = AbstractScript::VERSION ?? '0.0.0';
+
+        $sourcePath = $this->cleanPath($sourcePath);
+        $targetPath = $this->cleanPath(SHACK_INSTALLER_BASE);
+
+        if ($sourcePath != $targetPath && version_compare($sourceVersion, SHACK_INSTALLER_COMPATIBLE, 'lt')) {
+            $source = join('/', array_slice(explode('/', $sourcePath), 0, $sourceBase));
+
+            $errorMessage = 'LIB_SHACKINSTALLER_ABORT_'
+                . ($parent->getRoute() == 'uninstall' ? 'UNINSTALL' : 'INSTALL');
+
+            Factory::getApplication()->enqueueMessage(Text::sprintf($errorMessage, $source), 'error');
+
+            $this->cancelInstallation = true;
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return string
+     */
+    protected function cleanPath(string $path): string
+    {
+        return str_replace(DIRECTORY_SEPARATOR, '/', str_replace(JPATH_ROOT . '/', '', $path));
+    }
+
+    /**
+     * @param InstallerAdapter $parent
+     *
      * @return void
      * @throws \Exception
      */
@@ -233,6 +280,10 @@ abstract class AbstractScript
         $this->app = Factory::getApplication();
 
         $this->outputAllowed = JPATH_BASE == JPATH_ADMINISTRATOR;
+
+        if ($this->checkInheritance($parent) == false) {
+            return;
+        }
 
         try {
             $this->dbo       = Factory::getDbo();
