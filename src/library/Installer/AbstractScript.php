@@ -54,6 +54,14 @@ abstract class AbstractScript
     public const VERSION = '2.1.3';
 
     /**
+     * Recognized installation types
+     */
+    protected const TYPE_INSTALL          = 'install';
+    protected const TYPE_DISCOVER_INSTALL = 'discover_install';
+    protected const TYPE_UPDATE           = 'update';
+    protected const TYPE_UNINSTALL        = 'uninstall';
+
+    /**
      * @var bool
      */
     protected $outputAllowed = true;
@@ -379,7 +387,7 @@ abstract class AbstractScript
                 $this->clearUpdateServers();
             }
 
-            if (in_array($type, ['install', 'update'])) {
+            if (in_array($type, [static::TYPE_INSTALL, static::TYPE_UPDATE])) {
                 // Check minimum target Joomla Platform
                 if (isset($this->manifest->alledia->targetplatform)) {
                     $targetPlatform = (string)$this->manifest->alledia->targetplatform;
@@ -433,7 +441,7 @@ abstract class AbstractScript
 
                 // Check for minimum previous version
                 $targetVersion = (string)$this->manifest->alledia->previousminimum;
-                if ($type == 'update' && $targetVersion) {
+                if ($type == static::TYPE_UPDATE && $targetVersion) {
                     if (!$this->validatePreviousVersion($targetVersion)) {
                         // Previous minimum is not installed
                         $minimumVersion = str_replace('*', 'x', $targetVersion);
@@ -450,11 +458,11 @@ abstract class AbstractScript
             }
 
             if ($success) {
-                if ($type === 'update') {
+                if ($type === static::TYPE_UPDATE) {
                     $this->preserveFavicon();
                 }
 
-                if ($type !== 'uninstall') {
+                if ($type !== static::TYPE_UNINSTALL) {
                     $this->clearObsolete($this->manifest->alledia->obsolete->preflight);
                 }
             }
@@ -2163,7 +2171,7 @@ abstract class AbstractScript
         }
 
         // Welcome message
-        if ($type === 'install') {
+        if (in_array($type, [static::TYPE_INSTALL, static::TYPE_DISCOVER_INSTALL])) {
             $string = 'LIB_SHACKINSTALLER_THANKS_INSTALL';
         } else {
             $string = 'LIB_SHACKINSTALLER_THANKS_UPDATE';
