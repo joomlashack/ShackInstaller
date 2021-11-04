@@ -228,8 +228,6 @@ abstract class AbstractScript
      */
     protected function checkInheritance(InstallerAdapter $parent): bool
     {
-        Factory::getLanguage()->load('lib_shackinstaller.sys', realpath(__DIR__ . '/../..'));
-
         $parentClasses   = class_parents($this);
         $scriptClassName = array_pop($parentClasses);
         $scriptClass     = new \ReflectionClass($scriptClassName);
@@ -277,9 +275,11 @@ abstract class AbstractScript
     {
         $this->sendDebugMessage(__METHOD__);
 
-        $this->app = Factory::getApplication();
-
+        $this->app           = Factory::getApplication();
         $this->outputAllowed = JPATH_BASE == JPATH_ADMINISTRATOR;
+
+        $language = Factory::getLanguage();
+        $language->load('lib_shackinstaller.sys', realpath(__DIR__ . '/../..'));
 
         if ($this->checkInheritance($parent) == false) {
             return;
@@ -308,7 +308,6 @@ abstract class AbstractScript
             }
 
             // Determine basepath for localized files
-            $language = Factory::getLanguage();
             $basePath = $this->installer->getPath('source');
             if (is_dir($basePath)) {
                 if ($this->type == 'component' && $basePath != $targetPath) {
@@ -330,7 +329,6 @@ abstract class AbstractScript
 
             // All the files we want to load
             $languageFiles = [
-                'lib_shackinstaller.sys',
                 $this->getFullElement()
             ];
 
