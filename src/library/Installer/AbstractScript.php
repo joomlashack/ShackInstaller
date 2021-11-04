@@ -939,15 +939,15 @@ abstract class AbstractScript
     /**
      * Add a message to the message list
      *
-     * @param string $msg
+     * @param string $message
      * @param string $type
      *
      * @return void
      * @deprecated v2.0.0: use $this->sendMessage()
      */
-    final protected function setMessage($msg, $type = 'message')
+    final protected function setMessage($message, $type = 'message')
     {
-        $this->sendMessage($msg, $type);
+        $this->sendMessage($message, $type);
     }
 
     /**
