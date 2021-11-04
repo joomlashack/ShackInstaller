@@ -489,49 +489,52 @@ abstract class AbstractScript
     {
         $this->sendDebugMessage(__METHOD__);
 
-        /*
-         * Joomla 4 now calls postFlight on uninstalls. Which is kinda cool actually.
-         * But this code is problematic in that scenario
-         */
-        if ($type == 'uninstall') {
+        if ($this->cancelInstallation) {
+            $this->sendMessage('LIB_SHACKINSTALLER_INSTALL_CANCELLED', 'warning');
+
             return;
         }
 
         try {
-            if ($this->cancelInstallation) {
-                $this->sendMessage('LIB_SHACKINSTALLER_INSTALL_CANCELLED', 'warning');
+            /*
+             * Joomla 4 now calls postFlight on uninstalls. Which is kinda cool actually.
+             * But this code is problematic in that scenario
+             */
+            if ($type != static::TYPE_UNINSTALL) {
+                $this->clearObsolete();
+                $this->installRelated($parent);
+                $this->addAllediaAuthorshipToExtension();
 
-                return;
-            }
+                $this->element = (string)$this->manifest->alledia->element;
 
-            $this->clearObsolete();
-            $this->installRelated($parent);
-            $this->addAllediaAuthorshipToExtension();
-
-            $this->element = (string)$this->manifest->alledia->element;
-
-            // Check and publish/reorder the plugin, if required
-            if (strpos($type, 'install') !== false && $this->type === 'plugin') {
-                $this->publishThisPlugin();
-                $this->reorderThisPlugin();
-            }
-
-            // If Free, remove any Pro library
-            $license = $this->getLicense();
-            if (!$license->isPro()) {
-                $proLibraryPath = $license->getProLibraryPath();
-                if (is_dir($proLibraryPath)) {
-                    Folder::delete($proLibraryPath);
+                // Check and publish/reorder the plugin, if required
+                if (
+                    $this->type === 'plugin'
+                    && in_array($type, [static::TYPE_INSTALL, static::TYPE_DISCOVER_INSTALL])
+                ) {
+                    $this->publishThisPlugin();
+                    $this->reorderThisPlugin();
                 }
-            }
 
-            if ($type === 'update') {
-                $this->preserveFavicon();
+                // If Free, remove any Pro library
+                $license = $this->getLicense();
+                if (!$license->isPro()) {
+                    $proLibraryPath = $license->getProLibraryPath();
+                    if (is_dir($proLibraryPath)) {
+                        Folder::delete($proLibraryPath);
+                    }
+                }
+
+                if ($type === static::TYPE_UPDATE) {
+                    $this->preserveFavicon();
+                }
             }
 
             $this->customPostFlight($type, $parent);
 
-            $this->displayWelcome($type);
+            if ($type != static::TYPE_UNINSTALL) {
+                $this->displayWelcome($type);
+            }
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
