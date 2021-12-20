@@ -2055,6 +2055,39 @@ abstract class AbstractScript
     }
 
     /**
+     * Joomla 4 does a database check that has lots of problems with standard sql syntax
+     * causing it to declare the database tables as not up to date and in some cases
+     * generates various sql errors. This can optionally be called during Post Install to
+     * clear out all update files and still maintain the latest schema version correctly.
+     *
+     * @param string $basePath
+     */
+    final protected function clearDBUpdateFiles(string $basePath)
+    {
+        $this->sendDebugMessage(__METHOD__);
+
+        $updatePath = $basePath . '/sql/updates';
+        if (is_dir($updatePath) && $files = Folder::files($updatePath, '\.sql$', true, true)) {
+            $this->sendDebugMessage('Removing:<pre>' . print_r($files, 1) . '</pre>');
+            $final = reset($files);
+            foreach ($files as $file) {
+                $version     = basename($file, '.sql');
+                $lastVersion = basename($final, '.sql');
+
+                if (version_compare($version, $lastVersion, 'gt')) {
+                    $final = $file;
+                }
+                File::delete($file);
+            }
+
+            if ($final) {
+                File::write($final, '');
+                $this->sendDebugMessage('Wrote blank: ' . $final);
+            }
+        }
+    }
+
+    /**
      * @param SimpleXMLElement|string $element
      * @param ?string                 $type
      * @param mixed                   $default
