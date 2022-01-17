@@ -90,7 +90,7 @@ defined('_JEXEC') or die();
             echo Text::sprintf(
                 'LIB_SHACKINSTALLER_LICENSED_AS',
                 $this->getName(),
-                '<a href="http://www.gnu.org/licenses/gpl-3.0.html">GNU/GPL v3.0</a>'
+                '<a href="https://www.gnu.org/licenses/gpl-3.0">GNU/GPL v3.0</a>'
             );
             ?>.
         </div>
