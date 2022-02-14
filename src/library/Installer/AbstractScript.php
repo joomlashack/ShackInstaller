@@ -30,6 +30,7 @@ use JDatabaseDriver;
 use JEventDispatcher;
 use JFormFieldCustomFooter;
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
@@ -828,7 +829,7 @@ abstract class AbstractScript
                             $msgType
                         );
                     }
-                } elseif ($this->app->get('debug', 0)) {
+                } elseif ($this->app->get('debug', 0) || $this->debug) {
                     $this->sendMessage(
                         Text::sprintf(
                             'LIB_SHACKINSTALLER_RELATED_NOT_UNINSTALLED',
@@ -2179,7 +2180,8 @@ abstract class AbstractScript
     final protected function sendDebugMessage(string $text)
     {
         if ($this->debug) {
-            $this->sendMessage($text, 'Debug-' . get_class($this));
+            $type = Version::MAJOR_VERSION == 3 ? 'Debug-' . get_class($this) : CMSApplicationInterface::MSG_DEBUG;
+            $this->sendMessage($text, $type);
         }
     }
 
