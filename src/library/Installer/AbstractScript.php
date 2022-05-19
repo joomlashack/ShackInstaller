@@ -831,18 +831,8 @@ abstract class AbstractScript
                 $uninstall       = $this->getXmlValue($extension['uninstall'], 'bool', $defaultUninstall);
                 $systemExtension = in_array(join('.', [$type, $group, $element]), $this->systemExtensions);
                 if ($uninstall && $systemExtension == false) {
-                    if ($current = $this->findExtension($type, $element, $group)) {
-                        $msg     = 'LIB_SHACKINSTALLER_RELATED_UNINSTALL';
-                        $msgType = 'message';
-                        if (!$installer->uninstall($current->get('type'), $current->get('extension_id'))) {
-                            $msg     .= '_FAIL';
-                            $msgType = 'error';
-                        }
-                        $this->sendMessage(
-                            Text::sprintf($msg, ucfirst($type), $element),
-                            $msgType
-                        );
-                    }
+                    $this->uninstallExtension($type, $element, $group);
+
                 } else {
                     $message = 'LIB_SHACKINSTALLER_RELATED_NOT_UNINSTALLED'
                         . ($systemExtension ? '_SYSTEM' : '');
@@ -850,9 +840,36 @@ abstract class AbstractScript
                     if ($type == 'plugin') {
                         $type = $group . ' ' . $type;
                     }
+
                     $this->sendDebugMessage(Text::sprintf($message, ucwords($type), $element));
                 }
             }
+        }
+    }
+
+    /**
+     * @param string  $type
+     * @param string  $element
+     * @param ?string $group
+     *
+     * @return void
+     * @throws \Exception
+     */
+    final protected function uninstallExtension(string $type, string $element, ?string $group = null)
+    {
+        if ($extension = $this->findExtension($type, $element, $group)) {
+            $installer = new Installer();
+
+            $success = $installer->uninstall($extension->get('type'), $extension->get('extension_id'));
+            $msg     = 'LIB_SHACKINSTALLER_RELATED_UNINSTALL' . ($success ? '' : '_FAIL');
+            if ($type == 'plugin') {
+                $type = $group . ' ' . $type;
+            }
+
+            $this->sendMessage(
+                Text::sprintf($msg, ucwords($type), $element),
+                $success ? 'message' : 'error'
+            );
         }
     }
 
