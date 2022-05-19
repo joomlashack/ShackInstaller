@@ -108,6 +108,14 @@ abstract class AbstractScript
     protected $element = null;
 
     /**
+     * @var string[]
+     */
+    protected $systemExtensions = [
+        'library..allediaframework',
+        'plugin.system.osmylicensesmanager'
+    ];
+
+    /**
      * @var bool
      */
     protected $isLicensesManagerInstalled = false;
@@ -820,8 +828,9 @@ abstract class AbstractScript
                 $element = $this->getXmlValue($extension['element']);
                 $group   = $this->getXmlValue($extension['group']);
 
-                $uninstall = $this->getXmlValue($extension['uninstall'], 'bool', $defaultUninstall);
-                if ($uninstall) {
+                $uninstall       = $this->getXmlValue($extension['uninstall'], 'bool', $defaultUninstall);
+                $systemExtension = in_array(join('.', [$type, $group, $element]), $this->systemExtensions);
+                if ($uninstall && $systemExtension == false) {
                     if ($current = $this->findExtension($type, $element, $group)) {
                         $msg     = 'LIB_SHACKINSTALLER_RELATED_UNINSTALL';
                         $msgType = 'message';
@@ -834,15 +843,14 @@ abstract class AbstractScript
                             $msgType
                         );
                     }
-                } elseif ($this->app->get('debug', 0) || $this->debug) {
-                    $this->sendMessage(
-                        Text::sprintf(
-                            'LIB_SHACKINSTALLER_RELATED_NOT_UNINSTALLED',
-                            ucfirst($type),
-                            $element
-                        ),
-                        'warning'
-                    );
+                } else {
+                    $message = 'LIB_SHACKINSTALLER_RELATED_NOT_UNINSTALLED'
+                        . ($systemExtension ? '_SYSTEM' : '');
+
+                    if ($type == 'plugin') {
+                        $type = $group . ' ' . $type;
+                    }
+                    $this->sendDebugMessage(Text::sprintf($message, ucwords($type), $element));
                 }
             }
         }
