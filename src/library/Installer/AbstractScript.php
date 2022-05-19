@@ -604,7 +604,6 @@ abstract class AbstractScript
         try {
             $this->uninstallRelated();
             $this->customUninstall($parent);
-            $this->clearObsolete($this->manifest->alledia->obsolete->uninstall);
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
