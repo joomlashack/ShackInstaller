@@ -898,7 +898,9 @@ abstract class AbstractScript
         $eid = $row->find($terms);
 
         if ($eid) {
-            $row->load($eid);
+            if ($row->load($eid) == false) {
+                throw new \Exception($row->getError());
+            }
 
             return $row;
         }
