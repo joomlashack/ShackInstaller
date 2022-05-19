@@ -725,7 +725,7 @@ abstract class AbstractScript
                     $current = $this->findExtension($type, $element, $group);
                     $isNew   = empty($current);
 
-                    $typeName = ucfirst(trim($group . ' ' . $type));
+                    $typeName = ucwords(trim($group . ' ' . $type));
 
                     // Get data from the manifest
                     $tmpInstaller = new Installer();
