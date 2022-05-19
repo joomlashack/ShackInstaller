@@ -618,6 +618,7 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return bool
+     * @throws Throwable
      */
     protected function customPreFlight(string $type, InstallerAdapter $parent): bool
     {
@@ -630,6 +631,7 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return bool
+     * @throws Throwable
      */
     protected function customInstall(InstallerAdapter $parent): bool
     {
@@ -642,6 +644,7 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return bool
+     * @throws Throwable
      */
     protected function customDiscoverInstall(InstallerAdapter $parent): bool
     {
@@ -654,6 +657,7 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return bool
+     * @throws Throwable
      */
     protected function customUpdate(InstallerAdapter $parent): bool
     {
@@ -667,6 +671,7 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return void
+     * @throws Throwable
      */
     protected function customPostFlight(string $type, InstallerAdapter $parent)
     {
@@ -678,6 +683,7 @@ abstract class AbstractScript
      * @param InstallerAdapter $parent
      *
      * @return void
+     * @throws Throwable
      */
     protected function customUninstall(InstallerAdapter $parent)
     {
