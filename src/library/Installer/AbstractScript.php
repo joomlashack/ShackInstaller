@@ -722,6 +722,17 @@ abstract class AbstractScript
                     $group   = $this->getXmlValue($extension['group']);
                     $key     = md5(join(':', [$type, $element, $group]));
 
+                    if ($type == 'plugin' && in_array($group, ['search', 'finder'])) {
+                        if (is_dir(JPATH_ADMINISTRATOR . '/components/com_' . $group) == false) {
+                            // skip search/finder plugins based on installed components
+                            $this->sendDebugMessage(sprintf('Skipped/Uninstalled plugin %s',
+                                ucwords($group . ' ' . $element)));
+
+                            $this->uninstallExtension($type, $element, $group);
+                            continue;
+                        }
+                    }
+
                     $current = $this->findExtension($type, $element, $group);
                     $isNew   = empty($current);
 
