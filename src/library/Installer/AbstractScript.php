@@ -2152,7 +2152,9 @@ abstract class AbstractScript
 
             case 'string':
             default:
-                $value = trim($value);
+                if ($value) {
+                    $value = trim($value);
+                }
                 break;
         }
 
