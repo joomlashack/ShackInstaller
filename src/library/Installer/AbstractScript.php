@@ -1741,7 +1741,7 @@ abstract class AbstractScript
             function ($matches) {
                 return strtoupper($matches[1]) . $matches[2];
             },
-            $name
+            $name ?? ''
         );
 
         return $result;
