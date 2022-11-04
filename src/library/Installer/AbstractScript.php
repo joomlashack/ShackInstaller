@@ -52,7 +52,7 @@ require_once 'include.php';
 
 abstract class AbstractScript
 {
-    public const VERSION = '2.2.3';
+    public const VERSION = '2.2.4';
 
     /**
      * Recognized installation types
