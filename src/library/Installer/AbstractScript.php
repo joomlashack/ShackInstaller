@@ -521,7 +521,10 @@ abstract class AbstractScript
                     $this->preserveFavicon();
                 }
 
-                if ($type !== static::TYPE_UNINSTALL) {
+                if (
+                    $type !== static::TYPE_UNINSTALL
+                    && empty($this->manifest->alledia->obsolete->preflight) == false
+                ) {
                     $this->clearObsolete($this->manifest->alledia->obsolete->preflight);
                 }
             }
