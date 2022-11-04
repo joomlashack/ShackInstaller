@@ -23,6 +23,7 @@
 
 namespace Alledia\Installer;
 
+// phpcs:disable PSR1.Files.SideEffects
 defined('_JEXEC') or die();
 
 use Alledia\Installer\Extension\Licensed;
@@ -49,6 +50,8 @@ use SimpleXMLElement;
 use Throwable;
 
 require_once 'include.php';
+
+// phpcs:enable PSR1.Files.SideEffects
 
 abstract class AbstractScript
 {
@@ -463,21 +466,21 @@ abstract class AbstractScript
                 }
 
                 // Check for minimum mysql version
-                if ($targetMySQLVersion = $this->manifest->alledia->mysqlminimum) {
-                    $targetMySQLVersion = (string)$targetMySQLVersion;
+                if ($targetMySqlVersion = $this->manifest->alledia->mysqlminimum) {
+                    $targetMySqlVersion = (string)$targetMySqlVersion;
 
                     if ($this->dbo->getServerType() == 'mysql') {
                         $dbVersion = $this->dbo->getVersion();
                         if (stripos($dbVersion, 'maria') !== false) {
                             // For MariaDB this is a bit of a punt. We'll assume any version of Maria will do
-                            $dbVersion = $targetMySQLVersion;
+                            $dbVersion = $targetMySqlVersion;
                         }
 
-                        if ($this->validateTargetVersion($dbVersion, $targetMySQLVersion) == false) {
+                        if ($this->validateTargetVersion($dbVersion, $targetMySqlVersion) == false) {
                             // mySQL version too low
-                            $minimumMySQL = str_replace('*', 'x', $targetMySQLVersion);
+                            $minimumMySql = str_replace('*', 'x', $targetMySqlVersion);
 
-                            $msg = Text::sprintf('LIB_SHACKINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySQL);
+                            $msg = Text::sprintf('LIB_SHACKINSTALLER_WRONG_MYSQL', $this->getName(), $minimumMySql);
                             $this->sendMessage($msg, 'warning');
                             $success = false;
                         }
@@ -564,7 +567,7 @@ abstract class AbstractScript
              */
             if ($type != static::TYPE_UNINSTALL) {
                 $this->clearObsolete();
-                $this->installRelated($parent);
+                $this->installRelated();
                 $this->addAllediaAuthorshipToExtension();
 
                 $this->element = (string)$this->manifest->alledia->element;
@@ -701,11 +704,10 @@ abstract class AbstractScript
     }
 
     /**
-     * @param InstallerAdapter $parent
-     *
      * @return void
+     * @throws \Exception
      */
-    final protected function installRelated($parent)
+    final protected function installRelated()
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -729,8 +731,12 @@ abstract class AbstractScript
                     if ($type == 'plugin' && in_array($group, ['search', 'finder'])) {
                         if (is_dir(JPATH_ADMINISTRATOR . '/components/com_' . $group) == false) {
                             // skip search/finder plugins based on installed components
-                            $this->sendDebugMessage(sprintf('Skipped/Uninstalled plugin %s',
-                                ucwords($group . ' ' . $element)));
+                            $this->sendDebugMessage(
+                                sprintf(
+                                    'Skipped/Uninstalled plugin %s',
+                                    ucwords($group . ' ' . $element)
+                                )
+                            );
 
                             $this->uninstallExtension($type, $element, $group);
                             continue;
@@ -833,8 +839,6 @@ abstract class AbstractScript
     final protected function uninstallRelated()
     {
         if ($this->manifest->alledia->relatedExtensions) {
-            $installer = new Installer();
-
             $defaultAttributes = $this->manifest->alledia->relatedExtensions->attributes();
             $defaultUninstall  = $this->getXmlValue($defaultAttributes['uninstall'], 'bool');
 
@@ -894,8 +898,9 @@ abstract class AbstractScript
      * @param ?string $group
      *
      * @return ?Extension
+     * @throws \Exception
      */
-    final protected function findExtension($type, $element, $group = null)
+    final protected function findExtension(?string $type, ?string $element, ?string $group = null): ?Extension
     {
         // @TODO: Why do we need to use JTable?
         /** @var Extension $row */
@@ -1075,6 +1080,7 @@ abstract class AbstractScript
      * root path.
      *
      * @return void
+     * @throws \Exception
      */
     final protected function clearObsolete(SimpleXMLElement $obsolete = null)
     {
@@ -1148,8 +1154,9 @@ abstract class AbstractScript
      * Finds the extension row for the main extension
      *
      * @return ?Extension
+     * @throws \Exception
      */
-    final protected function findThisExtension()
+    final protected function findThisExtension(): ?Extension
     {
         return $this->findExtension(
             $this->getXmlValue($this->manifest['type']),
@@ -1160,6 +1167,9 @@ abstract class AbstractScript
 
     /**
      * Use this in preflight to clear out obsolete update servers when the url has changed.
+     *
+     * @return void
+     * @throws \Exception
      */
     final protected function clearUpdateServers()
     {
@@ -1330,7 +1340,7 @@ abstract class AbstractScript
      *
      * @return int
      */
-    final protected function getExtensionId($type, $element, $group = '')
+    final protected function getExtensionId(string $type, string $element, ?string $group = ''): int
     {
         $db    = $this->dbo;
         $query = $db->getQuery(true)
@@ -1387,6 +1397,7 @@ abstract class AbstractScript
      * Check if it needs to publish the extension
      *
      * @return void
+     * @throws \Exception
      */
     final protected function publishThisPlugin()
     {
@@ -1403,6 +1414,7 @@ abstract class AbstractScript
      * Check if it needs to reorder the extension
      *
      * @return void
+     * @throws \Exception
      */
     final protected function reorderThisPlugin()
     {
@@ -1446,6 +1458,7 @@ abstract class AbstractScript
      * on the extensions table.
      *
      * @return void
+     * @throws \Exception
      */
     final protected function addAllediaAuthorshipToExtension()
     {
@@ -1501,6 +1514,7 @@ abstract class AbstractScript
      * that may have been created in a previous installation.
      *
      * @return void
+     * @throws \Exception
      */
     final protected function fixMenus()
     {
@@ -1597,8 +1611,6 @@ abstract class AbstractScript
      */
     final protected function addColumnsIfNotExists(string $table, array $columns)
     {
-        $db = $this->dbo;
-
         $columnSpecs = [];
         foreach ($columns as $columnName => $columnData) {
             $columnId               = $table . '.' . $columnName;
@@ -1672,8 +1684,9 @@ abstract class AbstractScript
      * @param string $expression
      *
      * @return bool
+     * @throws \Exception
      */
-    final protected function parseConditionalExpression($expression)
+    final protected function parseConditionalExpression(string $expression): bool
     {
         $expression = strtolower($expression);
         $terms      = explode('=', $expression);
@@ -2087,6 +2100,7 @@ abstract class AbstractScript
 
     /**
      * @return ?string
+     * @throws \Exception
      */
     final protected function getSchemaVersion(): ?string
     {
@@ -2241,7 +2255,8 @@ abstract class AbstractScript
      */
     final protected function displayWelcome(string $type)
     {
-        if ($this->installer->getPath('parent') || !$this->outputAllowed) {
+        if ($this->installer->getPath('parent') || $this->outputAllowed == false) {
+            // @TODO: seems to suppress output on multiple updates as well
             // Either a related extension or installing from frontend
             return;
         }
