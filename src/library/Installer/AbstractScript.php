@@ -2255,13 +2255,18 @@ abstract class AbstractScript
      */
     final protected function displayWelcome(string $type)
     {
-        if ($this->installer->getPath('parent') || $this->outputAllowed == false) {
-            // @TODO: seems to suppress output on multiple updates as well
-            // Either a related extension or installing from frontend
+        if ($this->outputAllowed == false) {
             return;
         }
 
-        $this->sendDebugMessage(__METHOD__);
+        $this->sendDebugMessage(
+            sprintf(
+                '%s<br>Parent: %s<br>Current: %s',
+                __METHOD__,
+                $this->installer->getPath('parent'),
+                $this->installer->getPath('source')
+            )
+        );
 
         $license = $this->getLicense();
         $name    = $this->getName() . ($license->isPro() ? ' Pro' : '');
