@@ -81,6 +81,11 @@ abstract class AbstractScript
     protected $dbo = null;
 
     /**
+     * @var string
+     */
+    protected $schemaVersion = null;
+
+    /**
      * @var JEventDispatcher|DispatcherInterface
      */
     protected $dispatcher = null;
@@ -299,9 +304,10 @@ abstract class AbstractScript
         }
 
         try {
-            $this->dbo       = Factory::getDbo();
-            $this->installer = $parent->getParent();
-            $this->manifest  = $this->installer->getManifest();
+            $this->dbo           = Factory::getDbo();
+            $this->schemaVersion = $this->getSchemaVersion();
+            $this->installer     = $parent->getParent();
+            $this->manifest      = $this->installer->getManifest();
 
             if ($media = $this->manifest->media) {
                 $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
@@ -2114,6 +2120,30 @@ abstract class AbstractScript
         }
 
         return null;
+    }
+
+    /**
+     * @param string|string[] $queries
+     *
+     * @return bool|Throwable
+     */
+    final protected function executeQuery($schemaVersion, $queries)
+    {
+        if (version_compare($this->schemaVersion, $schemaVersion, 'lt')) {
+            $this->sendDebugMessage(sprintf('Running v%s Schema Updates', $schemaVersion));
+
+            $db = $this->dbo;
+            try {
+                foreach ($queries as $query) {
+                    $db->setQuery($query)->execute();
+                }
+
+            } catch (Throwable $error) {
+                return $error;
+            }
+        }
+
+        return true;
     }
 
     /**
