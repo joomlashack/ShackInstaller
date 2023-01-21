@@ -2358,4 +2358,46 @@ abstract class AbstractScript
             }
         }
     }
+
+    /**
+     * WARNIMG! This is duplicated from the Joomlashack Framework
+     *
+     * @param string  $name
+     * @param string  $prefix
+     * @param string  $component
+     * @param ?string $appName
+     * @param ?array  $options
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getJoomlaModel(
+        string $name,
+        string $prefix,
+        string $component,
+        ?string $appName = null,
+        ?array $options = []
+    ) {
+        $defaultApp = 'Site';
+        $appNames   = [$defaultApp, 'Administrator'];
+
+        $appName = ucfirst($appName ?: $defaultApp);
+        $appName = in_array($appName, $appNames) ? $appName : $defaultApp;
+
+        if (Version::MAJOR_VERSION < 4) {
+            $basePath = $appName == 'Administrator' ? JPATH_ADMINISTRATOR : JPATH_SITE;
+
+            $path = $basePath . '/components/' . $component;
+            BaseDatabaseModel::addIncludePath($path . '/models');
+            Table::addIncludePath($path . '/tables');
+
+            $model = BaseDatabaseModel::getInstance($name, $prefix, $options);
+
+        } else {
+            $model = Factory::getApplication()->bootComponent($component)
+                ->getMVCFactory()->createModel($name, $appName, $options);
+        }
+
+        return $model;
+    }
 }
