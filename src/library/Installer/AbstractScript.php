@@ -305,9 +305,9 @@ abstract class AbstractScript
 
         try {
             $this->dbo           = Factory::getDbo();
-            $this->schemaVersion = $this->getSchemaVersion();
             $this->installer     = $parent->getParent();
             $this->manifest      = $this->installer->getManifest();
+            $this->schemaVersion = $this->getSchemaVersion();
 
             if ($media = $this->manifest->media) {
                 $this->mediaFolder = JPATH_SITE . '/' . $media['folder'] . '/' . $media['destination'];
@@ -2129,7 +2129,7 @@ abstract class AbstractScript
      */
     final protected function executeQuery($schemaVersion, $queries)
     {
-        if (version_compare($this->schemaVersion, $schemaVersion, 'lt')) {
+        if ($this->schemaVersion && version_compare($this->schemaVersion, $schemaVersion, 'lt')) {
             $this->sendDebugMessage(sprintf('Running v%s Schema Updates', $schemaVersion));
 
             $db = $this->dbo;
