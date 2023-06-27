@@ -229,7 +229,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function __construct($parent)
+    public function __construct(InstallerAdapter $parent)
     {
         $this->sendDebugMessage('ShackInstaller v' . static::VERSION);
         $this->sendDebugMessage('Base v' . SHACK_INSTALLER_VERSION);
@@ -384,7 +384,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function install($parent)
+    public function install(InstallerAdapter $parent): bool
     {
         try {
             return $this->customInstall($parent);
@@ -396,12 +396,14 @@ abstract class AbstractScript
         return false;
     }
 
+    // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
     /**
      * @param InstallerAdapter $parent
      *
      * @return bool
      */
-    public function discover_install($parent)
+    public function discover_install(InstallerAdapter $parent): bool
     {
         try {
             if ($this->install($parent)) {
@@ -414,13 +416,14 @@ abstract class AbstractScript
 
         return false;
     }
+    // phpcs:enable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
     /**
      * @param InstallerAdapter $parent
      *
      * @return bool
      */
-    public function update($parent)
+    public function update(InstallerAdapter $parent): bool
     {
         try {
             return $this->customUpdate($parent);
@@ -439,7 +442,7 @@ abstract class AbstractScript
      * @return bool
      * @throws \Exception
      */
-    public function preFlight($type, $parent)
+    public function preFlight(string $type, InstallerAdapter $parent): bool
     {
         if ($this->cancelInstallation) {
             $this->sendDebugMessage('CANCEL: ' . __METHOD__);
@@ -556,7 +559,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function postFlight($type, $parent)
+    public function postFlight(string $type, InstallerAdapter $parent): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -618,7 +621,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function uninstall($parent)
+    public function uninstall(InstallerAdapter $parent): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -964,7 +967,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function setPluginOrder($extension, $order)
+    final protected function setPluginOrder(Extension $extension, string $order): void
     {
         if ($extension->get('type') == 'plugin' && empty($order) == false) {
             $db    = $this->dbo;
@@ -1047,13 +1050,13 @@ abstract class AbstractScript
     /**
      * Add a message to the message list
      *
-     * @param string $message
-     * @param string $type
+     * @param string  $message
+     * @param ?string $type
      *
      * @return void
      * @deprecated v2.0.0: use $this->sendMessage()
      */
-    final protected function setMessage($message, $type = 'message')
+    final protected function setMessage(string $message, ?string $type = 'message'): void
     {
         $this->sendMessage($message, $type);
     }
@@ -1211,8 +1214,11 @@ abstract class AbstractScript
      *
      * @return string
      */
-    final protected function getFullElement($type = null, $element = null, $group = null)
-    {
+    final protected function getFullElement(
+        ?string $type = null,
+        ?string $element = null,
+        ?string $group = null
+    ): string {
         $prefixes = [
             'component' => 'com',
             'plugin'    => 'plg',
@@ -1239,7 +1245,7 @@ abstract class AbstractScript
     /**
      * @return Licensed
      */
-    final protected function getLicense()
+    final protected function getLicense(): Licensed
     {
         if ($this->license === null) {
             $this->license = new Licensed(
@@ -1257,7 +1263,7 @@ abstract class AbstractScript
      *
      * @return Registry
      */
-    final protected function getInfoFromManifest($manifestPath)
+    final protected function getInfoFromManifest(string $manifestPath): Registry
     {
         $info = new Registry();
 
@@ -1294,7 +1300,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    final protected function getExtensionPath($type, $element, $group = '')
+    final protected function getExtensionPath(string $type, string $element, ?string $group = ''): string
     {
         $folders = [
             'component' => 'administrator/components/',
@@ -1562,7 +1568,7 @@ abstract class AbstractScript
      * @return string[]
      * @deprecated v2.1.0: Use $this->findColumn()
      */
-    final protected function getColumnsFromTable($table)
+    final protected function getColumnsFromTable(string $table): array
     {
         if (!isset($this->columns[$table])) {
             $db = $this->dbo;
@@ -1588,7 +1594,7 @@ abstract class AbstractScript
      * @return string[]
      * @deprecated v2.1.0: use $this->findIndex()
      */
-    final protected function getIndexesFromTable($table)
+    final protected function getIndexesFromTable(string $table): array
     {
         if (!isset($this->indexes[$table])) {
             $db = $this->dbo;
@@ -1635,7 +1641,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.1.0: use $this->addIndexes()
      */
-    final protected function addIndexesIfNotExists($table, $indexes)
+    final protected function addIndexesIfNotExists(string $table, array $indexes): void
     {
         $db = $this->dbo;
 
@@ -1660,7 +1666,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.1.0: Use $this->dropColumns()
      */
-    final protected function dropColumnsIfExists($table, $columns)
+    final protected function dropColumnsIfExists(string $table, array $columns): void
     {
         $columnIds = [];
         foreach ($columns as $column) {
@@ -1678,7 +1684,7 @@ abstract class AbstractScript
      * @return bool
      * @deprecated v2.1.0: Use $this->findTable()
      */
-    final protected function tableExists(string $name)
+    final protected function tableExists(string $name): bool
     {
         return $this->findTable($name);
     }
@@ -1726,7 +1732,7 @@ abstract class AbstractScript
      *
      * @return string[] An associative array with information about the extension
      */
-    final protected function getExtensionInfoFromElement($element)
+    final protected function getExtensionInfoFromElement(string $element): array
     {
         $result = array_fill_keys(
             ['type', 'name', 'group', 'prefix', 'namespace'],
@@ -1816,7 +1822,7 @@ abstract class AbstractScript
      *
      * @return string
      */
-    final protected function getName()
+    final protected function getName(): string
     {
         return (string)($this->manifest->alledia->name ?? $this->manifest->alledia->namespace);
     }
@@ -2186,7 +2192,7 @@ abstract class AbstractScript
      *
      * @return bool|string
      */
-    final protected function getXmlValue($element, $type = 'string', $default = null)
+    final protected function getXmlValue($element, ?string $type = 'string', $default = null)
     {
         $value = $element ? (string)$element : $default;
 
