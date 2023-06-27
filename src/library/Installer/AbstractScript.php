@@ -23,9 +23,6 @@
 
 namespace Alledia\Installer;
 
-// phpcs:disable PSR1.Files.SideEffects
-defined('_JEXEC') or die();
-
 use Alledia\Installer\Extension\Licensed;
 use JDatabaseDriver;
 use JEventDispatcher;
@@ -48,6 +45,9 @@ use Joomla\Event\DispatcherInterface;
 use Joomla\Registry\Registry;
 use SimpleXMLElement;
 use Throwable;
+
+// phpcs:disable PSR1.Files.SideEffects
+defined('_JEXEC') or die();
 
 require_once 'include.php';
 
