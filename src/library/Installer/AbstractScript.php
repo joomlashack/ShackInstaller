@@ -1054,28 +1054,6 @@ abstract class AbstractScript
     }
 
     /**
-     * Display queued messages
-     *
-     * @return void
-     * @deprecated v2.0.0: use $this->sendMessage()
-     */
-    final protected function showMessages()
-    {
-        if ($this->messages) {
-            foreach ($this->messages as $msg) {
-                $text = $msg[0] ?? null;
-                $type = $msg[1] ?? null;
-
-                if ($text) {
-                    $this->sendMessage($text, $type);
-                }
-            }
-
-            $this->messages = [];
-        }
-    }
-
-    /**
      * Delete obsolete files, folders and extensions.
      * Files and folders are identified from the site
      * root path.
