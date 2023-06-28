@@ -289,7 +289,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    protected function initProperties($parent)
+    protected function initProperties(InstallerAdapter $parent): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -541,7 +541,7 @@ abstract class AbstractScript
                 }
             }
 
-            $this->cancelInstallation = !$success;
+            $this->cancelInstallation = $success == false;
 
             return $success;
 
@@ -696,7 +696,7 @@ abstract class AbstractScript
      * @return void
      * @throws Throwable
      */
-    protected function customPostFlight(string $type, InstallerAdapter $parent)
+    protected function customPostFlight(string $type, InstallerAdapter $parent): void
     {
     }
 
@@ -708,7 +708,7 @@ abstract class AbstractScript
      * @return void
      * @throws Throwable
      */
-    protected function customUninstall(InstallerAdapter $parent)
+    protected function customUninstall(InstallerAdapter $parent): void
     {
     }
 
@@ -716,7 +716,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function installRelated()
+    final protected function installRelated(): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -845,7 +845,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function uninstallRelated()
+    final protected function uninstallRelated(): void
     {
         if ($this->manifest->alledia->relatedExtensions) {
             $defaultAttributes = $this->manifest->alledia->relatedExtensions->attributes();
@@ -883,7 +883,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function uninstallExtension(string $type, string $element, ?string $group = null)
+    final protected function uninstallExtension(string $type, string $element, ?string $group = null): void
     {
         if ($extension = $this->findExtension($type, $element, $group)) {
             $installer = new Installer();
@@ -1088,10 +1088,12 @@ abstract class AbstractScript
      * Files and folders are identified from the site
      * root path.
      *
+     * @param ?SimpleXMLElement $obsolete
+     *
      * @return void
      * @throws \Exception
      */
-    final protected function clearObsolete(SimpleXMLElement $obsolete = null)
+    final protected function clearObsolete(?SimpleXMLElement $obsolete = null): void
     {
         $obsolete = $obsolete ?: $this->manifest->alledia->obsolete;
 
@@ -1180,7 +1182,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function clearUpdateServers()
+    final protected function clearUpdateServers(): void
     {
         if ($extension = $this->findThisExtension()) {
             $db = $this->dbo;
@@ -1373,7 +1375,7 @@ abstract class AbstractScript
      *
      * @return string The path
      */
-    final protected function getManifestPath($type, $element, $group = '')
+    final protected function getManifestPath($type, $element, $group = ''): string
     {
         $installer = new Installer();
 
@@ -1411,7 +1413,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function publishThisPlugin()
+    final protected function publishThisPlugin(): void
     {
         $attributes = $this->manifest->alledia->element->attributes();
         $publish    = (string)$attributes['publish'];
@@ -1428,7 +1430,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function reorderThisPlugin()
+    final protected function reorderThisPlugin(): void
     {
         $attributes = $this->manifest->alledia->element->attributes();
         $ordering   = (string)$attributes['ordering'];
@@ -1448,7 +1450,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function storeFeedbackForRelatedExtension(string $key, string $property, string $value)
+    final protected function storeFeedbackForRelatedExtension(string $key, string $property, string $value): void
     {
         $this->sendDebugMessage(sprintf(
             '%s<br>**** %s-%s-%s<br><br>',
@@ -1472,7 +1474,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function addAllediaAuthorshipToExtension()
+    final protected function addAllediaAuthorshipToExtension(): void
     {
         if ($extension = $this->findThisExtension()) {
             $db = $this->dbo;
@@ -1505,8 +1507,10 @@ abstract class AbstractScript
      * method is called, we can't add stylesheets to the head.
      *
      * @param mixed $stylesheets
+     *
+     * @return void
      */
-    final protected function addStyle($stylesheets)
+    final protected function addStyle($stylesheets): void
     {
         if (is_string($stylesheets)) {
             $stylesheets = [$stylesheets];
@@ -1528,7 +1532,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function fixMenus()
+    final protected function fixMenus(): void
     {
         if ($this->type == 'component') {
             $db = $this->dbo;
@@ -1592,7 +1596,6 @@ abstract class AbstractScript
      * @param string $table The table name
      *
      * @return string[]
-     * @deprecated v2.1.0: use $this->findIndex()
      */
     final protected function getIndexesFromTable(string $table): array
     {
@@ -1621,7 +1624,7 @@ abstract class AbstractScript
      * @return void
      * @deprecated v2.1.0: Use $this->addColumns()
      */
-    final protected function addColumnsIfNotExists(string $table, array $columns)
+    final protected function addColumnsIfNotExists(string $table, array $columns): void
     {
         $columnSpecs = [];
         foreach ($columns as $columnName => $columnData) {
@@ -1890,7 +1893,7 @@ abstract class AbstractScript
      * @return void
      * @TODO: allow use of specification array
      */
-    final protected function addColumns(array $columnSpecs)
+    final protected function addColumns(array $columnSpecs): void
     {
         $db = $this->dbo;
 
@@ -1916,7 +1919,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function dropColumns(array $columnIds)
+    final protected function dropColumns(array $columnIds): void
     {
         $db = $this->dbo;
         foreach ($columnIds as $columnId) {
@@ -1967,7 +1970,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function addIndexes(array $indexes)
+    final protected function addIndexes(array $indexes): void
     {
         $db = $this->dbo;
 
@@ -1999,7 +2002,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function dropIndexes(array $indexIds)
+    final protected function dropIndexes(array $indexIds): void
     {
         $db = $this->dbo;
 
@@ -2056,7 +2059,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function dropConstraints(array $constraintIds)
+    final protected function dropConstraints(array $constraintIds): void
     {
         $db = $this->dbo;
 
@@ -2159,8 +2162,10 @@ abstract class AbstractScript
      * clear out all update files and still maintain the latest schema version correctly.
      *
      * @param string $basePath
+     *
+     * @return void
      */
-    final protected function clearDBUpdateFiles(string $basePath)
+    final protected function clearDBUpdateFiles(string $basePath): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -2221,7 +2226,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function sendMessage(string $text, string $type = 'message')
+    final protected function sendMessage(string $text, string $type = 'message'): void
     {
         if ($this->outputAllowed) {
             try {
@@ -2240,7 +2245,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function sendErrorMessage(Throwable $error, bool $cancel = true)
+    final protected function sendErrorMessage(Throwable $error, bool $cancel = true): void
     {
         if ($cancel) {
             $this->cancelInstallation = true;
@@ -2276,7 +2281,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function sendDebugMessage(string $text)
+    final protected function sendDebugMessage(string $text): void
     {
         if ($this->debug) {
             $type = Version::MAJOR_VERSION == 3 ? 'Debug-' . get_class($this) : CMSApplicationInterface::MSG_DEBUG;
@@ -2289,7 +2294,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final protected function displayWelcome(string $type)
+    final protected function displayWelcome(string $type): void
     {
         if ($this->outputAllowed == false) {
             return;
