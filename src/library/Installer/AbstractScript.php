@@ -529,10 +529,6 @@ abstract class AbstractScript
             }
 
             if ($success) {
-                if ($type === static::TYPE_UPDATE) {
-                    $this->preserveFavicon();
-                }
-
                 if (
                     $type !== static::TYPE_UNINSTALL
                     && empty($this->manifest->alledia->obsolete->preflight) == false
@@ -597,10 +593,6 @@ abstract class AbstractScript
                     if (is_dir($proLibraryPath)) {
                         Folder::delete($proLibraryPath);
                     }
-                }
-
-                if ($type === static::TYPE_UPDATE) {
-                    $this->preserveFavicon();
                 }
             }
 
@@ -1828,39 +1820,6 @@ abstract class AbstractScript
     final protected function getName(): string
     {
         return (string)($this->manifest->alledia->name ?? $this->manifest->alledia->namespace);
-    }
-
-    /**
-     * If a template, preserve the favicon during an update.
-     * Rename favicon during preFlight(). Rename back during postFlight()
-     */
-    final protected function preserveFavicon()
-    {
-        $nameOfExtension = (string)$this->manifest->alledia->element;
-
-        $extensionType = $this->getExtensionInfoFromElement($nameOfExtension);
-
-        if ($extensionType['prefix'] === 'tpl') {
-            $pathToTemplate = $this->getExtensionPath($this->type, $nameOfExtension);
-
-            // These will be used to preserve the favicon during an update
-            $favicon     = $pathToTemplate . '/favicon.ico';
-            $faviconTemp = $pathToTemplate . '/favicon-temp.ico';
-
-            /**
-             * Rename favicon.
-             * The order of the conditionals should be kept the same, because
-             * preFlight() runs before postFLight().
-             * If the order is reversed, favicon in update package will replace
-             * $faviconTemp during update, which we don't want to happen.
-             */
-            if (is_file($faviconTemp)) {
-                rename($faviconTemp, $favicon);
-
-            } elseif (is_file($favicon)) {
-                rename($favicon, $faviconTemp);
-            }
-        }
     }
 
     /**
