@@ -120,7 +120,7 @@ abstract class AbstractScript
      */
     protected $systemExtensions = [
         'library..allediaframework',
-        'plugin.system.osmylicensesmanager'
+        'plugin.system.osmylicensesmanager',
     ];
 
     /**
@@ -348,7 +348,7 @@ abstract class AbstractScript
 
             // All the files we want to load
             $languageFiles = [
-                $this->getFullElement()
+                $this->getFullElement(),
             ];
 
             // Load from localized or core language folder
@@ -909,7 +909,7 @@ abstract class AbstractScript
 
         $prefixes = [
             'component' => 'com_',
-            'module'    => 'mod_'
+            'module'    => 'mod_',
         ];
 
         // Fix the element, if the prefix is not found
@@ -926,7 +926,7 @@ abstract class AbstractScript
 
         $terms = [
             'type'    => $type,
-            'element' => $element
+            'element' => $element,
         ];
 
         if ($type === 'plugin') {
@@ -969,7 +969,7 @@ abstract class AbstractScript
             $query->from('#__extensions');
             $query->where([
                 $db->quoteName('folder') . ' = ' . $db->quote($extension->get('folder')),
-                $db->quoteName('type') . ' = ' . $db->quote($extension->get('type'))
+                $db->quoteName('type') . ' = ' . $db->quote($extension->get('type')),
             ]);
             $query->order($db->quoteName('ordering'));
 
@@ -978,7 +978,7 @@ abstract class AbstractScript
             // Set the order only if plugin already successfully installed
             if (array_key_exists($extension->get('element'), $plugins)) {
                 $target = [
-                    $extension->get('element') => $plugins[$extension->get('element')]
+                    $extension->get('element') => $plugins[$extension->get('element')],
                 ];
                 $others = array_diff_key($plugins, $target);
 
@@ -1198,7 +1198,7 @@ abstract class AbstractScript
             'library'   => 'lib',
             'cli'       => 'cli',
             'module'    => 'mod',
-            'file'      => 'file'
+            'file'      => 'file',
         ];
 
         $type    = $type ?: $this->type;
@@ -1281,7 +1281,7 @@ abstract class AbstractScript
             'library'   => 'libraries/',
             'cli'       => 'cli/',
             'module'    => 'modules/',
-            'file'      => 'administrator/manifests/files/'
+            'file'      => 'administrator/manifests/files/',
         ];
 
         $basePath = JPATH_SITE . '/' . $folders[$type];
@@ -1333,7 +1333,7 @@ abstract class AbstractScript
             ->where([
                 $db->quoteName('element') . ' = ' . $db->quote($element),
                 $db->quoteName('folder') . ' = ' . $db->quote($group),
-                $db->quoteName('type') . ' = ' . $db->quote($type)
+                $db->quoteName('type') . ' = ' . $db->quote($type),
             ]);
         $db->setQuery($query);
 
@@ -1354,7 +1354,7 @@ abstract class AbstractScript
             case 'file':
                 $folders = [
                     'library' => 'libraries',
-                    'file'    => 'files'
+                    'file'    => 'files',
                 ];
 
                 $manifestPath = JPATH_SITE . '/administrator/manifests/' . $folders[$type] . '/' . $element . '.xml';
@@ -1466,7 +1466,7 @@ abstract class AbstractScript
                 ->set($db->quoteName('custom_data') . '=' . $db->quote('{"author":"Joomlashack"}'))
                 ->where([
                     $db->quoteName('type') . '=' . $db->quote('library'),
-                    $db->quoteName('element') . '=' . $db->quote('allediaframework')
+                    $db->quoteName('element') . '=' . $db->quote('allediaframework'),
                 ]);
             $db->setQuery($query)->execute();
         }
@@ -1516,7 +1516,7 @@ abstract class AbstractScript
                     ->set('component_id = ' . $db->quote($id))
                     ->where([
                         'type = ' . $db->quote('component'),
-                        'link LIKE ' . $db->quote("%option={$option}%")
+                        'link LIKE ' . $db->quote("%option={$option}%"),
                     ]);
                 $db->setQuery($query)->execute();
 
@@ -1718,7 +1718,7 @@ abstract class AbstractScript
             'mod' => 'module',
             'lib' => 'library',
             'tpl' => 'template',
-            'cli' => 'cli'
+            'cli' => 'cli',
         ];
 
         $element = explode('_', $element, 3);
@@ -1733,7 +1733,7 @@ abstract class AbstractScript
                 [
                     'type'  => $types[$prefix],
                     'group' => $group,
-                    'name'  => $name
+                    'name'  => $name,
                 ]
             );
         }
