@@ -2378,4 +2378,49 @@ abstract class AbstractScript
 
         return $model;
     }
+
+    /**
+     * Utility function to setting extensions states
+     * @param array $extensions
+     * @param int   $state
+     * @return array
+     * @throws \Exception
+     */
+    final protected function setExtensionState(array $extensions, int $state = 0): array
+    {
+        $states = [];
+        if (in_array($state, [0, 1])) {
+            foreach ($extensions as $extension) {
+                $parts = explode('.', $extension);
+
+                $element = array_pop($parts);
+                $folder  = null;
+
+                switch (count($parts)) {
+                    case 1:
+                        $type = array_pop($parts);
+                        break;
+
+                    case 2:
+                        $folder = array_pop($parts);
+                        $type   = array_pop($parts);
+                        break;
+
+                    default:
+                        // Badly structured extension identifier
+                        break 2;
+                }
+
+                if ($object = $this->findExtension($type, $element, $folder)) {
+                    $states[$extension] = (int)$object->get('enabled');
+                    if ($states[$extension] != $state) {
+                        $object->set('enabled', $state);
+                        $object->store();
+                    }
+                }
+            }
+        }
+
+        return $states;
+    }
 }
