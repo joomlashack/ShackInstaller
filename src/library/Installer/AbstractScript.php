@@ -1836,7 +1836,7 @@ abstract class AbstractScript
 
         foreach ($columnSpecs as $columnId => $specification) {
             if (strpos($columnId, '.') !== false && empty($this->findColumn($columnId))) {
-                list($table, $columnName) = explode('.', $columnId);
+                [$table, $columnName] = explode('.', $columnId);
 
                 $db->setQuery(
                     sprintf(
@@ -1861,7 +1861,7 @@ abstract class AbstractScript
         $db = $this->dbo;
         foreach ($columnIds as $columnId) {
             if (strpos($columnId, '.') !== false) {
-                list($table, $column) = explode('.', $columnId);
+                [$table, $column] = explode('.', $columnId);
 
                 $db->setQuery(
                     sprintf(
@@ -1885,7 +1885,7 @@ abstract class AbstractScript
         if (strpos($columnId, '.') !== false) {
             $db = $this->dbo;
 
-            list($table, $field) = explode('.', $columnId, 2);
+            [$table, $field] = explode('.', $columnId, 2);
 
             if (isset($this->tableColumns[$table]) == false) {
                 $this->tableColumns[$table] = $db->setQuery('SHOW COLUMNS FROM ' . $db->quoteName($table))
@@ -1946,7 +1946,7 @@ abstract class AbstractScript
         foreach ($indexIds as $indexId) {
             if (strpos($indexId, '.') !== false) {
                 if ($this->findIndex($indexId)) {
-                    list($table, $indexName) = explode('.', $indexId);
+                    [$table, $indexName] = explode('.', $indexId);
 
                     $db->setQuery(
                         sprintf(
@@ -1971,7 +1971,7 @@ abstract class AbstractScript
         if (strpos($indexId, '.') !== false) {
             $db = $this->dbo;
 
-            list($table, $indexName) = explode('.', $indexId);
+            [$table, $indexName] = explode('.', $indexId);
 
             if (isset($this->tableIndexes[$table]) == false) {
                 $this->tableIndexes[$table] = $db->setQuery('SHOW INDEX FROM ' . $db->quoteName($table))
@@ -2002,7 +2002,7 @@ abstract class AbstractScript
 
         foreach ($constraintIds as $constraintId) {
             if (strpos($constraintId, '.') !== false && $this->findConstraint($constraintId)) {
-                list($table, $constraintName) = explode('.', $constraintId);
+                [$table, $constraintName] = explode('.', $constraintId);
 
                 $db->setQuery(
                     sprintf(
@@ -2026,7 +2026,7 @@ abstract class AbstractScript
         if (strpos($constraintId, '.') !== false) {
             $db = $this->dbo;
 
-            list($table, $constraint) = explode('.', $constraintId);
+            [$table, $constraint] = explode('.', $constraintId);
 
             if (isset($this->tableConstraints[$table]) == false) {
                 $query = $db->getQuery(true)
