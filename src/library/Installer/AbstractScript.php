@@ -2380,7 +2380,7 @@ abstract class AbstractScript
     }
 
     /**
-     * Utility function to setting extensions states
+     * Utility function to setting extension states
      * @param array $extensions
      * @param int   $state
      * @return array
@@ -2414,6 +2414,14 @@ abstract class AbstractScript
                 if ($object = $this->findExtension($type, $element, $folder)) {
                     $states[$extension] = (int)$object->get('enabled');
                     if ($states[$extension] != $state) {
+                        $this->sendDebugMessage(
+                            sprintf(
+                                '%s: %s',
+                                $extension,
+                                $state ? 'Enabled' : 'Disabled'
+                            )
+                        );
+
                         $object->set('enabled', $state);
                         $object->store();
                     }
