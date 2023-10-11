@@ -386,6 +386,8 @@ abstract class AbstractScript
      */
     public function install(InstallerAdapter $parent): bool
     {
+        $this->sendDebugMessage(__METHOD__);
+
         try {
             return $this->customInstall($parent);
 
@@ -405,6 +407,8 @@ abstract class AbstractScript
      */
     public function discover_install(InstallerAdapter $parent): bool
     {
+        $this->sendDebugMessage(__METHOD__);
+
         try {
             if ($this->install($parent)) {
                 return $this->customDiscoverInstall($parent);
@@ -425,6 +429,8 @@ abstract class AbstractScript
      */
     public function update(InstallerAdapter $parent): bool
     {
+        $this->sendDebugMessage(__METHOD__);
+
         try {
             return $this->customUpdate($parent);
 
