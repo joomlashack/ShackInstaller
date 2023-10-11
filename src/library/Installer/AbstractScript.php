@@ -633,6 +633,40 @@ abstract class AbstractScript
     }
 
     /**
+     * @param int     $number
+     * @param string  $error
+     * @param ?string $file
+     * @param ?int    $line
+     *
+     * @return void
+     */
+    public static function errorHandler(int $number, string $error, ?string $file = null, ?int $line = null): void
+    {
+        try {
+            $codes = get_defined_constants(true);
+            $codes = $codes['Core'];
+
+            $codes = array_filter(
+                $codes,
+                function ($key) {
+                    return strpos($key, 'E_') === 0;
+                },
+                ARRAY_FILTER_USE_KEY
+            );
+
+            $name = array_search($number, $codes);
+
+            Factory::getApplication()->enqueueMessage(
+                sprintf('%s: %s<br>(%s) %s', $name, $error, $line ?: 'NA', $file ?: 'NA'),
+                'warning'
+            );
+
+        } catch (Throwable $error) {
+            // ignore
+        }
+    }
+
+    /**
      * For use in subclasses
      *
      * @param string           $type
