@@ -384,7 +384,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function install(InstallerAdapter $parent): bool
+    final public function install(InstallerAdapter $parent): bool
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -405,7 +405,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function discover_install(InstallerAdapter $parent): bool
+    final public function discover_install(InstallerAdapter $parent): bool
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -427,7 +427,7 @@ abstract class AbstractScript
      *
      * @return bool
      */
-    public function update(InstallerAdapter $parent): bool
+    final public function update(InstallerAdapter $parent): bool
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -448,7 +448,7 @@ abstract class AbstractScript
      * @return bool
      * @throws \Exception
      */
-    public function preFlight(string $type, InstallerAdapter $parent): bool
+    final public function preFlight(string $type, InstallerAdapter $parent): bool
     {
         if ($this->cancelInstallation) {
             $this->sendDebugMessage('CANCEL: ' . __METHOD__);
@@ -561,7 +561,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function postFlight(string $type, InstallerAdapter $parent): void
+    final public function postFlight(string $type, InstallerAdapter $parent): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -619,7 +619,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    public function uninstall(InstallerAdapter $parent): void
+    final public function uninstall(InstallerAdapter $parent): void
     {
         $this->sendDebugMessage(__METHOD__);
 
