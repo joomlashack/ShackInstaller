@@ -735,103 +735,114 @@ abstract class AbstractScript
                     $group   = $this->getXmlValue($extension['group']);
                     $key     = md5(join(':', [$type, $element, $group]));
 
-                    if ($type == 'plugin' && in_array($group, ['search', 'finder'])) {
-                        if (is_dir(JPATH_ADMINISTRATOR . '/components/com_' . $group) == false) {
-                            // skip search/finder plugins based on installed components
-                            $this->sendDebugMessage(
-                                sprintf(
-                                    'Skipped/Uninstalled plugin %s',
-                                    ucwords($group . ' ' . $element)
-                                )
+                    $this->sendDebugMessage(
+                        sprintf('Related: %s%s/%s', $type, $group ? ($group . '/') : '', $element)
+                    );
+
+                    try {
+                        if ($type == 'plugin' && in_array($group, ['search', 'finder'])) {
+                            if (is_dir(JPATH_ADMINISTRATOR . '/components/com_' . $group) == false) {
+                                // skip search/finder plugins based on installed components
+                                $this->sendDebugMessage(
+                                    sprintf(
+                                        'Skipped/Uninstalled plugin %s',
+                                        ucwords($group . ' ' . $element)
+                                    )
+                                );
+
+                                $this->uninstallExtension($type, $element, $group);
+                                continue;
+                            }
+                        }
+
+                        $current = $this->findExtension($type, $element, $group);
+                        $isNew   = empty($current);
+
+                        $typeName = ucwords(trim($group . ' ' . $type));
+
+                        // Get data from the manifest
+                        $tmpInstaller = new Installer();
+                        $tmpInstaller->setPath('source', $path);
+                        $tmpInstaller->setPath('parent', $this->installer->getPath('source'));
+
+                        $newManifest = $tmpInstaller->getManifest();
+                        $newVersion  = (string)$newManifest->version;
+
+                        $this->storeFeedbackForRelatedExtension($key, 'name', (string)$newManifest->name);
+
+                        $downgrade = $this->getXmlValue($extension['downgrade'], 'bool', $defaultDowngrade);
+
+                        if (($isNew || $downgrade) == false) {
+                            $currentManifestPath = $this->getManifestPath($type, $element, $group);
+                            $currentManifest     = $this->getInfoFromManifest($currentManifestPath);
+
+                            // Avoid to update for an outdated version
+                            $currentVersion = $currentManifest->get('version');
+
+                            if (version_compare($currentVersion, $newVersion, '>')) {
+                                // Store the state of the install/update
+                                $this->storeFeedbackForRelatedExtension(
+                                    $key,
+                                    'message',
+                                    Text::sprintf(
+                                        'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_SKIPED',
+                                        $newVersion,
+                                        $currentVersion
+                                    )
+                                );
+
+                                // Skip the installation for this extension
+                                continue;
+                            }
+                        }
+
+                        $text = 'LIB_SHACKINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
+
+                        if ($tmpInstaller->install($path)) {
+                            $this->sendMessage(Text::sprintf($text, $typeName, $element));
+                            if ($isNew) {
+                                $current = $this->findExtension($type, $element, $group);
+
+                                if (is_object($current)) {
+                                    if ($type === 'plugin') {
+                                        if ($this->getXmlValue($extension['publish'], 'bool', $defaultPublish)) {
+                                            $current->publish();
+
+                                            $this->storeFeedbackForRelatedExtension($key, 'publish', true);
+                                        }
+
+                                        if ($ordering = $this->getXmlValue($extension['ordering'])) {
+                                            $this->setPluginOrder($current, $ordering);
+
+                                            $this->storeFeedbackForRelatedExtension($key, 'ordering', $ordering);
+                                        }
+                                    }
+                                }
+                            }
+
+                            $this->storeFeedbackForRelatedExtension(
+                                $key,
+                                'message',
+                                Text::sprintf('LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
                             );
 
-                            $this->uninstallExtension($type, $element, $group);
-                            continue;
-                        }
-                    }
+                        } else {
+                            $this->sendMessage(Text::sprintf($text . '_FAIL', $typeName, $element), 'error');
 
-                    $current = $this->findExtension($type, $element, $group);
-                    $isNew   = empty($current);
-
-                    $typeName = ucwords(trim($group . ' ' . $type));
-
-                    // Get data from the manifest
-                    $tmpInstaller = new Installer();
-                    $tmpInstaller->setPath('source', $path);
-                    $tmpInstaller->setPath('parent', $this->installer->getPath('source'));
-
-                    $newManifest = $tmpInstaller->getManifest();
-                    $newVersion  = (string)$newManifest->version;
-
-                    $this->storeFeedbackForRelatedExtension($key, 'name', (string)$newManifest->name);
-
-                    $downgrade = $this->getXmlValue($extension['downgrade'], 'bool', $defaultDowngrade);
-                    if (!$isNew && !$downgrade) {
-                        $currentManifestPath = $this->getManifestPath($type, $element, $group);
-                        $currentManifest     = $this->getInfoFromManifest($currentManifestPath);
-
-                        // Avoid to update for an outdated version
-                        $currentVersion = $currentManifest->get('version');
-
-                        if (version_compare($currentVersion, $newVersion, '>')) {
-                            // Store the state of the install/update
                             $this->storeFeedbackForRelatedExtension(
                                 $key,
                                 'message',
                                 Text::sprintf(
-                                    'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_SKIPED',
-                                    $newVersion,
-                                    $currentVersion
+                                    'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_FAILED',
+                                    $newVersion
                                 )
                             );
-
-                            // Skip the install for this extension
-                            continue;
                         }
+                        unset($tmpInstaller);
+
+                    } catch (Throwable $error) {
+                        $this->sendErrorMessage($error, false);
                     }
-
-                    $text = 'LIB_SHACKINSTALLER_RELATED_' . ($isNew ? 'INSTALL' : 'UPDATE');
-                    if ($tmpInstaller->install($path)) {
-                        $this->sendMessage(Text::sprintf($text, $typeName, $element));
-                        if ($isNew) {
-                            $current = $this->findExtension($type, $element, $group);
-
-                            if (is_object($current)) {
-                                if ($type === 'plugin') {
-                                    if ($this->getXmlValue($extension['publish'], 'bool', $defaultPublish)) {
-                                        $current->publish();
-
-                                        $this->storeFeedbackForRelatedExtension($key, 'publish', true);
-                                    }
-
-                                    if ($ordering = $this->getXmlValue($extension['ordering'])) {
-                                        $this->setPluginOrder($current, $ordering);
-
-                                        $this->storeFeedbackForRelatedExtension($key, 'ordering', $ordering);
-                                    }
-                                }
-                            }
-                        }
-
-                        $this->storeFeedbackForRelatedExtension(
-                            $key,
-                            'message',
-                            Text::sprintf('LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_INSTALLED', $newVersion)
-                        );
-
-                    } else {
-                        $this->sendMessage(Text::sprintf($text . '_FAIL', $typeName, $element), 'error');
-
-                        $this->storeFeedbackForRelatedExtension(
-                            $key,
-                            'message',
-                            Text::sprintf(
-                                'LIB_SHACKINSTALLER_RELATED_UPDATE_STATE_FAILED',
-                                $newVersion
-                            )
-                        );
-                    }
-                    unset($tmpInstaller);
                 }
             }
         }
