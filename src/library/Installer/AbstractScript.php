@@ -2126,13 +2126,19 @@ abstract class AbstractScript
      */
     final protected function executeQuery($schemaVersion, $queries)
     {
+        $this->sendDebugMessage(__METHOD__);
+        $this->sendDebugMessage($this->schemaVersion . ' / ' . $schemaVersion);
+
         if ($this->schemaVersion && version_compare($this->schemaVersion, $schemaVersion, 'lt')) {
             $this->sendDebugMessage(sprintf('Running v%s Schema Updates', $schemaVersion));
 
             $db = $this->dbo;
             try {
-                foreach ($queries as $query) {
-                    $db->setQuery($query)->execute();
+                foreach ((array)$queries as $query) {
+                    $this->sendDebugMessage($query);
+                    if ($db->setQuery($query)->execute() == false) {
+                        return new \Exception('Query Error: ' . $query);
+                    }
                 }
 
             } catch (Throwable $error) {
