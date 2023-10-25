@@ -37,7 +37,14 @@ if (defined('SHACK_INSTALLER_VERSION') == false) {
     define('SHACK_INSTALLER_VERSION', '2.4.1');
     define('SHACK_INSTALLER_COMPATIBLE', '2.4.0');
 
-    $reportErrors = $reportErrors ?? (E_ALL ^ E_DEPRECATED ^ E_USER_DEPRECATED);
+    if (isset($reportErrors) == false) {
+        $reportErrors = E_ALL ^ E_DEPRECATED ^ E_USER_DEPRECATED;
+        if (Version::MAJOR_VERSION == 4) {
+            // There is a bad line of code in Joomla 4 that runs during extension install/update
+            $reportErrors = $reportErrors ^ E_NOTICE;
+        }
+    }
+
     if ($reportErrors) {
         set_error_handler('\\Alledia\\Installer\\AbstractScript::errorHandler', $reportErrors);
     }
