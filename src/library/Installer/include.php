@@ -37,7 +37,7 @@ if (defined('SHACK_INSTALLER_VERSION') == false) {
     define('SHACK_INSTALLER_VERSION', '2.4.0');
     define('SHACK_INSTALLER_COMPATIBLE', '2.4.0');
 
-    $reportErrors = $reportErrors ?? (E_ALL ^ E_DEPRECATED);
+    $reportErrors = $reportErrors ?? (E_ALL ^ E_DEPRECATED ^ E_USER_DEPRECATED);
     if ($reportErrors) {
         set_error_handler('\\Alledia\\Installer\\AbstractScript::errorHandler', $reportErrors);
     }
