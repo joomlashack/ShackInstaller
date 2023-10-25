@@ -22,10 +22,12 @@
  */
 
 use Alledia\Installer\AutoLoader;
+use Joomla\CMS\Version;
 
+// phpcs:disable PSR1.Files.SideEffects
 defined('_JEXEC') or die();
 
-if (!defined('SHACK_INSTALLER_BASE')) {
+if (defined('SHACK_INSTALLER_BASE') == false) {
     define('SHACK_INSTALLER_BASE', __DIR__);
 
     require_once SHACK_INSTALLER_BASE . '/AutoLoader.php';
@@ -34,7 +36,7 @@ if (!defined('SHACK_INSTALLER_BASE')) {
 AutoLoader::register('Alledia\\Installer', __DIR__, true);
 
 if (defined('SHACK_INSTALLER_VERSION') == false) {
-    define('SHACK_INSTALLER_VERSION', '2.4.1');
+    define('SHACK_INSTALLER_VERSION', '2.4.2');
     define('SHACK_INSTALLER_COMPATIBLE', '2.4.0');
 
     if (isset($reportErrors) == false) {
