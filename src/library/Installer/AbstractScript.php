@@ -2338,6 +2338,8 @@ abstract class AbstractScript
 
                 unset($field, $footerElement);
             }
+        } else {
+            $this->sendDebugMessage('No Footer element was found');
         }
 
         // Show additional installation messages
@@ -2359,6 +2361,8 @@ abstract class AbstractScript
 
                 $this->isLicensesManagerInstalled = true;
             }
+
+            $this->sendDebugMessage('License Manager plugin: ' . (int)$this->isLicensesManagerInstalled);
         }
 
         // Welcome message
@@ -2383,14 +2387,13 @@ abstract class AbstractScript
         */
         $path = $extensionPath . '/views/installer/tmpl/default.php';
 
+        if (is_file($path) == false) {
+            $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
+        }
+
+        $this->sendDebugMessage(sprintf('Welcome View (%s): %s', (int)is_file($path), $path));
         if (is_file($path)) {
             include $path;
-
-        } else {
-            $path = $extensionPath . '/alledia_views/installer/tmpl/default.php';
-            if (is_file($path)) {
-                include $path;
-            }
         }
     }
 
