@@ -970,11 +970,6 @@ abstract class AbstractScript
             }
         }
 
-        // Fix the element for templates
-        if ($type == 'template') {
-            $element = str_replace('tpl_', '', $element);
-        }
-
         $terms = [
             'type'    => $type,
             'element' => $element,
@@ -1120,6 +1115,7 @@ abstract class AbstractScript
 
         $this->sendDebugMessage(__METHOD__ . '<pre>' . print_r($obsolete, 1) . '</pre>');
 
+        $this->clearOldSystemPlugin();
         if ($obsolete) {
             if ($obsolete->extension) {
                 foreach ($obsolete->extension as $extension) {
@@ -2490,5 +2486,21 @@ abstract class AbstractScript
         }
 
         return $states;
+    }
+
+    /**
+     * If the old system plugin is installed, it requires special handling to avoid
+     * fatal conflicts with its install script
+     *
+     * @return void
+     * @throws \Exception
+     */
+    final protected function clearOldSystemPlugin()
+    {
+        if ($oldSystemPlugin = $this->findExtension('plugin', 'ossystem', 'system')) {
+            if (class_exists('PlgSystemOSSystemInstallerScript') == false) {
+                class_alias(static::class, 'PlgSystemOSSystemInstallerScript');
+            }
+        }
     }
 }
