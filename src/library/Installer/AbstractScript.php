@@ -24,7 +24,6 @@
 namespace Alledia\Installer;
 
 use Alledia\Installer\Extension\Licensed;
-use JDatabaseDriver;
 use JEventDispatcher;
 use JFormFieldCustomFooter;
 use Joomla\CMS\Application\CMSApplication;
@@ -41,6 +40,7 @@ use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Version;
 use Joomla\Component\Plugins\Administrator\Model\PluginModel;
+use Joomla\Database\DatabaseDriver;
 use Joomla\Event\DispatcherInterface;
 use Joomla\Registry\Registry;
 use SimpleXMLElement;
@@ -76,7 +76,7 @@ abstract class AbstractScript
     protected $app = null;
 
     /**
-     * @var JDatabaseDriver
+     * @var DatabaseDriver
      */
     protected $dbo = null;
 
@@ -956,7 +956,7 @@ abstract class AbstractScript
     {
         // @TODO: Why do we need to use JTable?
         /** @var Extension $row */
-        $row = \JTable::getInstance('extension');
+        $row = Table::getInstance('extension');
 
         $prefixes = [
             'component' => 'com_',
