@@ -2497,7 +2497,7 @@ abstract class AbstractScript
      */
     final protected function clearOldSystemPlugin()
     {
-        if ($oldSystemPlugin = $this->findExtension('plugin', 'ossystem', 'system')) {
+        if ($this->findExtension('plugin', 'ossystem', 'system')) {
             if (class_exists('PlgSystemOSSystemInstallerScript') == false) {
                 class_alias(static::class, 'PlgSystemOSSystemInstallerScript');
             }
