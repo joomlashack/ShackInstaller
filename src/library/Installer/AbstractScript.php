@@ -2439,6 +2439,7 @@ abstract class AbstractScript
      * Utility function to setting extension states
      * @param array $extensions
      * @param int   $state
+     *
      * @return array
      * @throws \Exception
      */
