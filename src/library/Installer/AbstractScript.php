@@ -52,14 +52,10 @@ defined('_JEXEC') or die();
 require_once 'include.php';
 
 // phpcs:enable PSR1.Files.SideEffects
-
 abstract class AbstractScript
 {
     public const VERSION = '2.4.4';
 
-    /**
-     * Recognized installation types
-     */
     protected const TYPE_INSTALL          = 'install';
     protected const TYPE_DISCOVER_INSTALL = 'discover_install';
     protected const TYPE_UPDATE           = 'update';
@@ -149,12 +145,6 @@ abstract class AbstractScript
     protected $mediaURL = null;
 
     /**
-     * @var string[]
-     * @deprecated v2.0.0
-     */
-    protected $messages = [];
-
-    /**
      * @var string
      */
     protected $type = null;
@@ -170,14 +160,6 @@ abstract class AbstractScript
      * @var array
      */
     protected $columns = null;
-
-    /**
-     * List of tables and respective indexes
-     *
-     * @var array
-     * @deprecated v2.1.0
-     */
-    protected $indexes = null;
 
     /**
      * @var object[]
@@ -1086,20 +1068,6 @@ abstract class AbstractScript
     }
 
     /**
-     * Add a message to the message list
-     *
-     * @param string  $message
-     * @param ?string $type
-     *
-     * @return void
-     * @deprecated v2.0.0: use $this->sendMessage()
-     */
-    final protected function setMessage(string $message, ?string $type = 'message'): void
-    {
-        $this->sendMessage($message, $type);
-    }
-
-    /**
      * Delete obsolete files, folders and extensions.
      * Files and folders are identified from the site
      * root path.
@@ -1579,134 +1547,6 @@ abstract class AbstractScript
                 }
             }
         }
-    }
-
-    /**
-     * Get and store a cache of columns of a table
-     *
-     * @param string $table The table name
-     *
-     * @return string[]
-     * @deprecated v2.1.0: Use $this->findColumn()
-     */
-    final protected function getColumnsFromTable(string $table): array
-    {
-        if (!isset($this->columns[$table])) {
-            $db = $this->dbo;
-            $db->setQuery('SHOW COLUMNS FROM ' . $db->quoteName($table));
-            $rows = $db->loadObjectList();
-
-            $columns = [];
-            foreach ($rows as $row) {
-                $columns[] = $row->Field;
-            }
-
-            $this->columns[$table] = $columns;
-        }
-
-        return $this->columns[$table];
-    }
-
-    /**
-     * Get and store a cache of indexes of a table
-     *
-     * @param string $table The table name
-     *
-     * @return string[]
-     */
-    final protected function getIndexesFromTable(string $table): array
-    {
-        if (!isset($this->indexes[$table])) {
-            $db = $this->dbo;
-            $db->setQuery('SHOW INDEX FROM ' . $db->quoteName($table));
-            $rows = $db->loadObjectList();
-
-            $indexes = [];
-            foreach ($rows as $row) {
-                $indexes[] = $row->Key_name;
-            }
-
-            $this->indexes[$table] = $indexes;
-        }
-
-        return $this->indexes[$table];
-    }
-
-    /**
-     * Add columns to a table if they doesn't exists
-     *
-     * @param string   $table   The table name
-     * @param string[] $columns Assoc array of columnNames => definition
-     *
-     * @return void
-     * @deprecated v2.1.0: Use $this->addColumns()
-     */
-    final protected function addColumnsIfNotExists(string $table, array $columns): void
-    {
-        $columnSpecs = [];
-        foreach ($columns as $columnName => $columnData) {
-            $columnId               = $table . '.' . $columnName;
-            $columnSpecs[$columnId] = $columnData;
-        }
-
-        $this->addColumns($columnSpecs);
-    }
-
-    /**
-     * Add indexes to a table if they doesn't exists
-     *
-     * @param string $table   The table name
-     * @param array  $indexes Assoc array of indexName => definition
-     *
-     * @return void
-     * @deprecated v2.1.0: use $this->addIndexes()
-     */
-    final protected function addIndexesIfNotExists(string $table, array $indexes): void
-    {
-        $db = $this->dbo;
-
-        $existentIndexes = $this->getIndexesFromTable($table);
-
-        foreach ($indexes as $index => $specification) {
-            if (!in_array($index, $existentIndexes)) {
-                $db->setQuery(
-                    "ALTER TABLE {$db->quoteName($table)} CREATE INDEX {$specification} ON {$index}"
-                )
-                    ->execute();
-            }
-        }
-    }
-
-    /**
-     * Drop columns from a table if they exists
-     *
-     * @param string   $table   The table name
-     * @param string[] $columns The column names that needed to be checked and added
-     *
-     * @return void
-     * @deprecated v2.1.0: Use $this->dropColumns()
-     */
-    final protected function dropColumnsIfExists(string $table, array $columns): void
-    {
-        $columnIds = [];
-        foreach ($columns as $column) {
-            $columnIds[] = $table . '.' . $column;
-        }
-
-        $this->dropColumns($columnIds);
-    }
-
-    /**
-     * Check if a table exists
-     *
-     * @param string $name
-     *
-     * @return bool
-     * @deprecated v2.1.0: Use $this->findTable()
-     */
-    final protected function tableExists(string $name): bool
-    {
-        return $this->findTable($name);
     }
 
     /**
