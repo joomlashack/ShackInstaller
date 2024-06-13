@@ -2025,7 +2025,7 @@ abstract class AbstractScript
      * @param ?string                 $type
      * @param mixed                   $default
      *
-     * @return bool|string
+     * @return ?bool|string
      */
     final protected function getXmlValue($element, ?string $type = 'string', $default = null)
     {
