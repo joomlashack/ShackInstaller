@@ -39,6 +39,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Version;
 use Joomla\Component\Plugins\Administrator\Model\PluginModel;
 use Joomla\Database\DatabaseDriver;
+use Joomla\Database\DatabaseInterface;
 use Joomla\Event\DispatcherInterface;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
@@ -233,6 +234,21 @@ abstract class AbstractScript
             class_alias(\Joomla\CMS\Filesystem\Folder::class, Folder::class);
             class_alias(\Joomla\CMS\Filesystem\File::class, File::class);
         }
+    }
+
+    /**
+     * cross-version method for getting a new installer instance
+     *
+     * @return Installer
+     */
+    final protected function getNewInstaller(): Installer
+    {
+        $installer = new Installer();
+        if (Version::MAJOR_VERSION > 5) {
+            $installer->setDatabase(Factory::getContainer()->get(DatabaseInterface::class));
+        }
+
+        return $installer;
     }
 
     /**
@@ -792,7 +808,7 @@ abstract class AbstractScript
                         $typeName = ucwords(trim($group . ' ' . $type));
 
                         // Get data from the manifest
-                        $tmpInstaller = new Installer();
+                        $tmpInstaller = $this->getNewInstaller();
                         $tmpInstaller->setPath('source', $path);
                         $tmpInstaller->setPath('parent', $this->installer->getPath('source'));
 
@@ -926,7 +942,7 @@ abstract class AbstractScript
     final protected function uninstallExtension(string $type, string $element, ?string $group = null): void
     {
         if ($extension = $this->findExtension($type, $element, $group)) {
-            $installer = new Installer();
+            $installer = $this->getNewInstaller();
 
             $success = $installer->uninstall($extension->get('type'), $extension->get('extension_id'));
             $msg     = 'LIB_SHACKINSTALLER_RELATED_UNINSTALL' . ($success ? '' : '_FAIL');
@@ -1109,7 +1125,7 @@ abstract class AbstractScript
                     $current = $this->findExtension($type, $element, $group);
                     if (empty($current) == false) {
                         // Try to uninstall
-                        $tmpInstaller = new Installer();
+                        $tmpInstaller = $this->getNewInstaller();
                         $uninstalled  = $tmpInstaller->uninstall($type, $current->get('extension_id'));
 
                         $typeName = ucfirst(trim(($group ?: '') . ' ' . $type));
@@ -1377,8 +1393,6 @@ abstract class AbstractScript
      */
     final protected function getManifestPath($type, $element, $group = ''): string
     {
-        $installer = new Installer();
-
         switch ($type) {
             case 'library':
             case 'file':
@@ -1389,6 +1403,7 @@ abstract class AbstractScript
 
                 $manifestPath = JPATH_SITE . '/administrator/manifests/' . $folders[$type] . '/' . $element . '.xml';
 
+                $installer = $this->getNewInstaller();
                 if (!file_exists($manifestPath) || !$installer->isManifest($manifestPath)) {
                     $manifestPath = false;
                 }
@@ -1397,6 +1412,7 @@ abstract class AbstractScript
             default:
                 $basePath = $this->getExtensionPath($type, $element, $group);
 
+                $installer = $this->getNewInstaller();
                 $installer->setPath('source', $basePath);
                 $installer->getManifest();
 
