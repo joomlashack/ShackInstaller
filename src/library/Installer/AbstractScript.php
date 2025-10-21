@@ -228,7 +228,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    final private function setClassAliases(): void
+    private function setClassAliases(): void
     {
         if (class_exists(Folder::class) == false) {
             class_alias(\Joomla\CMS\Filesystem\Folder::class, Folder::class);
@@ -241,7 +241,7 @@ abstract class AbstractScript
      *
      * @return Installer
      */
-    final protected function getNewInstaller(): Installer
+    private function getNewInstaller(): Installer
     {
         $installer = new Installer();
         if (Version::MAJOR_VERSION > 5) {
@@ -761,7 +761,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function installRelated(): void
+    private function installRelated(): void
     {
         $this->sendDebugMessage(__METHOD__);
 
@@ -901,7 +901,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function uninstallRelated(): void
+    private function uninstallRelated(): void
     {
         if ($this->manifest->alledia->relatedExtensions) {
             $defaultAttributes = $this->manifest->alledia->relatedExtensions->attributes();
@@ -939,7 +939,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    final protected function uninstallExtension(string $type, string $element, ?string $group = null): void
+    private function uninstallExtension(string $type, string $element, ?string $group = null): void
     {
         if ($extension = $this->findExtension($type, $element, $group)) {
             $installer = $this->getNewInstaller();
