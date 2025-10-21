@@ -54,7 +54,7 @@ require_once 'include.php';
 // phpcs:enable PSR1.Files.SideEffects
 abstract class AbstractScript
 {
-    public const VERSION = '2.4.4';
+    public const VERSION = '2.5.1-b1';
 
     protected const TYPE_INSTALL          = 'install';
     protected const TYPE_DISCOVER_INSTALL = 'discover_install';
