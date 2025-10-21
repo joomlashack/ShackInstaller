@@ -29,8 +29,6 @@ use JFormFieldCustomFooter;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\File;
-use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Language\Text;
@@ -42,6 +40,8 @@ use Joomla\CMS\Version;
 use Joomla\Component\Plugins\Administrator\Model\PluginModel;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Event\DispatcherInterface;
+use Joomla\Filesystem\File;
+use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
 use SimpleXMLElement;
 use Throwable;
@@ -213,11 +213,26 @@ abstract class AbstractScript
      */
     public function __construct(InstallerAdapter $parent)
     {
+        $this->setClassAliases();
+
         $this->sendDebugMessage('ShackInstaller v' . static::VERSION);
         $this->sendDebugMessage('Base v' . SHACK_INSTALLER_VERSION);
         $this->sendDebugMessage(__METHOD__);
 
         $this->initProperties($parent);
+    }
+
+    /**
+     * Provide aliased classes for cross-version compatibility
+     *
+     * @return void
+     */
+    final private function setClassAliases(): void
+    {
+        if (class_exists(Folder::class) == false) {
+            class_alias(\Joomla\CMS\Filesystem\Folder::class, Folder::class);
+            class_alias(\Joomla\CMS\Filesystem\File::class, File::class);
+        }
     }
 
     /**
