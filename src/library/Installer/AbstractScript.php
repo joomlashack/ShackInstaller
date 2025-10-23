@@ -214,26 +214,11 @@ abstract class AbstractScript
      */
     public function __construct(InstallerAdapter $parent)
     {
-        $this->setClassAliases();
-
         $this->sendDebugMessage('ShackInstaller v' . static::VERSION);
         $this->sendDebugMessage('Base v' . SHACK_INSTALLER_VERSION);
         $this->sendDebugMessage(__METHOD__);
 
         $this->initProperties($parent);
-    }
-
-    /**
-     * Provide aliased classes for cross-version compatibility
-     *
-     * @return void
-     */
-    private function setClassAliases(): void
-    {
-        if (class_exists(Folder::class) == false) {
-            class_alias(\Joomla\CMS\Filesystem\Folder::class, Folder::class);
-            class_alias(\Joomla\CMS\Filesystem\File::class, File::class);
-        }
     }
 
     /**
