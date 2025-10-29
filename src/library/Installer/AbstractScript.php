@@ -641,7 +641,7 @@ abstract class AbstractScript
      *
      * @return void
      */
-    public static function errorHandler(int $number, string $error, ?string $file = null, ?int $line = null): void
+    final public static function errorHandler(int $number, string $error, ?string $file = null, ?int $line = null): void
     {
         try {
             $codes = get_defined_constants(true);
