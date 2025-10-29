@@ -302,7 +302,10 @@ abstract class AbstractScript
         }
 
         try {
-            $this->dbo           = Factory::getDbo();
+            $this->dbo = Version::MAJOR_VERSION > 4
+                ? Factory::getContainer()->get(DatabaseInterface::class)
+                : Factory::getDbo();
+
             $this->installer     = $parent->getParent();
             $this->manifest      = $this->installer->getManifest();
             $this->schemaVersion = $this->getSchemaVersion();
