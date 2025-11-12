@@ -55,6 +55,8 @@ require_once 'include.php';
 // phpcs:enable PSR1.Files.SideEffects
 abstract class AbstractScript
 {
+    use TraitFramework;
+
     public const VERSION = '2.6.1';
 
     protected const TYPE_INSTALL          = 'install';
@@ -302,9 +304,7 @@ abstract class AbstractScript
         }
 
         try {
-            $this->dbo = Version::MAJOR_VERSION > 4
-                ? Factory::getContainer()->get(DatabaseInterface::class)
-                : Factory::getDbo();
+            $this->dbo = $this->getDatabase();
 
             $this->installer     = $parent->getParent();
             $this->manifest      = $this->installer->getManifest();
@@ -771,7 +771,7 @@ abstract class AbstractScript
                     $key     = md5(join(':', [$type, $element, $group]));
 
                     $this->sendDebugMessage(
-                        sprintf('Related: %s%s/%s', $type, $group ? ($group . '/') : '', $element)
+                        sprintf('Related: %s/%s%s', $type, $group ? ($group . '/') : '', $element)
                     );
 
                     try {
@@ -2250,48 +2250,6 @@ abstract class AbstractScript
         if (is_file($path)) {
             include $path;
         }
-    }
-
-    /**
-     * WARNIMG! This is duplicated from the Joomlashack Framework
-     *
-     * @param string  $name
-     * @param string  $prefix
-     * @param string  $component
-     * @param ?string $appName
-     * @param ?array  $options
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    protected function getJoomlaModel(
-        string $name,
-        string $prefix,
-        string $component,
-        ?string $appName = null,
-        ?array $options = []
-    ) {
-        $defaultApp = 'Site';
-        $appNames   = [$defaultApp, 'Administrator'];
-
-        $appName = ucfirst($appName ?: $defaultApp);
-        $appName = in_array($appName, $appNames) ? $appName : $defaultApp;
-
-        if (Version::MAJOR_VERSION < 4) {
-            $basePath = $appName == 'Administrator' ? JPATH_ADMINISTRATOR : JPATH_SITE;
-
-            $path = $basePath . '/components/' . $component;
-            BaseDatabaseModel::addIncludePath($path . '/models');
-            Table::addIncludePath($path . '/tables');
-
-            $model = BaseDatabaseModel::getInstance($name, $prefix, $options);
-
-        } else {
-            $model = Factory::getApplication()->bootComponent($component)
-                ->getMVCFactory()->createModel($name, $appName, $options);
-        }
-
-        return $model;
     }
 
     /**
