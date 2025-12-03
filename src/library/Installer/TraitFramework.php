@@ -142,7 +142,7 @@ trait TraitFramework
      */
     final protected function getJoomlaForm(
         string $name,
-        string $source = null,
+        ?string $source = null,
         array $options = [],
         bool $clear = true,
         ?string $xpath = null
