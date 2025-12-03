@@ -2033,7 +2033,8 @@ abstract class AbstractScript
             }
 
             if ($final) {
-                File::write($final, '');
+                $emptyString = '';
+                File::write($final, $emptyString);
                 $this->sendDebugMessage('Wrote blank: ' . $final);
             }
         }
