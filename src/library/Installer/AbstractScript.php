@@ -58,7 +58,7 @@ abstract class AbstractScript
 {
     use TraitFramework;
 
-    public const VERSION = '2.6.3';
+    public const VERSION = '2.6.4';
 
     protected const TYPE_INSTALL          = 'install';
     protected const TYPE_DISCOVER_INSTALL = 'discover_install';
