@@ -68,22 +68,22 @@ abstract class AbstractScript
     /**
      * @var bool
      */
-    protected $outputAllowed = true;
+    protected bool $outputAllowed = true;
 
     /**
      * @var CMSApplication
      */
-    protected $app = null;
+    protected CMSApplication $app;
 
     /**
-     * @var DatabaseDriver
+     * @var \JDatabaseDriver|DatabaseDriver
      */
     protected $dbo = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $schemaVersion = null;
+    protected ?string $schemaVersion = null;
 
     /**
      * @var JEventDispatcher|DispatcherInterface
@@ -91,34 +91,34 @@ abstract class AbstractScript
     protected $dispatcher = null;
 
     /**
-     * @var Installer
+     * @var ?Installer
      */
-    protected $installer = null;
+    protected ?Installer $installer = null;
 
     /**
-     * @var SimpleXMLElement
+     * @var ?SimpleXMLElement
      */
-    protected $manifest = null;
+    protected ?SimpleXMLElement $manifest = null;
 
     /**
-     * @var SimpleXMLElement
+     * @var ?SimpleXMLElement
      */
-    protected $previousManifest = null;
+    protected ?SimpleXMLElement $previousManifest = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $mediaFolder = null;
+    protected ?string $mediaFolder = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $element = null;
+    protected ?string $element = null;
 
     /**
      * @var string[]
      */
-    protected $systemExtensions = [
+    protected array $systemExtensions = [
         'library..allediaframework',
         'plugin.system.osmylicensesmanager',
     ];
@@ -126,88 +126,88 @@ abstract class AbstractScript
     /**
      * @var bool
      */
-    protected $isLicensesManagerInstalled = false;
+    protected bool $isLicensesManagerInstalled = false;
 
     /**
-     * @var Licensed
+     * @var ?Licensed
      */
-    protected $license = null;
+    protected ?Licensed $license = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $licenseKey = null;
+    protected ?string $licenseKey = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $footer = null;
+    protected ?string $footer = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $mediaURL = null;
+    protected ?string $mediaURL = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $type = null;
+    protected ?string $type = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $group = null;
+    protected ?string $group = null;
 
     /**
      * List of tables and respective columns
      *
-     * @var array
+     * @var ?array
      */
-    protected $columns = null;
+    protected ?array $columns = null;
 
     /**
      * @var object[]
      */
-    protected $tableColumns = [];
+    protected array $tableColumns = [];
 
     /**
      * @var object[]
      */
-    protected $tableIndexes = [];
+    protected array $tableIndexes = [];
 
     /**
      * @var object[]
      */
-    protected $tableConstraints = [];
+    protected array $tableConstraints = [];
 
     /**
-     * @var array
+     * @var ?array
      */
-    protected $tables = null;
+    protected ?array $tables = null;
 
     /**
      * Flag to cancel the installation
      *
      * @var bool
      */
-    protected $cancelInstallation = false;
+    protected bool $cancelInstallation = false;
 
     /**
      * Feedback of the install by related extension
      *
      * @var array
      */
-    protected $relatedExtensionFeedback = [];
+    protected array $relatedExtensionFeedback = [];
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $welcomeMessage = null;
+    protected ?string $welcomeMessage = null;
 
     /**
      * @var bool
      */
-    protected $debug = false;
+    protected bool $debug = false;
 
     /**
      * @param InstallerAdapter $parent
@@ -928,7 +928,7 @@ abstract class AbstractScript
      * @return void
      * @throws \Exception
      */
-    private function uninstallExtension(string $type, string $element, ?string $group = null): void
+    final protected function uninstallExtension(string $type, string $element, ?string $group = null): void
     {
         if ($extension = $this->findExtension($type, $element, $group)) {
             $installer = $this->getNewInstaller();
