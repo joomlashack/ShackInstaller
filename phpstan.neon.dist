@@ -1,0 +1,49 @@
+includes:
+    - tests/phpstan/paths.php
+
+parameters:
+    level: 5
+    # The library must run on every php version supported by Joomla 3.10 through 6
+    phpVersion:
+        min: 70400
+        max: 80599
+    tmpDir: tests/_output/phpstan
+    paths:
+        - src
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+    scanFiles:
+        - tests/phpstan/stubs.php
+    # Analysis runs against one Joomla checkout and one copy of this library, but
+    # these change at runtime. Without this, every version branch looks like dead code.
+    dynamicConstantNames:
+        - Joomla\CMS\Version::MAJOR_VERSION
+        - JVERSION
+        - JPATH_ADMINISTRATOR
+        - JPATH_BASE
+        - Alledia\Installer\AbstractScript::VERSION
+        - SHACK_INSTALLER_BASE
+        - SHACK_INSTALLER_COMPATIBLE
+        - SHACK_INSTALLER_VERSION
+    ignoreErrors:
+        # The welcome templates are included from AbstractScript::displayWelcome(),
+        # so $this is the install script and its protected members are in scope
+        -
+            identifiers:
+                - property.protected
+                - method.protected
+            paths:
+                - src/views/*
+        # Joomla 3 has no DI container. Analysis against Joomla 4+ sees it as always there.
+        -
+            identifier: ternary.alwaysTrue
+            path: src/library/Installer/TraitFramework.php
+        # bootComponent() is typed as ComponentInterface, but every core com_* component
+        # is an MVCFactoryServiceInterface
+        -
+            message: '#^Call to an undefined method Joomla\\CMS\\Extension\\ComponentInterface::getMVCFactory\(\)\.$#'
+            path: src/library/Installer/TraitFramework.php
+        # AdminModel::saveorder() documents $order as int|null but uses it as an array
+        -
+            message: '#^Parameter \#2 \$order of method Joomla\\CMS\\MVC\\Model\\AdminModel::saveorder\(\) expects int\|null#'
+            path: src/library/Installer/AbstractScript.php

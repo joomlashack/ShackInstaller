@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="library" version="4.0" method="upgrade">
+    <name>lib_shacklib</name>
+    <libraryname>shacklib</libraryname>
+    <version>3.0.0</version>
+</extension>

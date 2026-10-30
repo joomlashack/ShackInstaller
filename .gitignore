@@ -62,3 +62,8 @@ error_log
 config.codekit
 
 tests/_output/*
+
+# Tests #
+#########
+!tests/composer.lock
+tests/Support/_generated/

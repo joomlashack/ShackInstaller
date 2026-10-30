@@ -1,0 +1,37 @@
+{
+    "name"             : "joomlashack/shackinstaller",
+    "description"      : "Shared library for Joomlashack extension install scripts",
+    "minimum-stability": "stable",
+    "license"          : "GPL-2.0-or-later",
+    "type"             : "library",
+    "authors"          : [
+        {
+            "name" : "Joomlashack",
+            "email": "help@joomlashack.com"
+        }
+    ],
+    "require"          : {
+        "php"          : ">=7.4",
+        "ext-json"     : "*",
+        "ext-simplexml": "*"
+    },
+    "scripts"          : {
+        "test"   : [
+            "@composer --working-dir=tests install --no-interaction --quiet",
+            "@php tests/vendor/codeception/codeception/codecept run"
+        ],
+        "analyse": [
+            "@composer --working-dir=tests install --no-interaction --quiet",
+            "@php tests/vendor/bin/phpstan analyse --memory-limit=2G"
+        ],
+        "check"  : [
+            "@analyse",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "test"   : "Install test dependencies into tests/vendor and run the Codeception suite",
+        "analyse": "Run PHPStan static analysis on src against a Joomla checkout, for php 7.4 through 8.5",
+        "check"  : "Run analyse and test, stopping at the first failure"
+    }
+}

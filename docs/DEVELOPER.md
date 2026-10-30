@@ -431,8 +431,7 @@ legacy.
 
 ### Building
 
-There is no composer, test suite or lint config in this repository. Packaging uses Phing and the
-external ShackBuilder project:
+Packaging uses Phing and the external ShackBuilder project:
 
 1. Copy `build.dist.properties` to `build.properties` (gitignored).
 2. Set `builder.path` to your local ShackBuilder checkout.
@@ -441,11 +440,41 @@ external ShackBuilder project:
 Optional properties in `build.properties` include `builder.phplint=1` to lint all PHP after
 packaging, and `project.movePackage`/`project.movePackageTo`.
 
-### Testing changes
+### Tests and static analysis
 
-With no automated tests, check changes by building a client extension that bundles your working copy
-and installing it on a test site. Cover each Joomla major version you touched code for. At a minimum,
-run:
+| Command | What it does |
+|---------|--------------|
+| `composer test` | Runs the Codeception unit tests in `tests/Unit` |
+| `composer analyse` | Runs PHPStan (level 5) on `src`, for PHP 7.4 through 8.5 |
+| `composer check` | Runs `analyse`, then `test` |
+
+Each command first installs the tools into `tests/vendor` from `tests/composer.json`. The tools need
+PHP 8.2+ to run, but PHPStan checks the code against every PHP version from 7.4 to 8.5.
+
+**Unit tests** run without Joomla:
+- `tests/Support/Joomla` holds minimal stand-ins for the few Joomla classes the tested code uses.
+- `tests/Support/Data/site` is a fixture site with sample manifests.
+- `Tests\Support\Fixtures\TestScript` is an install script that skips the Joomla-bound constructor,
+  lets a test preset protected properties and call protected methods, and records which `custom*`
+  hooks ran.
+
+Anything that needs the database or Joomla's own installer still has to be tested on a real site
+(see below). Any PHP warning or deprecation fails the test that caused it, so running the suite on
+a newer PHP version catches newly deprecated code.
+
+**PHPStan** needs a Joomla checkout to look up classes. Use the newest supported Joomla, because
+Joomla 3 can't satisfy the Joomla 4+ branches. Set the `JOOMLA_PATH` environment variable or
+`project.Joomla.path` in `build.properties`:
+
+```
+JOOMLA_PATH=/path/to/joomla6 composer analyse
+```
+
+### Testing on a site
+
+Unit tests don't cover the database, the Joomla installer or the welcome screen. For those, build a
+client extension that bundles your working copy and install it on a test site. Cover each Joomla
+major version you touched code for. At a minimum, run:
 
 - a fresh install, an update over the previous release, and an uninstall
 - a package where another extension already ships an older copy of the library

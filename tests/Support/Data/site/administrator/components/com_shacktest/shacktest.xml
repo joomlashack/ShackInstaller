@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="4.0" method="upgrade">
+    <name>COM_SHACKTEST</name>
+    <author>Joomlashack</author>
+    <version>1.2.3</version>
+    <alledia>
+        <element>shacktest</element>
+        <namespace>ShackTest</namespace>
+        <name>Shack Test</name>
+        <license>pro</license>
+    </alledia>
+</extension>

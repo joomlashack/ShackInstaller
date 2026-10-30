@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" version="4.0" method="upgrade">
+    <name>plg_system_shackfree</name>
+    <version>2.0.0</version>
+    <alledia>
+        <element publish="true">shackfree</element>
+        <namespace>ShackFree</namespace>
+        <license>free</license>
+    </alledia>
+</extension>

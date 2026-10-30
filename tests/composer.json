@@ -1,0 +1,32 @@
+{
+    "name"        : "joomlashack/shackinstaller-tests",
+    "description" : "Test suite for ShackInstaller",
+    "type"        : "project",
+    "license"     : "GPL-2.0-or-later",
+    "authors"     : [
+        {
+            "name" : "Joomlashack",
+            "email": "help@joomlashack.com"
+        }
+    ],
+    "require-dev" : {
+        "codeception/codeception"   : "^5.3",
+        "codeception/module-asserts": "^3.3",
+        "joomla/registry"           : "^3.0",
+        "phpstan/phpstan"           : "^2.1"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Joomla\\CMS\\"   : "Support/Joomla/",
+            "Tests\\Support\\": "Support/"
+        }
+    },
+    "config"      : {
+        "platform": {
+            "php": "8.2.0"
+        }
+    },
+    "scripts"     : {
+        "test": "codecept run -c .."
+    }
+}
