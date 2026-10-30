@@ -31,8 +31,11 @@ defined('_JEXEC') or die();
 
 if (defined('SHACK_INSTALLER_BASE') == false) {
     define('SHACK_INSTALLER_BASE', __DIR__);
+}
 
-    require_once SHACK_INSTALLER_BASE . '/AutoLoader.php';
+// Copies before v2.0.4 load their AutoLoader without defining SHACK_INSTALLER_BASE
+if (class_exists(AutoLoader::class, false) == false) {
+    require_once __DIR__ . '/AutoLoader.php';
 }
 
 AutoLoader::register('Alledia\\Installer', __DIR__, true);

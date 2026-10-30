@@ -371,6 +371,14 @@ example, a package install) can load more than one. PHP can only define each cla
   `SHACK_INSTALLER_BASE` and its `VERSION` is older than `SHACK_INSTALLER_COMPATIBLE`, the install is
   cancelled. The user sees which extension is in the way (`LIB_SHACKINSTALLER_ABORT_INSTALL`).
 
+What the check can't catch:
+
+- Once a script has declared its class, every later script in the request extends that same
+  `AbstractScript`, so the check passes. When an older extension's script runs first, newer scripts
+  run on its older base without any warning.
+- Copies before v2.0.4 have no check and define none of the constants. A newer copy still loads
+  alongside them, but a newer script can end up on one of those old bases.
+
 What this means for maintainers:
 
 - A subclass can end up running against an **older or newer** `AbstractScript` than the one it was

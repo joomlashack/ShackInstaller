@@ -253,7 +253,10 @@ abstract class AbstractScript
         $scriptClass     = new \ReflectionClass($scriptClassName);
 
         $sourcePath    = dirname($scriptClass->getFileName());
-        $sourceBase    = strpos($sourcePath, JPATH_PLUGINS) === 0 ? 3 : 2;
+        // Folders that name the extension: plugins/<group>/<name>, administrator/components/<name>, modules/<name>
+        $sourceBase    = (strpos($sourcePath, JPATH_PLUGINS) === 0 || strpos($sourcePath, JPATH_ADMINISTRATOR) === 0)
+            ? 3
+            : 2;
         $sourceVersion = AbstractScript::VERSION;
 
         $sourcePath = $this->cleanPath($sourcePath);
