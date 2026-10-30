@@ -51,14 +51,14 @@ class Generic
     /**
      * The extension id
      *
-     * @var int
+     * @var ?int
      */
     protected $id = null;
 
     /**
      * The extension name
      *
-     * @var string
+     * @var ?string
      */
     protected $name = null;
 
@@ -98,7 +98,7 @@ class Generic
     /**
      * The manifest information
      *
-     * @var \SimpleXMLElement
+     * @var \SimpleXMLElement|false|null
      */
     public $manifest = null;
 
@@ -417,7 +417,7 @@ class Generic
     {
         $db     = Factory::getDbo();
         $params = $db->quote($this->params->toString());
-        $id     = $db->quote($this->id);
+        $id     = (int)$this->id;
 
         $query = "UPDATE `#__extensions` SET params = {$params} WHERE extension_id = {$id}";
         $db->setQuery($query);

@@ -147,7 +147,6 @@ trait TraitFramework
         bool $clear = true,
         ?string $xpath = null
     ): Form {
-        /** @var Form $form */
         if (Version::MAJOR_VERSION < 4) {
             $form = Form::getInstance($name, $source, $options, $clear, $xpath);
 

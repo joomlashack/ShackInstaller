@@ -72,7 +72,7 @@ abstract class AbstractScript
     /**
      * Not typed: this is a ConsoleApplication, not a CMSApplication, when installing from the CLI
      *
-     * @var CMSApplication|CMSApplicationInterface
+     * @var CMSApplication|CMSApplicationInterface|null
      */
     protected $app = null;
 
@@ -254,7 +254,7 @@ abstract class AbstractScript
 
         $sourcePath    = dirname($scriptClass->getFileName());
         $sourceBase    = strpos($sourcePath, JPATH_PLUGINS) === 0 ? 3 : 2;
-        $sourceVersion = AbstractScript::VERSION ?? '0.0.0';
+        $sourceVersion = AbstractScript::VERSION;
 
         $sourcePath = $this->cleanPath($sourcePath);
         $targetPath = $this->cleanPath(SHACK_INSTALLER_BASE);
@@ -853,7 +853,7 @@ abstract class AbstractScript
                                         if ($this->getXmlValue($extension['publish'], 'bool', $defaultPublish)) {
                                             $current->publish();
 
-                                            $this->storeFeedbackForRelatedExtension($key, 'publish', true);
+                                            $this->storeFeedbackForRelatedExtension($key, 'publish', '1');
                                         }
 
                                         if ($ordering = $this->getXmlValue($extension['ordering'])) {
@@ -1079,7 +1079,7 @@ abstract class AbstractScript
 
                 if (count($neworder) == count($plugins)) {
                     // Only reorder if have a validated new order
-                    /** @var PluginModel $model */
+                    /** @var PluginModel|false|null $model */
                     $model = $this->getJoomlaModel('Plugin', 'PluginsModel', 'com_plugins', 'Administrator');
 
                     if ($model) {
@@ -1112,7 +1112,7 @@ abstract class AbstractScript
     {
         $obsolete = $obsolete ?: $this->manifest->alledia->obsolete;
 
-        $this->sendDebugMessage(__METHOD__ . '<pre>' . print_r($obsolete, 1) . '</pre>');
+        $this->sendDebugMessage(__METHOD__ . '<pre>' . print_r($obsolete, true) . '</pre>');
 
         $this->clearOldSystemPlugin();
         if ($obsolete) {
@@ -2036,7 +2036,7 @@ abstract class AbstractScript
 
         $updatePath = $basePath . '/sql/updates';
         if (is_dir($updatePath) && $files = Folder::files($updatePath, '\.sql$', true, true)) {
-            $this->sendDebugMessage('Removing:<pre>' . print_r($files, 1) . '</pre>');
+            $this->sendDebugMessage('Removing:<pre>' . print_r($files, true) . '</pre>');
             $final = reset($files);
             foreach ($files as $file) {
                 $version     = basename($file, '.sql');
@@ -2061,7 +2061,7 @@ abstract class AbstractScript
      * @param ?string                 $type
      * @param mixed                   $default
      *
-     * @return ?bool|string
+     * @return bool|string|null
      */
     final protected function getXmlValue($element, ?string $type = 'string', $default = null)
     {

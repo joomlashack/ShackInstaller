@@ -55,7 +55,7 @@ class AutoLoader
     protected static function registerLoader($method)
     {
         if (static::$instance === null) {
-            static::$instance = new static();
+            static::$instance = new self();
         }
 
         spl_autoload_register([static::$instance, $method]);
