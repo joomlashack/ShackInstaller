@@ -72,7 +72,7 @@ A special `<alledia>` tag in the manifest controls various parts of the installa
 Boolean attribute values can be written as true/false or 1/0.
 ```xml
     <alledia>
-        <element publish="bool" ordering="string">elementname</element>
+        <element publish="bool|condition" ordering="string">elementname</element>
         <namespace>ExtensionName</namespace>
         <name>CustomName</name>
         <license>free | pro</license>
@@ -82,13 +82,13 @@ Boolean attribute values can be written as true/false or 1/0.
         <previousminimum>.*</previousminimum>
 
         <relatedExtensions downgrade="bool"
-                           publish="bool"
+                           publish="bool|condition"
                            uninstall="bool">
             <extension type="string"
                        element="string"
                        group="string"
                        downgrade="bool"
-                       publish="bool"
+                       publish="bool|condition"
                        ordering="string"
                        uninstall="bool">
                 ExtensionFolder
@@ -122,7 +122,7 @@ For plugins, two optional attributes apply to the plugin itself on a new install
 
 |Attribute|Values|
 |---------|------|
-|publish|true &#124; false -- enable the plugin after install|
+|publish|true &#124; false &#124; a [publish condition](#publish-conditions) -- enable the plugin after install|
 |ordering|Same values as the `ordering` attribute of `<extension>` below|
 
 #### Namespace and name tags
@@ -157,6 +157,31 @@ three default to false if not set.
 - The ShackFramework library and the License Key Manager plugin are never uninstalled, even when
   `uninstall` is set, because other extensions may depend on them.
 
+#### Publish conditions
+
+Any `publish` attribute can name another extension instead of `true`/`false`. The plugin is then
+enabled only if that extension is already installed on the site:
+
+```xml
+<extension type="plugin"
+           group="osmap"
+           element="com_virtuemart"
+           publish="com_virtuemart:*">plg_osmap_com_virtuemart</extension>
+```
+
+|Condition|Enables the plugin when|
+|---------|-----------------------|
+|`com_virtuemart:*`, `com_virtuemart=*` or `com_virtuemart`|`com_virtuemart` is installed|
+|`com_virtuemart:4.2`, `com_virtuemart:4.*`|`com_virtuemart` 4.2 or higher / 4.0 or higher is installed|
+
+- Use the full extension name with its prefix: `com_`, `mod_`, `plg_<group>_`, `lib_` or `tpl_`.
+- "Installed" means the extension has a row in `#__extensions`. It doesn't have to be enabled.
+- The condition is checked when the plugin is first installed, like `publish="true"`. Updates don't
+  change whether the plugin is enabled, and the plugin isn't enabled automatically if the other
+  extension is installed later.
+- Related extensions are installed in manifest order, so a condition on another related extension
+  only works if that one is listed first.
+
 #### Obsolete items
 
 Obsolete items are uninstalled or deleted after the main extension is installed and before any related
@@ -178,7 +203,7 @@ are marked 'O'.
 |group|RO|For plugins, the plugin folder. Otherwise ignored.|
 |element|RO|Extension element name. The `com_`/`mod_` prefix is optional.|
 |downgrade|R|true &#124; false -- okay to downgrade on a reinstall|
-|publish|R|true &#124; false -- used for plugins only|
+|publish|R|true &#124; false &#124; a [publish condition](#publish-conditions) -- plugins only. Applies only to new installations|
 |ordering|R|# &#124; first &#124; last &#124; before:pluginelement &#124; after:pluginelement<br>Plugins only. Applies only to new installations|
 |uninstall|R|true &#124; false -- uninstall during uninstall of the current extension|
 

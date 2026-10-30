@@ -769,7 +769,7 @@ abstract class AbstractScript
 
             $defaultAttributes = $this->manifest->alledia->relatedExtensions->attributes();
             $defaultDowngrade  = $this->getXmlValue($defaultAttributes['downgrade'], 'bool');
-            $defaultPublish    = $this->getXmlValue($defaultAttributes['publish'], 'bool');
+            $defaultPublish    = $this->getPublishState($defaultAttributes['publish']);
 
             foreach ($this->manifest->alledia->relatedExtensions->extension as $extension) {
                 $path = $extensionsPath . '/' . $this->getXmlValue($extension);
@@ -850,7 +850,7 @@ abstract class AbstractScript
 
                                 if (is_object($current)) {
                                     if ($type === 'plugin') {
-                                        if ($this->getXmlValue($extension['publish'], 'bool', $defaultPublish)) {
+                                        if ($this->getPublishState($extension['publish'], $defaultPublish)) {
                                             $current->publish();
 
                                             $this->storeFeedbackForRelatedExtension($key, 'publish', '1');
@@ -1436,12 +1436,27 @@ abstract class AbstractScript
     final protected function publishThisPlugin(): void
     {
         $attributes = $this->manifest->alledia->element->attributes();
-        $publish    = (string)$attributes['publish'];
 
-        if ($publish === 'true' || $publish === '1') {
+        if ($this->getPublishState($attributes['publish'])) {
             $extension = $this->findThisExtension();
             $extension->publish();
         }
+    }
+
+    /**
+     * Evaluate a publish attribute, which can be true/false or a conditional expression
+     *
+     * @param ?SimpleXMLElement $attribute
+     * @param bool              $default Used when the attribute is missing
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    final protected function getPublishState(?SimpleXMLElement $attribute, bool $default = false): bool
+    {
+        $expression = $this->getXmlValue($attribute);
+
+        return $expression === null ? $default : $this->parseConditionalExpression($expression);
     }
 
     /**
@@ -1586,7 +1601,9 @@ abstract class AbstractScript
 
     /**
      * Parses a conditional string, returning a Boolean value (default: false).
-     * For now it only supports an extension name and * as version.
+     *
+     * Accepts true/1, or a full extension name that must be installed, optionally
+     * followed by a minimum version: com_foo, com_foo:*, com_foo:4.2, plg_system_foo=*
      *
      * @param string $expression
      *
@@ -1595,25 +1612,25 @@ abstract class AbstractScript
      */
     final protected function parseConditionalExpression(string $expression): bool
     {
-        $expression = strtolower($expression);
-        $terms      = explode('=', $expression);
-        $firstTerm  = array_shift($terms);
+        $expression = strtolower(trim($expression));
 
-        if (count($terms) == 0) {
-            return $firstTerm == 'true' || $firstTerm == '1';
+        if ($expression === 'true' || $expression === '1') {
+            return true;
+        }
 
-        } elseif (preg_match('/^(com_|plg_|mod_|lib_|tpl_|cli_)/', $firstTerm)) {
-            // The first term is the name of an extension
+        if (preg_match('/^((?:com|plg|mod|lib|tpl|cli)_[a-z0-9_.-]+)(?:[:=](.*))?$/', $expression, $match)) {
+            $info      = $this->getExtensionInfoFromElement($match[1]);
+            $extension = $this->findExtension($info['type'], $info['name'], $info['group']);
 
-            $info = $this->getExtensionInfoFromElement($firstTerm);
+            if ($extension) {
+                $version = trim($match[2] ?? '');
+                if ($version === '' || $version === '*') {
+                    return true;
+                }
 
-            $extension = $this->findExtension($info['type'], $firstTerm, $info['group']);
+                $manifest = json_decode((string)$extension->get('manifest_cache'));
 
-            // @TODO: compare the version, if specified, or different than *
-            // @TODO: Check if the extension is enabled, not just installed
-
-            if (empty($extension) == false) {
-                return true;
+                return $this->validateTargetVersion((string)($manifest->version ?? ''), $version);
             }
         }
 
@@ -1643,11 +1660,17 @@ abstract class AbstractScript
             'cli' => 'cli',
         ];
 
-        $element = explode('_', $element, 3);
+        // Only plugins have a group, so the name of anything else can contain underscores
+        $parts  = explode('_', $element, 2);
+        $prefix = $result['prefix'] = $parts[0];
+        $name   = $parts[1] ?? null;
+        $group  = null;
 
-        $prefix = $result['prefix'] = array_shift($element);
-        $name   = array_pop($element);
-        $group  = array_pop($element);
+        if ($prefix === 'plg' && $name !== null) {
+            $parts = explode('_', $name, 2);
+            $group = count($parts) > 1 ? $parts[0] : null;
+            $name  = end($parts);
+        }
 
         if (array_key_exists($prefix, $types)) {
             $result = array_merge(

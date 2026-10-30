@@ -282,7 +282,8 @@ All of these are `final protected` methods on `AbstractScript`.
 | `clearObsolete($xml = null)` | Process an `<obsolete>`-style node (defaults to the manifest's) |
 | `clearUpdateServers()` | Remove this extension's update sites |
 | `fixMenus()` | For components: point existing menu items at the new extension ID, and delete the admin menu when `<menu hidden="true">` |
-| `parseConditionalExpression($expr)` | `'true'`/`'1'`, or `'com_foo=*'` (true if that extension is installed) |
+| `parseConditionalExpression($expr)` | `true`/`1`, or a full extension name that must be installed, with an optional minimum version: `com_foo`, `com_foo:*`, `plg_system_foo:2.0` |
+| `getPublishState($attribute, $default)` | Evaluate a `publish` attribute with `parseConditionalExpression()`, or return `$default` when the attribute is missing |
 
 ### Versions
 

@@ -70,6 +70,8 @@ class ElementTest extends Unit
             'component'       => ['com_foo', 'component', null, 'foo', 'com'],
             'module'          => ['mod_foo', 'module', null, 'foo', 'mod'],
             'unknown prefix'  => ['xyz_foo', null, null, null, 'xyz'],
+            'component with underscore' => ['com_my_comp', 'component', null, 'my_comp', 'com'],
+            'plugin with underscore'    => ['plg_content_my_plugin', 'plugin', 'content', 'my_plugin', 'plg'],
         ];
     }
 
