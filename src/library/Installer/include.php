@@ -41,7 +41,7 @@ if (class_exists(AutoLoader::class, false) == false) {
 AutoLoader::register('Alledia\\Installer', __DIR__, true);
 
 if (defined('SHACK_INSTALLER_VERSION') == false) {
-    define('SHACK_INSTALLER_VERSION', '2.6.4');
+    define('SHACK_INSTALLER_VERSION', '2.6.5');
     define('SHACK_INSTALLER_COMPATIBLE', '2.4.0');
 
     if (isset($reportErrors) == false) {
