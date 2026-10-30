@@ -24,7 +24,7 @@
 
 namespace Alledia\Installer;
 
-use Alledia\Framework\Factory;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Log\Log;
 
 defined('_JEXEC') or die();
