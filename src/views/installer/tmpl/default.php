@@ -23,7 +23,6 @@
  */
 
 use Alledia\Installer\AbstractScript;
-use Alledia\Installer\Extension\Generic;
 use Alledia\Installer\Extension\Licensed;
 
 defined('_JEXEC') or die();
@@ -36,7 +35,6 @@ defined('_JEXEC') or die();
  * @var string         $configPath
  * @var string         $customFooterPath
  * @var string         $extensionPath
- * @var Generic        $licensesManagerExtension
  * @var string         $string
  * @var string         $path
  */

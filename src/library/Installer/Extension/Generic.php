@@ -373,9 +373,9 @@ class Generic
             ->select('sites.location')
             ->from('#__update_sites AS sites')
             ->leftJoin('#__update_sites_extensions AS extensions ON (sites.update_site_id = extensions.update_site_id)')
-            ->where('extensions.extension_id = ' . $this->id);
+            ->where('extensions.extension_id = ' . (int)$this->id);
 
-        return $db->setQuery($query)->loadResult();
+        return (string)$db->setQuery($query)->loadResult();
     }
 
     /**
@@ -394,7 +394,7 @@ class Generic
             ->select('sites.update_site_id')
             ->from($db->quoteName('#__update_sites') . ' AS sites')
             ->leftJoin($join)
-            ->where('extensions.extension_id = ' . $this->id);
+            ->where('extensions.extension_id = ' . (int)$this->id);
         $db->setQuery($query);
         $siteId = (int)$db->loadResult();
 
@@ -431,6 +431,6 @@ class Generic
      */
     public function getName(): string
     {
-        return $this->name;
+        return (string)$this->name;
     }
 }

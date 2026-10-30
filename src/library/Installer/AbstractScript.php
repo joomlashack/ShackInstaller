@@ -33,7 +33,6 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Table\Extension;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
@@ -71,9 +70,11 @@ abstract class AbstractScript
     protected bool $outputAllowed = true;
 
     /**
-     * @var CMSApplication
+     * Not typed: this is a ConsoleApplication, not a CMSApplication, when installing from the CLI
+     *
+     * @var CMSApplication|CMSApplicationInterface
      */
-    protected CMSApplication $app;
+    protected $app = null;
 
     /**
      * @var \JDatabaseDriver|DatabaseDriver
@@ -325,7 +326,7 @@ abstract class AbstractScript
             $manifestPath = $targetPath . '/' . basename($this->installer->getPath('manifest'));
 
             if (is_file($manifestPath)) {
-                $this->previousManifest = simplexml_load_file($manifestPath);
+                $this->previousManifest = simplexml_load_file($manifestPath) ?: null;
             }
 
             // Determine basepath for localized files
@@ -391,7 +392,14 @@ abstract class AbstractScript
         $this->sendDebugMessage(__METHOD__);
 
         try {
-            return $this->customInstall($parent);
+            $success = $this->customInstall($parent);
+
+            // Joomla calls install() for discover installs, never discover_install()
+            if ($success && $parent->getRoute() == static::TYPE_DISCOVER_INSTALL) {
+                $success = $this->customDiscoverInstall($parent);
+            }
+
+            return $success;
 
         } catch (Throwable $error) {
             $this->sendErrorMessage($error);
@@ -403,6 +411,8 @@ abstract class AbstractScript
     // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
     /**
+     * Not called by Joomla 3 through 6, kept for backward compatibility
+     *
      * @param InstallerAdapter $parent
      *
      * @return bool
@@ -411,16 +421,7 @@ abstract class AbstractScript
     {
         $this->sendDebugMessage(__METHOD__);
 
-        try {
-            if ($this->install($parent)) {
-                return $this->customDiscoverInstall($parent);
-            }
-
-        } catch (Throwable $error) {
-            $this->sendErrorMessage($error);
-        }
-
-        return false;
+        return $this->install($parent);
     }
     // phpcs:enable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
@@ -640,10 +641,16 @@ abstract class AbstractScript
      * @param ?string $file
      * @param ?int    $line
      *
-     * @return void
+     * @return bool
      */
-    final public static function errorHandler(int $number, string $error, ?string $file = null, ?int $line = null): void
+    final public static function errorHandler(int $number, string $error, ?string $file = null, ?int $line = null): bool
     {
+        // Leave errors silenced with @ to the standard handler (0 in php 7, fatal errors only in php 8+)
+        $suppressed = [0, E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR | E_PARSE];
+        if (in_array(error_reporting(), $suppressed, true)) {
+            return false;
+        }
+
         try {
             $codes = get_defined_constants(true);
             $codes = $codes['Core'];
@@ -666,6 +673,8 @@ abstract class AbstractScript
         } catch (Throwable $error) {
             // ignore
         }
+
+        return true;
     }
 
     /**
@@ -813,7 +822,7 @@ abstract class AbstractScript
                             $currentManifest     = $this->getInfoFromManifest($currentManifestPath);
 
                             // Avoid to update for an outdated version
-                            $currentVersion = $currentManifest->get('version');
+                            $currentVersion = (string)$currentManifest->get('version');
 
                             if (version_compare($currentVersion, $newVersion, '>')) {
                                 // Store the state of the install/update
@@ -956,9 +965,12 @@ abstract class AbstractScript
      */
     final protected function findExtension(?string $type, ?string $element, ?string $group = null): ?Extension
     {
-        // @TODO: Why do we need to use JTable?
         /** @var Extension $row */
         $row = Table::getInstance('extension');
+
+        $type    = (string)$type;
+        $element = (string)$element;
+        $group   = (string)$group;
 
         $prefixes = [
             'component' => 'com_',
@@ -1067,21 +1079,20 @@ abstract class AbstractScript
 
                 if (count($neworder) == count($plugins)) {
                     // Only reorder if have a validated new order
-                    BaseDatabaseModel::addIncludePath(
-                        JPATH_ADMINISTRATOR . '/components/com_plugins/models',
-                        'PluginsModels'
-                    );
-
-                    // @TODO: Model class is (\PluginsModelPlugin) in J3 but this works either way
                     /** @var PluginModel $model */
-                    $model = BaseDatabaseModel::getInstance('Plugin', 'PluginsModel');
+                    $model = $this->getJoomlaModel('Plugin', 'PluginsModel', 'com_plugins', 'Administrator');
 
-                    $ids = [];
-                    foreach ($neworder as $plugin) {
-                        $ids[] = $plugin->extension_id;
+                    if ($model) {
+                        $ids = [];
+                        foreach ($neworder as $plugin) {
+                            $ids[] = $plugin->extension_id;
+                        }
+                        $order = range(1, count($ids));
+                        $model->saveorder($ids, $order);
+
+                    } else {
+                        $this->sendDebugMessage('Plugin model not found, unable to reorder');
                     }
-                    $order = range(1, count($ids));
-                    $model->saveorder($ids, $order);
                 }
             }
         }
@@ -1203,7 +1214,7 @@ abstract class AbstractScript
                     ->where($db->quoteName('extension_id') . '=' . (int)$extension->get('extension_id'));
                 $db->setQuery($query)->execute();
 
-                array_walk($list, 'intval');
+                $list  = array_map('intval', $list);
                 $query = $db->getQuery(true)
                     ->delete($db->quoteName('#__update_sites'))
                     ->where($db->quoteName('update_site_id') . ' IN (' . join(',', $list) . ')');
@@ -1234,6 +1245,7 @@ abstract class AbstractScript
             'cli'       => 'cli',
             'module'    => 'mod',
             'file'      => 'file',
+            'package'   => 'pkg',
         ];
 
         $type    = $type ?: $this->type;
@@ -1274,11 +1286,10 @@ abstract class AbstractScript
     {
         $info = new Registry();
 
-        if (is_file($manifestPath)) {
-            $xml = simplexml_load_file($manifestPath);
-
+        $xml = is_file($manifestPath) ? simplexml_load_file($manifestPath) : null;
+        if ($xml) {
             $attributes = (array)$xml->attributes();
-            $attributes = $attributes['@attributes'];
+            $attributes = $attributes['@attributes'] ?? [];
             foreach ($attributes as $attribute => $value) {
                 $info->set($attribute, $value);
             }
@@ -1378,7 +1389,11 @@ abstract class AbstractScript
     /**
      * Get the path for the manifest file
      *
-     * @return string The path
+     * @param string  $type
+     * @param string  $element
+     * @param ?string $group
+     *
+     * @return string The path, or an empty string if not found
      */
     final protected function getManifestPath($type, $element, $group = ''): string
     {
@@ -1409,7 +1424,7 @@ abstract class AbstractScript
                 break;
         }
 
-        return $manifestPath;
+        return $manifestPath ?: '';
     }
 
     /**
@@ -1485,7 +1500,7 @@ abstract class AbstractScript
             $db = $this->dbo;
 
             // Update the extension
-            $customData         = json_decode($extension->get('custom_data')) ?: (object)[];
+            $customData         = json_decode((string)$extension->get('custom_data')) ?: (object)[];
             $customData->author = 'Joomlashack';
 
             $query = $db->getQuery(true)
@@ -2103,19 +2118,19 @@ abstract class AbstractScript
         }
 
         if ($this->outputAllowed) {
-            $trace = $error->getTrace();
-            $trace = array_shift($trace);
+            // The first frame may have no file/line, e.g. when thrown from a callback
+            $trace = $error->getTrace()[0] ?? [];
+            $file  = $error->getFile();
+            $line  = $error->getLine();
 
             if (empty($trace['class'])) {
-                $caller = basename($trace['file']);
+                $caller = basename($file);
 
             } else {
                 $className = explode('\\', $trace['class']);
                 $caller    = array_pop($className);
             }
-            $line     = $trace['line'];
             $function = $trace['function'] ?? null;
-            $file     = $trace['file'];
 
             if ($function) {
                 $message = sprintf('%s: %s<br>%s::%s() - %s', $line, $file, $caller, $function, $error->getMessage());
@@ -2209,13 +2224,10 @@ abstract class AbstractScript
         // If Pro extension, includes the license form view
         if ($license->isPro()) {
             // Get the OSMyLicensesManager extension to handle the license key
-            if ($licensesManagerExtension = new Licensed('osmylicensesmanager', 'plugin', 'system')) {
-                if (isset($licensesManagerExtension->params)) {
-                    $this->licenseKey = $licensesManagerExtension->params->get('license-keys', '');
-                } else {
-                    $this->licenseKey = '';
-                }
+            if ($licensesManager = $this->findExtension('plugin', 'osmylicensesmanager', 'system')) {
+                $params = new Registry($licensesManager->get('params'));
 
+                $this->licenseKey                 = $params->get('license-keys', '');
                 $this->isLicensesManagerInstalled = true;
             }
 

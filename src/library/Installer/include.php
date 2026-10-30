@@ -22,6 +22,7 @@
  * along with ShackInstaller.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+use Alledia\Installer\AbstractScript;
 use Alledia\Installer\AutoLoader;
 use Joomla\CMS\Version;
 
@@ -49,6 +50,12 @@ if (defined('SHACK_INSTALLER_VERSION') == false) {
     }
 
     if ($reportErrors) {
-        set_error_handler('\\Alledia\\Installer\\AbstractScript::errorHandler', $reportErrors);
+        // A closure so this works even when AbstractScript.php is the file being loaded (php 8 checks callbacks)
+        set_error_handler(
+            function (int $number, string $error, ?string $file = null, ?int $line = null): bool {
+                return AbstractScript::errorHandler($number, $error, $file, $line);
+            },
+            $reportErrors
+        );
     }
 }
