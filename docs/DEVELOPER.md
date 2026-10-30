@@ -237,8 +237,11 @@ your hook.
 - Removes `<obsolete><preflight>` items (not on uninstall).
 
 **`install()` / `update()` / `discover_install()`**
-- → `customInstall()` / `customUpdate()`. `discover_install` runs `install()` and then
-  `customDiscoverInstall()`.
+- → `customInstall()` / `customUpdate()`.
+- Joomla 3 through 6 never call the script's `discover_install()`. A discover install calls
+  `preFlight('discover_install')`, then `install()`, then `postFlight('discover_install')`. When the
+  route is `discover_install`, `install()` also runs `customDiscoverInstall()` after `customInstall()`.
+- `preFlight` skips the version constraint checks for discover installs.
 
 **`uninstall()`**
 - Uninstalls related extensions marked `uninstall`.
@@ -403,11 +406,15 @@ will mean replacing them, most likely behind a `Version::MAJOR_VERSION` branch.
 | `Factory::getLanguage()` | `AbstractScript::initProperties()` | `Factory::getApplication()->getLanguage()` |
 | `$db->getQuery(true)` | Throughout | `$db->createQuery()` (Joomla 5+ only) |
 | `Table::getInstance()` | `findExtension()`, `fixMenus()`, `getJoomlaTable()` (J3 branch) | `new Extension($db)` or the component's MVC factory |
-| `BaseDatabaseModel::addIncludePath()` / `getInstance()` | `setPluginOrder()` | `bootComponent('com_plugins')->getMVCFactory()->createModel('Plugin', 'Administrator')` |
 | `Table::getError()` | `findExtension()` | Catch exceptions instead |
 
 The deprecated Joomla methods raise `E_USER_DEPRECATED`. The error handler set in `include.php`
 ignores that level, so they don't show up as installer warnings.
+
+Joomla 6 also deprecates class-based install scripts (`Com_FooInstallerScript extends AbstractScript`).
+Joomla 6 still runs them through its `LegacyInstallerScript` wrapper, but Joomla 7 will require a
+service-provider script that returns an `InstallerScriptInterface`. That needs a new entry point in
+this library, not just API replacements.
 
 ### Code style
 
@@ -462,7 +469,8 @@ Commit conventions: `Release vX.Y.Z` for the release commit, then `Bump dev vers
   `Debug-<class>` on J3).
 - `include.php` sets `AbstractScript::errorHandler` for `E_ALL` minus deprecations (and minus
   `E_NOTICE` on Joomla 4, because of a notice in core). PHP warnings then appear as admin messages.
-  To change this, set `$reportErrors` to an error mask before including `include.php`, or to `0` to
+  Errors silenced with `@` are passed to PHP's standard handler and stay silent. So are all errors
+  when the site's error reporting is set to None. To change this, set `$reportErrors` to an error mask before including `include.php`, or to `0` to
   turn the handler off. This only takes effect in the first copy of the library loaded in the request.
 - `Loader::includeFile()` logs missing files to `shackframework.loader.errors.php` in the Joomla log
   folder.
