@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-ShackInstaller is a shared PHP library that Joomlashack Joomla extensions bundle to power their install scripts. It is not a standalone extension: each extension copies `src/` into its own package, and its install script requires `library/Installer/include.php` and extends `Alledia\Installer\AbstractScript`. It must run under Joomla 3, 4 and 5+ at once, so code often branches on `Version::MAJOR_VERSION` or uses `is_callable` checks instead of calling version-specific APIs directly.
+ShackInstaller is a shared PHP library that Joomlashack Joomla extensions bundle to power their install scripts. It is not a standalone extension: each extension copies `src/` into its own package, and its install script requires `library/Installer/include.php` and extends `Alledia\Installer\AbstractScript`. It must run under Joomla 3.10 through 6 at once, so code often branches on `Version::MAJOR_VERSION` or uses `is_callable` checks instead of calling version-specific APIs directly.
 
 ## Build
 
